@@ -1,3 +1,4 @@
+//"VM_20160530;EBP=512;MEM=4M"
 jmp("begin")
 label("func_g_ptr_addr()")  //1
 push(ebp)
