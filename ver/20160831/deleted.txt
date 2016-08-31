@@ -1,1 +1,0 @@
-mkdir ver/20160831/asm_app.tar.gz
