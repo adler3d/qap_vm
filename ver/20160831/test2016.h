@@ -78,6 +78,32 @@
     vec2i pos;
   };
   qap_vertex qap_vertex(int color,vec2i pos){qap_vertex tmp;tmp.color=color;tmp.pos=pos;return tmp;}
+  struct vector_int{
+    int p;int n;int cap;
+    int reserve(int c){p=alloc(1*c);n=0;cap=c;return 0;}
+    int add(int ref){QapAssert(n<cap);p=set_int(p,ref);n++;return p;}
+    int get(int addr){
+      return get_int(addr);
+    }
+    int at(int id){
+      return get(p+id-n);
+    }
+    int front(){QapAssert(n>0);return at(0);}
+    int back(){QapAssert(n>0);return at(n-1);}
+    int addr_at(int id){return p+(id-n)*1;}
+    int add_mega_fast(vector_int IA,int vpos){
+      int sp=IA.p-IA.n;
+      int c=IA.n;
+      int edx=vpos;int eax=p;
+      for(;c;c--){
+        int ebx=sp;ebx=get_int(ebx);ebx+=edx;set_int(eax,ebx);eax++;
+        sp++;
+      }
+      n+=IA.n;
+      p+=IA.n;
+      return 0;
+    }
+  };
   struct vector_qap_vertex{
     int p;int n;int cap;
     int reserve(int c){p=alloc(3*c);n=0;cap=c;return 0;}
@@ -123,12 +149,12 @@
     {
       auto did=addr_at(n);auto sid=VA.addr_at(0);
       int van=VA.n*3;
-      __asm("mov(edi,var_did);mov(esi,var_sid);");
-      __asm("mov(ecx,var_van);");
-      __asm("rep_movsd_inc();");
-      __asm("mov(ecx,this_ptr);");
+      for(int i=0;i<van;i++){
+        set_int(did,get_int(sid));did++;sid++;
+      }
       n+=VA.n;
       p+=VA.n*3;
+      return 0;
     }
     int add_with_offset(vector_qap_vertex VA,vec2i offset)
     {
@@ -136,17 +162,14 @@
       int x=offset.x;
       int y=offset.y;
       int van=VA.n;
-      __asm("mov(edi,var_did);mov(esi,var_sid);");
-      __asm("mov(eax,var_x);mov(ebx,var_y);");
-      __asm("mov(ecx,var_van);");
-      __asm("{");
-      __asm("  LOOP_SCOPE();");
-      __asm("  movsd_inc();");
-      __asm("  addsd_inc(eax);addsd_inc(ebx);");
-      __asm("}");
-      __asm("mov(ecx,this_ptr);");
+      for(int i=0;i<van;i++){
+        set_int(did,get_int(sid));did++;sid++;
+        set_int(did,get_int(sid)+x);did++;sid++;
+        set_int(did,get_int(sid)+y);did++;sid++;
+      }
       n+=VA.n;
       p+=VA.n*3;
+      return 0;
     }
     int add_with_color(vector_qap_vertex VA,int color,vec2i offset)
     {
@@ -154,43 +177,14 @@
       int x=offset.x;
       int y=offset.y;
       int van=VA.n;
-      __asm("mov(edi,var_did);mov(esi,var_sid);");
-      __asm("mov(ebx,var_x);mov(edx,var_y);");
-      __asm("mov(ecx,var_van);");
-      __asm("{");
-      __asm("  LOOP_SCOPE();");
-      __asm("  inc(esi);mov(eax,param_color);stosd_inc();");
-      __asm("  addsd_inc(ebx);addsd_inc(edx);");
-      __asm("}");
-      __asm("mov(ecx,this_ptr);");
+      for(int i=0;i<van;i++){
+        set_int(did,color);did++;sid++;
+        set_int(did,get_int(sid)+x);did++;sid++;
+        set_int(did,get_int(sid)+y);did++;sid++;
+      }
       n+=VA.n;
       p+=VA.n*3;
-    }
-  };
-  struct vector_int{
-    int p;int n;int cap;
-    int reserve(int c){p=alloc(1*c);n=0;cap=c;return 0;}
-    int add(int ref){QapAssert(n<cap);p=set_int(p,ref);n++;return p;}
-    int get(int addr){
-      return get_int(addr);
-    }
-    int at(int id){
-      return get(p+id-n);
-    }
-    int front(){QapAssert(n>0);return at(0);}
-    int back(){QapAssert(n>0);return at(n-1);}
-    int addr_at(int id){return p+(id-n)*1;}
-    int add_mega_fast(vector_int IA,int vpos){
-      int sp=IA.p-IA.n;
-      int c=IA.n;
-      __asm("mov(edx,param_vpos);mov(eax,field_p);");
-      for(;c;c--){
-        //ptr[p]=ptr[sp];
-        __asm("mov(ebx,var_sp);mov(ebx,ptr[ebx]);add(ebx,edx);mov(ptr[eax],ebx);inc(eax);");
-        sp++;
-      }
-      n+=IA.n;
-      p+=IA.n;
+      return 0;
     }
   };
   struct vector_vec2i{
@@ -221,6 +215,14 @@
       return p;
     }
   };
+  t_out_dev new_geom(int n)
+  {
+    t_out_dev tmp;
+    tmp.color=255<<24;
+    tmp.VA.reserve(4*n);
+    tmp.IA.reserve(6*n);
+    return tmp;
+  }
   struct t_out_dev{
     vector_qap_vertex VA;
     vector_int IA;
@@ -286,6 +288,9 @@
     t_out_dev GenGeomLine(vec2i a,vec2i b,int hls){
       auto geom=new_geom(1);geom.color=color;
       auto ab=sub(b,a);
+      if(ab.mag()==0){
+        return geom;
+      }
       auto n=set_mag(ort(ab),hls);
       auto d=add(ab,n);
       geom.AddVertex(add(a,mul(n,+1)));
@@ -299,18 +304,6 @@
   };
   vec2i ort(vec2i v){return vec2i(v.y,-v.x);}
   vec2i set_mag(vec2i v,int mag){return div(mul(v,mag),v.mag());}
-  t_out_dev new_geom(int n)
-  {
-    t_out_dev tmp;
-    tmp.color=255<<24;
-    tmp.VA.reserve(4*n);
-    tmp.IA.reserve(6*n);
-    return tmp;
-  }
-  // struct qap_mesh{
-  //   vector{qap_vertex} VA;
-  //   vector{int} IA;
-  // };
 
   struct t_input{
     vec2i mpos;
@@ -323,7 +316,7 @@
   struct t_dev{
     int p;
     int read_int(){int v=get_int(p);p++;return v;}
-    vec2i read_vec2i(){return vec2i(read_int(),read_int());}
+    vec2i read_vec2i(){auto x=read_int();auto y=read_int();return vec2i(x,y);}
     vector_int read_vector_int(){vector_int tmp;tmp.n=read_int();p+=tmp.n;tmp.p=p;return tmp;}
     vector_int read_IA(){return read_vector_int();}
     vector_qap_vertex read_VA(){vector_qap_vertex tmp;tmp.n=read_int();p+=tmp.n*3;tmp.p=p;return tmp;}
@@ -334,40 +327,35 @@
     int write(vec2i pos){write(pos.x);write(pos.y);return p;}
     int write(int c,vec2i pos){write(c);write(pos.x);write(pos.y);return p;}
     int write(qap_vertex v){write(v.color);write(v.pos);return p;}
-    /*int write(t_out_dev dev)
-    {
-      write(dev.VA.n);
-      for(int i=0;i<dev.VA.n;i++)write(dev.VA.at(i));
-      write(dev.IA.n);
-      for(int i=0;i<dev.IA.n;i++)write(dev.IA.at(i));
-    }*/
     int write(vector_vec2i arr){
       write(arr.n);
       {
         auto n=arr.n*2;auto sp=arr.addr_at(0);
-        __asm("mov(esi,var_sp);mov(edi,field_p);");
-        __asm("push(ecx);mov(ecx,var_n);rep_movsd_inc();pop(ecx);");
+        int esi=sp;int edi=p;
+        for(int i=0;i<n;i++){set_int(edi,get_int(esi));edi++;esi++;}
         p+=n;
       }
+      return 0;
     }
     int write(t_out_dev dev)
     {
       write(dev.VA.n);
       {
         auto n=dev.VA.n*3;auto sp=dev.VA.addr_at(0);
-        __asm("mov(esi,var_sp);mov(edi,field_p);");
-        __asm("push(ecx);mov(ecx,var_n);rep_movsd_inc();pop(ecx);");
+        int esi=sp;int edi=p;
+        for(int i=0;i<n;i++){set_int(edi,get_int(esi));edi++;esi++;}
         p+=dev.VA.n*3;
       }
       write(dev.IA.n);
       {
         auto sp=dev.IA.addr_at(0);
         auto n=dev.IA.n;
-        QapAssert(0,n%3);
-        __asm("mov(esi,var_sp);mov(edi,field_p);");
-        __asm("push(ecx);mov(ecx,var_n);rep_movsd_inc();pop(ecx);");
+        QapAssert(0==n%3);
+        int esi=sp;int edi=p;
+        for(int i=0;i<n;i++){set_int(edi,get_int(esi));edi++;esi++;}
         p+=dev.IA.n;
       }
+      return 0;
     }
   };
   struct t_mem{
@@ -444,23 +432,6 @@
       od.add_wo(od.GenGeomQuad(cell_size,cell_size),add(sub(mpos,vec2i(h*cell_size,h*cell_size)),mul(vec2i(x,y),cell_size)));
     }
     return od;
-    /*
-    auto od=new_geom(64*4*16*2);
-    auto quad=od.GenGeomQuad(0,0,10,10);
-    auto line=new_geom(64*2*4);
-    for(int x=0;x<64;x++)
-    {
-      line.color=(255<<24)+((16+x*7)<<8);
-      auto pos=vec2i(mpos.x+16*x,0);
-      line.add_with_color(quad,pos);
-    }
-    for(int y=0;y<16;y++)
-    {
-      auto pos=vec2i(0,16*y);
-      od.add_with_offset(line,pos);
-    }
-    return od;
-    */
   }
   t_out_dev get_grid(vec2i mpos,int zoom)
   {
@@ -598,16 +569,6 @@
     {
       for(int i=0;i<arr.n;i++)od.add_with_offset(grid,arr.at(i));
     }
-    //od.add_with_offset(grid,add(obj_pos,mpos));
-    /*
-    {
-      int did=od.VA.addr_at(0);
-      int n=od.VA.n;
-      __asm("mov(ecx,var_n);");
-      __asm("mov(edi,var_did);");
-      __asm("mov(edx,var_zoom);");
-      __asm("{LOOP_SCOPE();inc(edi);mov(eax,ptr[edi]);mul(eax,edx);stosd_inc();mov(eax,ptr[edi]);mul(eax,edx);stosd_inc();}");
-    }*/
     t_mem mem;
     mem.ptr=alloc(1024*1024);
     t_dev out;
