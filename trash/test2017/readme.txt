@@ -30,6 +30,9 @@ TODO:
     
     тест готов:
     http://vm-vm.44fs.preview.openshiftapps.com/put?fn=our_file.txt&data=some_content
+    
+    host:
+    https://console.preview.openshift.com/console/project/vm/overview
   }
   php{
     Написать скрипт который будет хранить скрипты в файловой системе, а список файлов - в спецальном файле.
