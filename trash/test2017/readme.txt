@@ -19,6 +19,7 @@ TODO:
 Хранилище скриптов{}или{
   nodejs{
     Написать скрипт который будет хранить скрипты у себя в памяти.
+        
     on_request_put_file=(POST)=>{g_files[fn]=content;}
     on_request_list=()=>Object.keys(g_files).join("\n");
     on_request_get_file=()=>g_files[fn];
@@ -26,6 +27,9 @@ TODO:
     у файла должно быть (короткое_не_уникальное_имя&&длинное_уникальное_имя&&какое_то_описание&&preview_img)
     
     в конечном итоге preview-картинка должна выбираться автоматически.
+    
+    тест готов:
+    http://vm-vm.44fs.preview.openshiftapps.com/put?fn=our_file.txt&data=some_content
   }
   php{
     Написать скрипт который будет хранить скрипты в файловой системе, а список файлов - в спецальном файле.
