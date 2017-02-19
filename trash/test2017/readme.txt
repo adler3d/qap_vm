@@ -31,3 +31,8 @@ TODO:
     Написать скрипт который будет хранить скрипты в файловой системе, а список файлов - в спецальном файле.
   }
 }
+
+Hosts:{
+  forever: http://vm-vm.44fs.preview.openshiftapps.com/
+  30days(from 2017.02.19): http://vm-96205.app.xervo.io
+}
