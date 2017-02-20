@@ -1,0 +1,2 @@
+main=http://vm-vm.44fs.preview.openshiftapps.com
+shadow=http://vm-96205.app.xervo.io
