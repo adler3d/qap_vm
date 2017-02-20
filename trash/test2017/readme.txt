@@ -45,8 +45,6 @@ TODO:
     нужно сделать теневой сервер. // получаеться очень круто что я сразу поднял два сервака.
     
     нужно чтобы сервер знал свой url
-    
-    http://adler3d.github.io/qap_vm/trash/test2017/hosts.txt
   }
   php{
     Написать скрипт который будет хранить скрипты в файловой системе, а список файлов - в спецальном файле.
@@ -54,6 +52,9 @@ TODO:
 }
 
 Hosts:{
+  http://adler3d.github.io/qap_vm/trash/test2017/hosts.txt
+  /*
   forever: http://vm-vm.44fs.preview.openshiftapps.com/
   30days(from 2017.02.19): http://vm-96205.app.xervo.io
+  */
 }
