@@ -1,18 +1,12 @@
 <!DOCTYPE HTML>
 <html>
   <head></head>
-  <body>...</body>
+  <body><iframe id="iframe"></iframe></body>
   <script>
     var get_tick_count=()=>new Date().getTime();
     var rand=()=>(Math.random()*1024*64|0);
     var fn="/gd/"+get_tick_count()+"x"+rand()+".txt";
     var src="http://vm-vm.44fs.preview.openshiftapps.com/put?fn="+fn+"&data="+document.referrer;
-    xhr('GET',src,s=>document.body.innerHTML="<pre>"+s);
-    function xhr(method,url,callback)
-    {
-      var x=new XMLHttpRequest();
-      x.onreadystatechange=function(){if(x.readyState===4){callback(x.responseText,x.status,url);}};
-      x.open(method,url);x.send();return x;
-    }
+    document.getElementById('iframe').src=src;
   </script>
 </html>
