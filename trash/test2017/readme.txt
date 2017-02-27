@@ -61,5 +61,6 @@ Hosts:{
   /*
   forever: http://vm-vm.44fs.preview.openshiftapps.com/
   30days(from 2017.02.19): http://vm-96205.app.xervo.io
+  90days(from 2017.02.27): http://vm-96405.app.xervo.io
   */
 }
