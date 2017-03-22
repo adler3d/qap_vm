@@ -59,7 +59,7 @@ TODO:
 Hosts:{
   http://adler3d.github.io/qap_vm/trash/test2017/hosts.json
   /*
-  forever: http://vm-vm.44fs.preview.openshiftapps.com/
+  expired(21.03.2017): http://vm-vm.44fs.preview.openshiftapps.com/
   30days(from 2017.02.19): http://vm-96205.app.xervo.io
   30days(from 2017.02.27): http://vm-96405.app.xervo.io
   30days(from 2017.02.27): http://vm-96410.app.xervo.io
