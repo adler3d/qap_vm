@@ -74,9 +74,9 @@ hosts_sync((s)=>{
 
   qap_log(master);
   
-  var test2016_h='test2016.h';
+  var test2016_h=require("process").argv[2];
   //qap_log(fs.readFileSync(test2016_h));
-  xhr_post("http://"+master+'/put?fn='+test2016_h,{data:""+fs.readFileSync(test2016_h)},s=>{
+  xhr_post("http://"+master+'/put?fn='+test2016_h,{data:fs.readFileSync(test2016_h).toString("binary")},s=>{
     //fs.writeFileSync(fn,s);
     qap_log("xhr done //length = "+Buffer.byteLength(s));
     qap_log(s);
