@@ -3,9 +3,9 @@
   "agile-eyrie-44522.herokuapp.com":"public",
   "vm-vm.44fs.preview.openshiftapps.com":"public-expired",
   "vm-96205.app.xervo.io":"shadow-expired",
-  "vm-96405.app.xervo.io":"shadow",
-  "vm-96410.app.xervo.io":"shadow",
-  "gtmaaa-97031.app.xervo.io":"shadow",
+  "vm-96405.app.xervo.io":"shadow-expired",
+  "vm-96410.app.xervo.io":"shadow-expired",
+  "gtmaaa-97031.app.xervo.io":"shadow-expired",
   "time":"2017.04.23 17:00",
   "end":"unk"
 }
