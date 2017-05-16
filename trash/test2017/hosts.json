@@ -1,6 +1,6 @@
 {
   "beg":"unk",
-  "207.154.222.254:8080":"public",
+  "207.154.222.254":"public",
   "agile-eyrie-44522.herokuapp.com":"shadow",
   "vm-vm.44fs.preview.openshiftapps.com":"public-expired",
   "vm-96205.app.xervo.io":"shadow-expired",
