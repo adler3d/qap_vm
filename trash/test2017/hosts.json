@@ -1,8 +1,8 @@
 {
   "beg":"unk",
-  "207.154.222.254":"public",
-  "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"shadow",
+  "207.154.222.254":"public-but-off",
+  "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"public",
   "agile-eyrie-44522.herokuapp.com":"shadow",
-  "time":"2017.05.18 01:01",
+  "time":"2017.06.02 17:32",
   "end":"unk"
 }
