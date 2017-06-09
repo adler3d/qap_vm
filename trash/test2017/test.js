@@ -116,11 +116,18 @@ function initBuffers() {
       vertices[i*4+0]-=0.5;
       vertices[i*4+1]-=0.5;
     }
-    
+    var to_ogl=c=>{
+      var b=c&0x00ff0000;
+      var r=c&0x000000ff;
+      var t=b>>8*2;
+      b=r<<8*2;
+      r=t;
+      return (c&0xff00ff00)|r|b;
+    };
     var VA=vertices;VA.length=vn*3;var ca=[];ca.length=vn;
     for(var i=0;i<vn;i++)
     {
-      ca[i]=read();
+      ca[i]=to_ogl(read());
       VA[i*3+0]=read()*0.25;
       VA[i*3+1]=read()*0.25;
       VA[i*3+2]=0;
