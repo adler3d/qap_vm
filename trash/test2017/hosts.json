@@ -2,6 +2,7 @@
   "beg":"unk",
   "207.154.222.254":"public-but-off",
   "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"public",
+  "vm-vm.193b.starter-ca-central-1.openshiftapps.com":"shadow",
   "agile-eyrie-44522.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "time":"2017.09.01 11:01",
