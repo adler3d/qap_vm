@@ -1,8 +1,8 @@
 {
   "beg":"unk",
   "207.154.222.254":"public-but-off",
-  "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"public",
-  "vm-vm.193b.starter-ca-central-1.openshiftapps.com":"shadow",
+  "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"shadow",
+  "vm-vm.193b.starter-ca-central-1.openshiftapps.com":"public",
   "agile-eyrie-44522.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup",
