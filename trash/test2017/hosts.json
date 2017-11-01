@@ -5,7 +5,7 @@
   "vm10-vm10.1d35.starter-us-east-1.openshiftapps.com":"shadow",
   "vm20-vm20.1d35.starter-us-east-1.openshiftapps.com":"shadow",
   "vm-vm.193b.starter-ca-central-1.openshiftapps.com":"public",
-  "agile-eyrie-44522.herokuapp.com":"shadow-off",
+  "agile-eyrie-44522.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup",
   "time":"2017.10.30 13:51",
