@@ -15,7 +15,23 @@
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup-rip",
   "---":"---",
-  "test":["so if this lead to crash, then we needd fix or rollback",{"yes":":)"}],
+  "main":{
+    "public":"ca|vm10|vm20|vm30|us|os3",
+    "shadow":"os3",
+    "host2str":{
+      "port-3000.vm-adler3d727657.codeanyapp.com":"caw|1",
+      "vm-os3.7e14.starter-us-west-2.openshiftapps.com": "os3|2",
+      "vm-vm.1d35.starter-us-east-1.openshiftapps.com": "us|2",
+      "agile-eyrie-44522.herokuapp.com": "ae|5",
+      "vm-vm.193b.starter-ca-central-1.openshiftapps.com": "ca|2",
+      "vm50.herokuapp.com": "vm50|5",
+      "vm51.herokuapp.com": "vm51|5",
+      "vm52.herokuapp.com": "vm52|5",
+      "vm10-vm10.1d35.starter-us-east-1.openshiftapps.com": "vm10|2",
+      "vm20-vm20.1d35.starter-us-east-1.openshiftapps.com": "vm20|2",
+      "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com": "vm30|2"
+    }
+  },
   "time":"2018.02.19 18:52",
   "end":"unk"
 }
