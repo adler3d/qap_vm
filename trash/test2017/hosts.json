@@ -13,6 +13,8 @@
   "vm52.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup-rip",
+  "---":"---",
+  "test":["so if this lead to crash, then we needd fix or rollback",{"yes":":)"}]
   "time":"2018.02.19 18:52",
-  "end":"unk"
+  "end":"unk",
 }
