@@ -2,7 +2,7 @@
   "beg":"unk",
   "207.154.222.254":"public-but-off",
   "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"shadow-off",
-  "vm-os3.7e14.starter-us-west-2.openshiftapps.com":"shadow-new",
+  "vm-os3.7e14.starter-us-west-2.openshiftapps.com":"shadow",
   "vm10-vm10.1d35.starter-us-east-1.openshiftapps.com":"shadow",
   "vm20-vm20.1d35.starter-us-east-1.openshiftapps.com":"shadow",
   "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com":"shadow",
@@ -13,6 +13,6 @@
   "vm52.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup-rip",
-  "time":"2017.10.30 13:51",
+  "time":"2018.02.19 18:52",
   "end":"unk"
 }
