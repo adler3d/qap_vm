@@ -19,7 +19,6 @@
     "public":"ca|vm10|vm20|vm30|us|os3",
     "shadow":"os3",
     "host2str":{
-      "port-3000.vm-adler3d727657.codeanyapp.com":"caw|1",
       "vm-os3.7e14.starter-us-west-2.openshiftapps.com": "os3|2",
       "vm-vm.1d35.starter-us-east-1.openshiftapps.com": "us|2",
       "agile-eyrie-44522.herokuapp.com": "ae|5",
