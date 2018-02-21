@@ -18,6 +18,7 @@
   "main":{
     "public":"ca|vm10|vm20|vm30|us|os3",
     "shadow":"os3",
+    "g++":"os3|ca|vm10|vm20|vm30|us",
     "host2str":{
       "vm-os3.7e14.starter-us-west-2.openshiftapps.com": "os3|2",
       "vm-vm.1d35.starter-us-east-1.openshiftapps.com": "us|2",
