@@ -2,12 +2,12 @@
   "beg":"unk",
   "207.154.222.254":"public-but-off",
   "vm-vm.1d35.starter-us-east-1.openshiftapps.com":"shadow-off",
-  "vm-os3.7e14.starter-us-west-2.openshiftapps.com":"shadow",
-  "vm10-vm10.1d35.starter-us-east-1.openshiftapps.com":"shadow",
-  "vm20-vm20.1d35.starter-us-east-1.openshiftapps.com":"shadow",
-  "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com":"shadow",
-  "vm-vm.193b.starter-ca-central-1.openshiftapps.com":"public",
-  "agile-eyrie-44522.herokuapp.com":"shadow",
+  "vm-os3.7e14.starter-us-west-2.openshiftapps.com":"shadow-blocked",
+  "vm10-vm10.1d35.starter-us-east-1.openshiftapps.com":"shadow-blocked",
+  "vm20-vm20.1d35.starter-us-east-1.openshiftapps.com":"shadow-blocked",
+  "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com":"shadow-blocked",
+  "vm-vm.193b.starter-ca-central-1.openshiftapps.com":"public-blocked",
+  "agile-eyrie-44522.herokuapp.com":"public",
   "port-3000.vm-adler3d727657.codeanyapp.com":"shadow-unstable",
   "vm50.herokuapp.com":"shadow",
   "vm51.herokuapp.com":"shadow",
@@ -32,6 +32,6 @@
       "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com": "vm30|2"
     }
   },
-  "time":"2018.02.19 18:52",
+  "time":"2018.03.08 23:53",
   "end":"unk"
 }
