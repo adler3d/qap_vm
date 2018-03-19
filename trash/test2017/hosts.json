@@ -14,6 +14,8 @@
   "vm52.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup-rip",
+  "gs-gs.193b.starter-ca-central-1.openshiftapps.com":"gcc",
+  "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "---":"---",
   "main":{
     "public":"ca|vm10|vm20|vm30|us|os3",
@@ -32,6 +34,6 @@
       "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com": "vm30|2"
     }
   },
-  "time":"2018.03.08 23:53",
+  "time":"2018.03.20 00:42",
   "end":"unk"
 }
