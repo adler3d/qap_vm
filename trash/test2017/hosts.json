@@ -16,6 +16,7 @@
   "qap.atwebpages.com":"backup-rip",
   "gs-gs.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
+  "qpeya.herokuapp.com":"shadow",
   "---":"---",
   "main":{
     "public":"ca|vm10|vm20|vm30|us|os3",
