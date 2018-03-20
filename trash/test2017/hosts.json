@@ -1,6 +1,6 @@
 {
   "beg":"unk",
-  "agile-eyrie-44522.herokuapp.com":"public",
+  "agile-eyrie-44522.herokuapp.com":"shadow",
   "vm50.herokuapp.com":"shadow",
   "vm51.herokuapp.com":"shadow",
   "vm52.herokuapp.com":"shadow",
@@ -10,7 +10,7 @@
   "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "zeitvm02.now.sh":"shadow",
   "zeitvm01.now.sh":"shadow",
-  "zeitvm00.now.sh":"shadow",
+  "zeitvm00.now.sh":"public",
   "qpeya.herokuapp.com":"shadow",
   "qpenar.herokuapp.com":"shadow",
   "---":"---",
