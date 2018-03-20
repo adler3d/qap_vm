@@ -16,6 +16,9 @@
   "qap.atwebpages.com":"backup-rip",
   "gs-gs.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
+  "zeitvm02.now.sh":"shadow",
+  "zeitvm01.now.sh":"shadow",
+  "zeitvm00.now.sh":"shadow",
   "qpeya.herokuapp.com":"shadow",
   "---":"---",
   "main":{
@@ -32,7 +35,10 @@
       "vm52.herokuapp.com": "vm52|5",
       "vm10-vm10.1d35.starter-us-east-1.openshiftapps.com": "vm10|2",
       "vm20-vm20.1d35.starter-us-east-1.openshiftapps.com": "vm20|2",
-      "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com": "vm30|2"
+      "vm30-vm30.193b.starter-ca-central-1.openshiftapps.com": "vm30|2",
+      "zeitvm02.now.sh":"zvm02",
+      "zeitvm01.now.sh":"zvm01",
+      "zeitvm00.now.sh":"zvm00",
     }
   },
   "time":"2018.03.20 00:42",
