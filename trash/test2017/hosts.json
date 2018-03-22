@@ -22,6 +22,7 @@
       "agile-eyrie-44522.herokuapp.com": "ae|5",
       "vm50.herokuapp.com": "vm50|5",
       "vm51.herokuapp.com": "vm51|5",
+      "vm52.herokuapp.com": "vm52|5",
       "qpeya.herokuapp.com": "qpeya|5",
       "qpenar.herokuapp.com": "qpenar|5",
       "gs-gs.193b.starter-ca-central-1.openshiftapps.com": "gs|0",
@@ -31,6 +32,6 @@
       "zeitvm00.now.sh":"zvm00|1"
     }
   },
-  "time":"2018.03.20 17:42",
+  "time":"2018.03.22 19:00",
   "end":"unk"
 }
