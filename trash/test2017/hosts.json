@@ -13,6 +13,7 @@
   "zeitvm00.now.sh":"public",
   "qpeya.herokuapp.com":"shadow",
   "qpenar.herokuapp.com":"shadow",
+  "45.77.65.74.vultr.com":"shadow",
   "---":"---",
   "main":{
     "public":"ae",
@@ -29,7 +30,8 @@
       "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|0",
       "zeitvm02.now.sh":"zvm02|1",
       "zeitvm01.now.sh":"zvm01|1",
-      "zeitvm00.now.sh":"zvm00|1"
+      "zeitvm00.now.sh":"zvm00|1",
+      "45.77.65.74.vultr.com":"vultr|1"
     }
   },
   "time":"2018.03.22 19:00",
