@@ -14,7 +14,7 @@
   "qpeya.herokuapp.com":"shadow",
   "qpenar.herokuapp.com":"shadow",
   "vm.vultr.com":"shadow-dns_waiting",
-  "45.77.65.74":"shadow",
+  "140.82.34.102":"shadow",
   "---":"---",
   "main":{
     "public":"ae",
@@ -32,7 +32,7 @@
       "zeitvm02.now.sh":"zvm02|1",
       "zeitvm01.now.sh":"zvm01|1",
       "zeitvm00.now.sh":"zvm00|1",
-      "45.77.65.74":"vultr_ip|1"
+      "140.82.34.102":"vultr_ip|1"
     }
   },
   "time":"2018.03.22 19:00",
