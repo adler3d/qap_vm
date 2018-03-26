@@ -21,7 +21,7 @@
   "main":{
     "public":"zvm00",
     "shadow":"ae",
-    "without_https":"vultr_ip",
+    "without_https":"vultr_ip|gs|nwg",
     "without_backup":"zqn2|zqn1|zqn0",
     "g++":"vultr_ip|gs|ngw",
     "host2str":{
