@@ -16,12 +16,12 @@
   "zqn0.now.sh":"shadow",
   "qpeya.herokuapp.com":"shadow",
   "qpenar.herokuapp.com":"shadow",
-  "vm.vultr.com":"shadow-dns_waiting",
   "140.82.34.102":"shadow",
   "---":"---",
   "main":{
     "public":"zvm00",
     "shadow":"ae",
+    "without_https":"vultr_ip"
     "without_backup":"zqn2|zqn1|zqn0",
     "g++":"vultr_ip|gs|ngw",
     "host2str":{
