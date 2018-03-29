@@ -25,19 +25,19 @@
     "without_backup":"zqn2|zqn1|zqn0",
     "g++":"vultr_ip|gs|ngw",
     "host2str":{
+      "140.82.34.102":"vultr_ip|1",
       "vm51.herokuapp.com": "vm51|5",
       "vm52.herokuapp.com": "vm52|5",
       "qpeya.herokuapp.com": "qpeya|5",
       "qpenar.herokuapp.com": "qpenar|5",
-      "gs-gs.193b.starter-ca-central-1.openshiftapps.com": "gs|0",
-      "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|0",
+      "gs-gs.193b.starter-ca-central-1.openshiftapps.com": "gs|1",
+      "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|1",
       "zeitvm02.now.sh":"zvm02|1",
       "zeitvm01.now.sh":"zvm01|1",
       "zeitvm00.now.sh":"zvm00|1",
       "zqn2.now.sh":"zqn2|1",
       "zqn1.now.sh":"zqn1|1",
-      "zqn0.now.sh":"zqn0|1",
-      "140.82.34.102":"vultr_ip|1"
+      "zqn0.now.sh":"zqn0|1"
     }
   },
   "rips":{
