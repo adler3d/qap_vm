@@ -1,16 +1,16 @@
 {
   "beg":"unk",
-  "agile-eyrie-44522.herokuapp.com":"shadow",
-  "vm50.herokuapp.com":"shadow",
+  "zeitvm02.now.sh":"shadow",
+  "zeitvm01.now.sh":"shadow",
+  "zeitvm00.now.sh":"public",
+  "agile-eyrie-44522.herokuapp.com":"shadow-rip",
+  "vm50.herokuapp.com":"shadow-rip",
   "vm51.herokuapp.com":"shadow",
   "vm52.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup-rip",
   "gs-gs.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
-  "zeitvm02.now.sh":"shadow",
-  "zeitvm01.now.sh":"shadow",
-  "zeitvm00.now.sh":"public",
   "zqn2.now.sh":"shadow",
   "zqn1.now.sh":"shadow",
   "zqn0.now.sh":"shadow",
@@ -20,13 +20,11 @@
   "---":"---",
   "main":{
     "public":"zvm00",
-    "shadow":"ae",
+    "shadow":"zvm02",
     "without_https":"vultr_ip|gs|nwg",
     "without_backup":"zqn2|zqn1|zqn0",
     "g++":"vultr_ip|gs|ngw",
     "host2str":{
-      "agile-eyrie-44522.herokuapp.com": "ae|5",
-      "vm50.herokuapp.com": "vm50|5",
       "vm51.herokuapp.com": "vm51|5",
       "vm52.herokuapp.com": "vm52|5",
       "qpeya.herokuapp.com": "qpeya|5",
@@ -42,6 +40,12 @@
       "140.82.34.102":"vultr_ip|1"
     }
   },
-  "time":"2018.03.26 21:03",
+  "rips":{
+    "host2str":{
+      "agile-eyrie-44522.herokuapp.com": "ae|5",
+      "vm50.herokuapp.com": "vm50|5"
+    }
+  }
+  "time":"2018.03.29 09:43",
   "end":"unk"
 }
