@@ -1,6 +1,6 @@
 {
   "beg":"unk",
-  "zeitvm02.now.sh":"shadow",
+  "zeitvm02.now.sh":"shadow-rip",
   "zeitvm01.now.sh":"shadow",
   "zeitvm00.now.sh":"public",
   "agile-eyrie-44522.herokuapp.com":"shadow-rip",
@@ -20,7 +20,7 @@
   "---":"---",
   "main":{
     "public":"zvm00",
-    "shadow":"zvm02",
+    "shadow":"zvm01",
     "without_https":"vultr_ip|gs|nwg",
     "without_backup":"zqn2|zqn1|zqn0",
     "g++":"vultr_ip|gs|ngw",
@@ -30,7 +30,6 @@
       "qpenar.herokuapp.com": "qpenar|5",
       "gs-gs.193b.starter-ca-central-1.openshiftapps.com": "gs|1",
       "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|1",
-      "zeitvm02.now.sh":"zvm02|1",
       "zeitvm01.now.sh":"zvm01|1",
       "zeitvm00.now.sh":"zvm00|1",
       "zqn2.now.sh":"zqn2|1",
@@ -40,6 +39,7 @@
   },
   "rips":{
     "host2str":{
+      "zeitvm02.now.sh":"zvm02|1",
       "agile-eyrie-44522.herokuapp.com": "ae|5",
       "vm52.herokuapp.com": "vm52|5",
       "vm51.herokuapp.com": "vm51|5",
