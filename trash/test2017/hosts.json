@@ -11,7 +11,7 @@
   "qap.atwebpages.com":"backup-rip",
   "gs-gs.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
-  "zqn2.now.sh":"shadow",
+  "zqn2.now.sh":"shadow-rip",
   "zqn1.now.sh":"shadow",
   "zqn0.now.sh":"shadow",
   "qpeya.herokuapp.com":"shadow",
@@ -32,13 +32,13 @@
       "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|1",
       "zeitvm01.now.sh":"zvm01|1",
       "zeitvm00.now.sh":"zvm00|1",
-      "zqn2.now.sh":"zqn2|1",
       "zqn1.now.sh":"zqn1|1",
       "zqn0.now.sh":"zqn0|1"
     }
   },
   "rips":{
     "host2str":{
+      "zqn2.now.sh":"zqn2|1",
       "zeitvm02.now.sh":"zvm02|1",
       "agile-eyrie-44522.herokuapp.com": "ae|5",
       "vm52.herokuapp.com": "vm52|5",
