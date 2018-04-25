@@ -9,7 +9,6 @@
   "vm52.herokuapp.com":"shadow",
   "qpe.000webhostapp.com":"backup",
   "qap.atwebpages.com":"backup-rip",
-  "gs-gs.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "zqn2.now.sh":"shadow",
   "zqn1.now.sh":"shadow",
@@ -20,13 +19,12 @@
   "main":{
     "public":"zvm00",
     "shadow":"zvm01",
-    "without_https":"vultr_ip|gs|nwg",
+    "without_https":"gs|nwg",
     "without_backup":"zqn2|zqn1|zqn0",
-    "g++":"gs|ngw",
+    "g++":"ngw",
     "host2str":{
       "qpeya.herokuapp.com": "qpeya|5",
       "qpenar.herokuapp.com": "qpenar|5",
-      "gs-gs.193b.starter-ca-central-1.openshiftapps.com": "gs|1",
       "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|1",
       "agile-eyrie-44522.herokuapp.com": "ae|5",
       "vm52.herokuapp.com": "vm52|5",
