@@ -16,16 +16,14 @@
   "zqn0.now.sh":"shadow",
   "qpeya.herokuapp.com":"shadow",
   "qpenar.herokuapp.com":"shadow",
-  "140.82.34.102":"shadow",
   "---":"---",
   "main":{
     "public":"zvm00",
     "shadow":"zvm01",
     "without_https":"vultr_ip|gs|nwg",
     "without_backup":"zqn2|zqn1|zqn0",
-    "g++":"vultr_ip|gs|ngw",
+    "g++":"gs|ngw",
     "host2str":{
-      "140.82.34.102":"vultr_ip|1",
       "qpeya.herokuapp.com": "qpeya|5",
       "qpenar.herokuapp.com": "qpenar|5",
       "gs-gs.193b.starter-ca-central-1.openshiftapps.com": "gs|1",
