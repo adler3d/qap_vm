@@ -10,7 +10,6 @@
   "qpe.000webhostapp.com":"backup",
   "narod2019.000webhostapp.com":"backup-new",
   "qap.atwebpages.com":"backup-rip",
-  "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com":"gcc",
   "zqn2.now.sh":"shadow-rip",
   "zqn1.now.sh":"shadow-rip",
   "zqn0.now.sh":"shadow",
@@ -26,7 +25,6 @@
     "host2str":{
       "qpeya.herokuapp.com": "qpeya|5",
       "qpenar.herokuapp.com": "qpenar|5",
-      "nwg-nwg.193b.starter-ca-central-1.openshiftapps.com": "nwg|1",
       "agile-eyrie-44522.herokuapp.com": "ae|5",
       "vm52.herokuapp.com": "vm52|5",
       "vm51.herokuapp.com": "vm51|5",
