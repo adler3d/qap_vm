@@ -8,12 +8,6 @@
   "vm52.herokuapp.com":"shadow",
   "qap.atwebpages.com":"backup-rip",
   "gitseo-vm.glitch.me":"shadow",
-  "zeitvm01.now.sh":"rip-shadow",
-  "zeitvm00.now.sh":"rip-public",
-  "zeitvm02.now.sh":"rip-shadow",
-  "zqn2.now.sh":"shadow-rip",
-  "zqn1.now.sh":"shadow-rip",
-  "zqn0.now.sh":"shadow-rip",
   "---":"---",
   "main":{
     "public":"qpeya",
@@ -28,12 +22,6 @@
       "vm52.herokuapp.com": "vm52|5",
       "vm51.herokuapp.com": "vm51|5",
       "vm50.herokuapp.com": "vm50|5",
-      "zeitvm02.now.sh":"zvm02|1",
-      "zeitvm01.now.sh":"zvm01|1",
-      "zeitvm00.now.sh":"zvm00|1",
-      "zqn2.now.sh":"zqn2|1",
-      "zqn1.now.sh":"zqn1|1",
-      "zqn0.now.sh":"zqn0|1",
       "gitseo-vm.glitch.me":"gvm|3",
       "vm30.eu-gb.cf.appdomain.cloud":"vm30|4"
     }
