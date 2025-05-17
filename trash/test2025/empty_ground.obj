@@ -1,0 +1,37 @@
+# Object Export From Tinkercad Server 2015
+#scale 1.0
+#shift_algo under_ground
+mtllib empty_ground.mtl
+
+o ground
+v 174 		-169 		-1
+v 174 		-169 		-2
+v 174 		184 		-2
+v 174 		184 		-1
+v -183 		184 		-1
+v -183 		184 		-2
+v -183 		-169 		-2
+v -183 		-169 		-1
+# 8 vertices
+
+g group_2019_07_29
+
+usemtl white
+s 0
+
+f 1 	2 	3
+f 1 	3 	4
+f 5 	6 	7
+f 5 	7 	8
+f 4 	5 	8
+f 4 	8 	1
+f 2 	7 	6
+f 2 	6 	3
+f 8 	7 	2
+f 8 	2 	1
+f 4 	3 	6
+f 4 	6 	5
+# 12 faces
+
+#end of ground
+
