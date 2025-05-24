@@ -1,0 +1,19 @@
+#include <emscripten.h>
+#include <vector>
+using namespace std;
+int main() {
+  vector<int> V={1,2,3};
+  EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>';);
+  EM_ASM({
+    console.log('I received: ' + $0);
+    g_data=$0;
+    {
+      let a=HEAP32[(g_data>>2)+0];
+      let b=HEAP32[(g_data>>2)+1];
+      let c=HEAP32[(g_data>>2)+2];
+      console.log({a,b,c});
+    }
+  }, V.data());
+  EM_ASM(main(););
+  return 0;
+}
