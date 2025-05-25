@@ -912,6 +912,6 @@ int main() {
       }
     };
     g_draw();
-  },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VB.size(),qDev.IB.size());
+  },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
   return 0;
 }
