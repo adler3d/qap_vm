@@ -994,8 +994,4 @@ int qap_main(int nope) {
   },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
   return 0;
 }
-int main(){
-  EM_ASM(start(););
-  return 0;
-}
 }
