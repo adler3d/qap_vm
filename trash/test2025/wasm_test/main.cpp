@@ -934,7 +934,7 @@ int qap_main(int nope) {
     for(int i=0;i<5000;i++){
       rarr.push_back({});
       auto&b=rarr.back();
-      b.pos=vec2d(rand()%1000-500,rand()%1000-500);
+      b.pos=vec2d(rand()%1920-1920/2,rand()%1000-500);
       b.ang=(rand()%360)*Pi*2/360;
       b.dang=(rand()%1000-500)*0.0001;
       b.c.r=rand()%255;
