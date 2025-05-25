@@ -659,7 +659,7 @@ public:
         for(let i=0;i<g_IBN;i++){
           qDev.iarr[i]=HEAP32[(g_VI>>2)+i];
         }
-        if(qDev.gl)qDev.DIP(qDev);
+        if(qDev.gl&&qDev.prog&&qDev.parr_buff&&qDev.carr_buff&&qDev.tarr_buff&&qDev.iarr_buff)qDev.DIP(qDev);
       };
       g_draw2();
     },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
