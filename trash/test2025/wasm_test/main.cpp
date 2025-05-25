@@ -48,7 +48,8 @@ inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
 class QapColor
 {
 public:
-  typedef uchar byte;
+  typedef unsigned char byte;
+  typedef unsigned char uchar;
 public:
 public:
   typedef QapColor SelfClass;
