@@ -898,7 +898,7 @@ int main() {
     {
       qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
       qDev.parr.length=g_VBN*2;
-      qDev.carr.length=g_VBN;
+      qDev.carr.length=g_VBN*4;
       qDev.tarr.length=g_VBN*2;
       for(let i=0;i<g_VBN;i++){
         // vec3f,uint,vec2f -> 32*3,32,32*2 -> 32*6
