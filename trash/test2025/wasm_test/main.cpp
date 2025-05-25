@@ -13,8 +13,8 @@ int main() {
       let c=HEAP32[(g_data>>2)+2];
       console.log({a,b,c});
       let x=HEAP8[g_data+0];
-      let y=HEAP8[g_data+1];
-      let z=HEAP8[g_data+2];
+      let y=HEAP8[g_data+4];
+      let z=HEAP8[g_data+8];
       console.log({x,y,z});
     }
   }, int(V.data()));
