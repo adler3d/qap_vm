@@ -884,7 +884,7 @@ extern "C" {
   void update(){
     QapDev::BatchScope Scope(qDev);
     for(auto&ex:rarr){
-      qDev.color=ex.color;
+      qDev.color=ex.c;
       qDev.DrawQuad(ex.pos.x,ex.pos.y,512,512,ex.ang);
       ex.ang+=ex.dang;
     }
