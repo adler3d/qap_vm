@@ -1,5 +1,5 @@
-<a src="https://adler3d.github.io/qap_vm/trash/test2025/gd20250525/v0.html">v0.html</a>
-<a src="https://adler3d.github.io/qap_vm/trash/test2025/gd20250525/v1.html">v1.html</a>
+https://adler3d.github.io/qap_vm/trash/test2025/gd20250525/v0.html
+https://adler3d.github.io/qap_vm/trash/test2025/gd20250525/v1.html
 
 ```diff
 diff --git a/./v0.html b/./v1.html
