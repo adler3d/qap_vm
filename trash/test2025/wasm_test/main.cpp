@@ -931,7 +931,7 @@ int qap_main(int nope) {
   srand(time(NULL));
   {
     QapDev::BatchScope Scope(qDev);
-    for(int i=0;i<30;i++){
+    for(int i=0;i<5000;i++){
       rarr.push_back({});
       auto&b=rarr.back();
       b.pos=vec2d(rand()%1000-500,rand()%1000-500);
