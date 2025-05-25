@@ -873,8 +873,9 @@ int main() {
   vector<int> V={10,20,30};
   QapDev qDev;
   qDev.Init(1024*64,1024*64*3);
+  qDev.color=0xFFffFFff;
   qDev.DrawQuad(0,0,400,400,Pi/4);
-  EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V3';);
+  EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V4';);
   EM_ASM({
     console.log('I received: ' + $0);
     g_data=$0;
@@ -900,10 +901,13 @@ int main() {
       qDev.tarr.length=g_VBN*2;
       for(let i=0;i<g_VBN;i++){
         // vec3f,uint,vec2f -> 32*3,32,32*2 -> 32*6
-        qDev.parr[i*3+0]=HEAPF32[(g_VB>>2)+i*6+0];
-        qDev.parr[i*3+1]=HEAPF32[(g_VB>>2)+i*6+1];
+        qDev.parr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+0];
+        qDev.parr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+1];
         //qDev.parr[i*3+2]=HEAPF32[(g_VB>>2)+i*6+2];
-        qDev.carr[i]=HEAP32[(g_VB>>2)+i*6+3];
+        qDev.carr[i+0]=HEAP8[g_VB+i*6*4+3*4+0];
+        qDev.carr[i+1]=HEAP8[g_VB+i*6*4+3*4+1];
+        qDev.carr[i+2]=HEAP8[g_VB+i*6*4+3*4+2];
+        qDev.carr[i+3]=HEAP8[g_VB+i*6*4+3*4+3];
         qDev.tarr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+3+1+0];
         qDev.tarr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+3+1+1];
       }
