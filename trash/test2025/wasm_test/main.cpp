@@ -45,78 +45,200 @@ public:
 };
 inline static real dot(const vec2d&a,const vec2d&b){return a.x*b.x+a.y*b.y;}
 inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
-struct QapColor{
+class QapColor
+{
 public:
-  typedef unsigned char byte;
+  typedef uchar byte;
 public:
-  byte b,g,r,a;
-  QapColor():b(255),g(255),r(255),a(255){}
-  QapColor(byte A,byte R,byte G,byte B):a(A),r(R),g(G),b(B){}
-  QapColor(byte R,byte G,byte B):a(255),r(R),g(G),b(B){}
-  QapColor(const QapColor& v):a(v.a),r(v.r),g(v.g),b(v.b){}
 public:
-  QapColor&operator=(const QapColor&v){a=v.a;r=v.r;g=v.g;b=v.b;return *this;}
-  QapColor operator+()const{return *this;}
+  typedef QapColor SelfClass;
 public:
-  QapColor&operator*=(const QapColor&v){
-  #define F(r){r=Clamp(int(r)*int(v.r)/int(255),int(0),int(255));}
-    F(a)F(r)F(g)F(b)
-    #undef F
+  uchar b;
+  uchar g;
+  uchar r;
+  uchar a;
+public:
+public:
+  QapColor():b(255),g(255),r(255),a(255) {}
+  QapColor(byte A,byte R,byte G,byte B):a(A),r(R),g(G),b(B) {}
+  QapColor(byte R,byte G,byte B):a(255),r(R),g(G),b(B) {}
+  QapColor(const QapColor& v):a(v.a),r(v.r),g(v.g),b(v.b) {}
+  QapColor(const unsigned int&v){*this=(QapColor&)v;}
+public:
+  bool operator==(const QapColor&v)
+  {
+    return(a==v.a)&&(r==v.r)&&(g==v.g)&&(b==v.b);
+  }
+  QapColor&operator=(const QapColor&v)
+  {
+    a=v.a;
+    r=v.r;
+    g=v.g;
+    b=v.b;
     return *this;
   }
-  QapColor&operator+=(const QapColor&v){
-  #define F(r){r=Clamp(int(r)+int(v.r),int(0),int(255));}
-    F(a)F(r)F(g)F(b)
-    #undef F
+  QapColor operator+()const
+  {
     return *this;
   }
-  QapColor&operator-=(const QapColor&v){
-  #define F(r){r=Clamp(int(r)-int(v.r),int(0),int(255));}
-    F(a)F(r)F(g)F(b)
-    #undef F
+public:
+  QapColor&operator*=(const QapColor&v)
+  {
+    {
+      a=Clamp(int(a)*int(v.a)/int(255),int(0),int(255));
+    }
+    {
+      r=Clamp(int(r)*int(v.r)/int(255),int(0),int(255));
+    }
+    {
+      g=Clamp(int(g)*int(v.g)/int(255),int(0),int(255));
+    }
+    {
+      b=Clamp(int(b)*int(v.b)/int(255),int(0),int(255));
+    }
     return *this;
   }
-  QapColor operator*(const QapColor&v)const{
-    #define F(r)int(int(r)*int(v.r))/int(255)
-    return QapColor(F(a),F(r),F(g),F(b));
-    #undef F
+  QapColor&operator+=(const QapColor&v)
+  {
+    {
+      a=Clamp(int(a)+int(v.a),int(0),int(255));
+    }
+    {
+      r=Clamp(int(r)+int(v.r),int(0),int(255));
+    }
+    {
+      g=Clamp(int(g)+int(v.g),int(0),int(255));
+    }
+    {
+      b=Clamp(int(b)+int(v.b),int(0),int(255));
+    }
+    return *this;
   }
-  QapColor operator+(const QapColor&v)const{
-    #define F(r)Clamp(int(r)+int(v.r),int(0),int(255))
-    return QapColor(F(a),F(r),F(g),F(b));
-    #undef F
+  QapColor&operator-=(const QapColor&v)
+  {
+    {
+      a=Clamp(int(a)-int(v.a),int(0),int(255));
+    }
+    {
+      r=Clamp(int(r)-int(v.r),int(0),int(255));
+    }
+    {
+      g=Clamp(int(g)-int(v.g),int(0),int(255));
+    }
+    {
+      b=Clamp(int(b)-int(v.b),int(0),int(255));
+    }
+    return *this;
   }
-  QapColor operator-(const QapColor&v)const{
-    #define F(r)Clamp(int(r)-int(v.r),int(0),int(255))
-    return QapColor(F(a),F(r),F(g),F(b));
-    #undef F
+  QapColor operator*(const QapColor&v)const
+  {
+    return QapColor(int(int(a)*int(v.a))/int(255),int(int(r)*int(v.r))/int(255),int(int(g)*int(v.g))/int(255),int(int(b)*int(v.b))/int(255));
+  }
+  QapColor operator+(const QapColor&v)const
+  {
+    return QapColor(Clamp(int(a)+int(v.a),int(0),int(255)),Clamp(int(r)+int(v.r),int(0),int(255)),Clamp(int(g)+int(v.g),int(0),int(255)),Clamp(int(b)+int(v.b),int(0),int(255)));
+  }
+  QapColor operator-(const QapColor&v)const
+  {
+    return QapColor(Clamp(int(a)-int(v.a),int(0),int(255)),Clamp(int(r)-int(v.r),int(0),int(255)),Clamp(int(g)-int(v.g),int(0),int(255)),Clamp(int(b)-int(v.b),int(0),int(255)));
   }
 public:
-  #define F(r){r=byte(Clamp(real(r)*f,0.0,255.0));}
-    QapColor&operator*=(real f){F(b);F(g);F(r);return *this;}
-    QapColor&operator/=(real r){real f=1.0/r;F(b);F(g);F(r);return *this;}
-  #undef F
+  QapColor&operator*=(real f)
+  {
+    {
+      b=byte(Clamp(real(b)*f,0.0,255.0));
+    }
+    ;
+    {
+      g=byte(Clamp(real(g)*f,0.0,255.0));
+    }
+    ;
+    {
+      r=byte(Clamp(real(r)*f,0.0,255.0));
+    }
+    ;
+    return *this;
+  }
+  QapColor&operator/=(real r)
+  {
+    real f=1.0/r;
+    {
+      b=byte(Clamp(real(b)*f,0.0,255.0));
+    }
+    ;
+    {
+      g=byte(Clamp(real(g)*f,0.0,255.0));
+    }
+    ;
+    {
+      r=byte(Clamp(real(r)*f,0.0,255.0));
+    }
+    ;
+    return *this;
+  }
 public:
-  #ifdef D3DCOLOR_DEFINED
-    QapColor(const D3DCOLOR& v){*((D3DCOLOR*)(void*)this)=v;}
-    operator D3DCOLOR&()const{return *(DWORD*)this;};
-  #endif
+  /*
+  QapColor(const D3DCOLOR& v)
+  {
+    *((D3DCOLOR*)(void*)this)=v;
+  }
+  operator D3DCOLOR&()const
+  {
+    return *(DWORD*)this;
+  };*/
+  operator unsigned int&()const{
+    return *(unsigned int*)this;
+  }
 public:
-  #ifdef BOX2D_H
-    QapColor(const b2Color& v){a=255;r=int(v.r*255.0);g=int(v.g*255.0);b=int(v.b*255.0);}
-  #endif
 public:
-  byte GetLuminance(){return int(int(r)+int(g)+int(b))/int(3);}
-  inline static QapColor Mix(const QapColor&A,const QapColor&B,const real&t){
+  byte GetLuminance()const
+  {
+    return int(int(r)+int(g)+int(b))/int(3);
+  }
+  QapColor toGray()const
+  {
+    auto l=GetLuminance();
+    return QapColor(a,l,l,l);
+  }
+  inline static QapColor Mix(const QapColor&A,const QapColor&B,const real&t)
+  {
     real ct=Clamp(t,0.0,1.0);
     real tA=1.0-ct;
     real tB=ct;
     QapColor O;
-    #define F(r){O.r=byte(Clamp(real(A.r)*tA+real(B.r)*tB,0.0,255.0));}
-    F(b)F(g)F(r)F(a)
-    #undef F
+    {
+      O.b=byte(Clamp(real(A.b)*tA+real(B.b)*tB,0.0,255.0));
+    }
+    {
+      O.g=byte(Clamp(real(A.g)*tA+real(B.g)*tB,0.0,255.0));
+    }
+    {
+      O.r=byte(Clamp(real(A.r)*tA+real(B.r)*tB,0.0,255.0));
+    }
+    {
+      O.a=byte(Clamp(real(A.a)*tA+real(B.a)*tB,0.0,255.0));
+    }
     return O;
   }
+  inline static QapColor HalfMix(const QapColor&A,const QapColor&B)
+  {
+    QapColor O;
+    {
+      O.b=(int(A.b)+int(B.b))>>1;
+    }
+    {
+      O.g=(int(A.g)+int(B.g))>>1;
+    }
+    {
+      O.r=(int(A.r)+int(B.r))>>1;
+    }
+    {
+      O.a=(int(A.a)+int(B.a))>>1;
+    }
+    return O;
+  }
+  inline QapColor inv_rgb()const{return QapColor(a,0xff-r,0xff-g,0xff-b);}
+  inline QapColor swap_rg()const{return QapColor(a,b,g,r);}
 };
 class vec2f{
 public:
@@ -278,6 +400,128 @@ inline transform2f MakeZoomTransform(const vec2d&zoom)
   transform2f tmp(vec2f(0,0),QapMat22(vec2f(zoom.x,0.f),vec2f(0.f,zoom.y)));
   return tmp;
 }
+class vec3f{
+public:
+  float x,y,z;
+  //vec3f(const D3DVECTOR&v):D3DVECTOR(v){}
+  vec3f(){x=0;y=0;z=0;}
+  vec3f(float x,float y,float z)
+  {
+    #define F(a)this->a=a;
+    F(x);F(y);F(z);
+    #undef F
+  }
+public:
+  bool dist_to_point_less_that_r(const vec3f&p,real r)const{return (p-*this).SqrMag()<r*r;}
+  bool dist_to_point_less_that_r(const vec3f&p,float r)const{return (p-*this).SqrMag()<r*r;}
+  friend vec3f operator*(const float&u,const vec3f&v)
+  {
+    return vec3f(v.x*u,v.y*u,v.z*u);
+  }
+  friend vec3f operator*(const vec3f&v,const float&u)
+  {
+    return vec3f(v.x*u,v.y*u,v.z*u);
+  }
+  friend vec3f operator+(const vec3f&v,const vec3f&u)
+  {
+    return vec3f(v.x+u.x,v.y+u.y,v.z+u.z);
+  }
+  friend vec3f operator-(const vec3f&v,const vec3f&u)
+  {
+    return vec3f(v.x-u.x,v.y-u.y,v.z-u.z);
+  }
+  void operator*=(const float&k)
+  {
+    x*=k;
+    y*=k;
+    z*=k;
+  }
+  bool operator==(const vec3f&v)const
+  {
+    auto&a=*this;
+    bool xok=a.x==v.x;
+    bool yok=a.y==v.y;
+    bool zok=a.z==v.z;
+    return xok&&yok&&zok;
+  }
+  bool operator!=(const vec3f&v)const
+  {
+    return !operator==(v);
+  }
+  void operator+=(const vec3f&v)
+  {
+    x+=v.x;
+    y+=v.y;
+    z+=v.z;
+  }
+  void operator-=(const vec3f&v)
+  {
+    x-=v.x;
+    y-=v.y;
+    z-=v.z;
+  }
+  vec3f operator+()const{return *this;}
+  vec3f operator-()const{return *this*-1;}
+  vec3f RawMul(const vec3f&b)const
+  {
+    auto&a=*this;
+    return vec3f(a.x*b.x,a.y*b.y,a.z*b.z);
+  }
+  vec3f RawMul(float x,float y,float z)const
+  {
+    auto&a=*this;
+    return vec3f(a.x*x,a.y*y,a.z*z);
+  }
+  vec3f Mul(const vec3f&b)const
+  {
+    auto&a=*this;
+    return vec3f(a.x*b.x,a.y*b.y,a.z*b.z);
+  }
+  vec3f Mul(float x,float y,float z)const
+  {
+    auto&a=*this;
+    return vec3f(a.x*x,a.y*y,a.z*z);
+  }
+  float Mag()const
+  {
+    return sqrt(x*x+y*y+z*z);
+  }
+  float SqrMag()const
+  {
+    return x*x+y*y+z*z;
+  }
+  vec3f Norm()const
+  {
+    if((x==0)&&(y==0)&&(z==0))
+    {
+      return vec3f(0,0,0);
+    }
+    auto k=1.0f/Mag();
+    return vec3f(x*k,y*k,z*k);
+  }
+  vec3f cross(const vec3f&b)const
+  {
+    auto&a=*this;
+    return vec3f(
+      +(a.y*b.z-a.z*b.y),
+      -(a.x*b.z-a.z*b.x),
+      +(a.x*b.y-a.y*b.x)
+    );
+  }
+  float dot(const vec3f&b)const
+  {
+    auto&a=*this;
+    return (
+      a.x*b.x+
+      a.y*b.y+
+      a.z*b.z
+    );
+  }
+};
+inline float dot(const vec3f&a,const vec3f&b){return a.dot(b);}
+//inline float dot(const vec3d&a,const vec3d&b){return a.dot(b);}
+inline vec3f cross(const vec3f&a,const vec3f&b){return a.cross(b);}
+//inline vec3d cross(const vec3d&a,const vec3d&b){return a.cross(b);}
 class QapDev{
 public:
   QapColor color=0;
@@ -331,12 +575,12 @@ public:
   int DIPs;
   int Verts;
   int Tris;
-  QapDX::BlendType BlendMode;
-  QapDX::AlphaMode AlphaMode;
+  //QapDX::BlendType BlendMode;
+  //QapDX::AlphaMode AlphaMode;
   bool Batching;
   bool Textured;
   b2Transform xf,txf;
-  static const DWORD FVF=D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1;
+  //static const DWORD FVF=D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1;
 public:
   QapDev():color(0xFFFFFFFF),VB(NULL),IB(NULL),VBA(NULL),IBA(NULL),VPos(0),IPos(0),MaxVPos(0),MaxIPos(0),Batching(false),BlendMode(QapDX::BT_SUB),AlphaMode(QapDX::AM_NONE){DynRes.Owner=this;}
   ~QapDev(){Free();}
@@ -360,7 +604,7 @@ public:
     VB={};IB={};VPos=0;IPos=0;Batching=false;BlendMode=QapDX::BT_SUB;AlphaMode=QapDX::AM_NONE;
   };
 public:
-  void QapDev::BeginBatch()
+  void BeginBatch()
   {
     Batching=true;Textured=true;
     VBA=0;IBA=0;VPos=0;IPos=0;//Test it
@@ -397,7 +641,7 @@ public:
   void NextFrame(){DIPs=0;Verts=0;Tris=0;SetBlendMode(BlendMode);SetAlphaMode(AlphaMode);}
 public:
   void HackMode(bool Textured){this->Textured=Textured;}
-  virtual void BindTex(int Stage,QapDX::QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
+  //virtual void BindTex(int Stage,QapDX::QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
 public:
   inline Ver&AddVertexRaw(){return VBA[VPos++];}
   inline int AddVertex(const Ver&Source)
@@ -422,10 +666,10 @@ public:
   inline b2Transform GetTextureTransform(){return txf;}
   inline real GetZoom(){return vec2d(xf.r.col1).Mag();}
 public:
-  QapDX::BlendType GetBlendMode(){return BlendMode;}
-  QapDX::AlphaMode GetAlphaMode(){return AlphaMode;}
-  void SetBlendMode(QapDX::BlendType Mode){QapDX::Blend(BlendMode=Mode);}
-  void SetAlphaMode(QapDX::AlphaMode Mode){QapDX::Alpha(AlphaMode=Mode);}
+  //QapDX::BlendType GetBlendMode(){return BlendMode;}
+  //QapDX::AlphaMode GetAlphaMode(){return AlphaMode;}
+  //void SetBlendMode(QapDX::BlendType Mode){QapDX::Blend(BlendMode=Mode);}
+  //void SetAlphaMode(QapDX::AlphaMode Mode){QapDX::Alpha(AlphaMode=Mode);}
 public:
   inline int AddVertex(float x,float y,const QapColor&c,float u,float v)
   {
