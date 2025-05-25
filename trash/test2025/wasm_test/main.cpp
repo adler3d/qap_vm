@@ -2,11 +2,11 @@
 #include <vector>
 using namespace std;
 typedef double real;
-typedef unsigned char byte;
 template<typename TYPE>inline TYPE Lerp(const TYPE&A,const TYPE&B,const real&v){return A+(B-A)*v;}
 template<class TYPE>inline TYPE Clamp(const TYPE&v,const TYPE&a,const TYPE&b){return max(a,min(v, b));}
-struct QapColor
-{
+struct QapColor{
+public:
+  typedef unsigned char byte;
 public:
   byte b,g,r,a;
   QapColor():b(255),g(255),r(255),a(255){}
