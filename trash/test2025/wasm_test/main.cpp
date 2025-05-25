@@ -1,5 +1,8 @@
 #include <emscripten.h>
 #include <vector>
+#include <stdlib.h>
+#include <time.h>
+
 using namespace std;
 typedef double real;
 template<typename TYPE>inline TYPE Lerp(const TYPE&A,const TYPE&B,const real&v){return A+(B-A)*v;}
@@ -874,7 +877,10 @@ int main() {
   QapDev qDev;
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
-  qDev.DrawQuad(0,0,400,400,Pi/4);
+  srand(time(NULL));
+  for(int i=0;i<10;i++){
+    qDev.DrawQuad(rand()%1000-500,rand()%1000-500,200,200,(rand()%360)*Pi*2/360);
+  }
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V4';);
   EM_ASM({
     console.log('I received: ' + $0);
