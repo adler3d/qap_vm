@@ -931,10 +931,10 @@ int main() {
       b.pos=vec2d(rand()%1000-500,rand()%1000-500);
       b.ang=(rand()%360)*Pi*2/360;
       b.dang=(rand()%1000-500)*0.001;
-      b.color.r=rand()%255;
-      b.color.g=rand()%255;
-      b.color.b=rand()%255;
-      b.color.a=255;
+      b.c.r=rand()%255;
+      b.c.g=rand()%255;
+      b.c.b=rand()%255;
+      b.c.a=255;
       qDev.color.r=rand()%255;
       qDev.color.g=rand()%255;
       qDev.color.b=rand()%255;
