@@ -871,20 +871,74 @@ public:
     }
   }*/
 };
+struct t_rec{
+  vec2d pos;
+  QapColor c;
+  double ang;
+  double dang;
+};
+vector<t_rec> rarr;
+QapDev qDev;
 
+extern "C" {
+  void update(){
+    QapDev::BatchScope Scope(qDev);
+    for(auto&ex:rarr){
+      qDev.color=ex.color;
+      qDev.DrawQuad(ex.pos.x,ex.pos.y,512,512,ex.ang);
+      ex.ang+=ex.dang;
+    }
+    EM_ASM({
+      g_VB=$0;g_VI=$1;g_VBN=$2;g_IBN=$3;
+      //console.log({g_VB,g_VI,g_VBN,g_IBN});
+      g_draw=()=>{
+        //qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
+        qDev.parr.length=g_VBN*2;
+        qDev.carr.length=g_VBN*4;
+        qDev.tarr.length=g_VBN*2;
+        let inv_255=1.0/255;
+        for(let i=0;i<g_VBN;i++){
+          // vec3f,uint,vec2f -> 32*3,32,32*2 -> 32*6
+          qDev.parr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+0];
+          qDev.parr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+1];
+          //qDev.parr[i*3+2]=HEAPF32[(g_VB>>2)+i*6+2];
+          qDev.carr[i*4+0]=HEAPU8[g_VB+i*6*4+3*4+0]*inv_255;
+          qDev.carr[i*4+1]=HEAPU8[g_VB+i*6*4+3*4+1]*inv_255;
+          qDev.carr[i*4+2]=HEAPU8[g_VB+i*6*4+3*4+2]*inv_255;
+          qDev.carr[i*4+3]=HEAPU8[g_VB+i*6*4+3*4+3]*inv_255;
+          qDev.tarr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+3+1+0];
+          qDev.tarr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+3+1+1];
+        }
+        qDev.iarr.length=g_IBN;
+        for(let i=0;i<g_IBN;i++){
+          qDev.iarr[i]=HEAP32[(g_VI>>2)+i];
+        }
+      };
+      g_draw();
+    },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
+  }
+}
 int main() {
   vector<int> V={10,20,30};
-  QapDev qDev;
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
   srand(time(NULL));
   {
     QapDev::BatchScope Scope(qDev);
     for(int i=0;i<10;i++){
+      rarr.push_back({});
+      auto&b=rarr.back();
+      b.pos=vec2d(rand()%1000-500,rand()%1000-500);
+      b.ang=(rand()%360)*Pi*2/360;
+      b.dang=(rand()%1000-500)*0.001;
+      b.color.r=rand()%255;
+      b.color.g=rand()%255;
+      b.color.b=rand()%255;
+      b.color.a=255;
       qDev.color.r=rand()%255;
       qDev.color.g=rand()%255;
       qDev.color.b=rand()%255;
-      qDev.DrawQuad(rand()%1000-500,rand()%1000-500,512,512,(rand()%360)*Pi*2/360);
+      //qDev.DrawQuad(rand()%1000-500,rand()%1000-500,512,512,);
     }
   }
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V4';);
@@ -905,10 +959,10 @@ int main() {
   EM_ASM(main(););
   EM_ASM({
     g_VB=$0;g_VI=$1;g_VBN=$2;g_IBN=$3;
-    console.log({g_VB,g_VI,g_VBN,g_IBN});
+    //console.log({g_VB,g_VI,g_VBN,g_IBN});
     g_draw=()=>
     {
-      qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
+      //qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
       qDev.parr.length=g_VBN*2;
       qDev.carr.length=g_VBN*4;
       qDev.tarr.length=g_VBN*2;
