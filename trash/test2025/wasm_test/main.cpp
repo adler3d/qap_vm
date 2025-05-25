@@ -914,7 +914,7 @@ int main() {
       }
       qDev.iarr.length=g_IBN;
       for(let i=0;i<g_IBN;i++){
-        qDev.iarr[i]=HEAP32[(g_IB>>2)+i];
+        qDev.iarr[i]=HEAP32[(g_VI>>2)+i];
       }
     };
     g_draw();
