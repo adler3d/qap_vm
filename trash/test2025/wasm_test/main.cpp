@@ -941,7 +941,7 @@ int qap_main(int nope) {
       b.c.g=rand()%255;
       b.c.b=rand()%255;
       b.c.a=255;
-      qDev.wh=(rand()%1000)*128/1000.0+64;
+      b.wh=(rand()%1000)*128/1000.0+64;
       qDev.color.r=rand()%255;
       qDev.color.g=rand()%255;
       qDev.color.b=rand()%255;
