@@ -995,3 +995,7 @@ int qap_main(int nope) {
   return 0;
 }
 }
+int main(){
+  EM_ASM(start(););
+  return 0;
+}
