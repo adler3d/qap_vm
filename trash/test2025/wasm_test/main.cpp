@@ -881,6 +881,9 @@ int main() {
   {
     QapDev::BatchScope Scope(qDev);
     for(int i=0;i<10;i++){
+      qDev.color.r=rand()%255;
+      qDev.color.g=rand()%255;
+      qDev.color.b=rand()%255;
       qDev.DrawQuad(rand()%1000-500,rand()%1000-500,512,512,(rand()%360)*Pi*2/360);
     }
   }
