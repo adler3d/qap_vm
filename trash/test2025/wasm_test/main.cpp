@@ -898,25 +898,23 @@ int main() {
     {
       qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
       qDev.parr.length=g_VBN*2;
-      //qDev.carr.length=g_VBN;
-      //qDev.tarr.length=g_VBN*2;
+      qDev.carr.length=g_VBN;
+      qDev.tarr.length=g_VBN*2;
       for(let i=0;i<g_VBN;i++){
         // vec3f,uint,vec2f -> 32*3,32,32*2 -> 32*6
         qDev.parr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+0];
         qDev.parr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+1];
         //qDev.parr[i*3+2]=HEAPF32[(g_VB>>2)+i*6+2];
-        /*
         qDev.carr[i*4+0]=HEAPU8[g_VB+i*6*4+3*4+0];
         qDev.carr[i*4+1]=HEAPU8[g_VB+i*6*4+3*4+1];
         qDev.carr[i*4+2]=HEAPU8[g_VB+i*6*4+3*4+2];
         qDev.carr[i*4+3]=HEAPU8[g_VB+i*6*4+3*4+3];
         qDev.tarr[i*2+0]=HEAP32[(g_VB>>2)+i*6+3+1+0];
         qDev.tarr[i*2+1]=HEAP32[(g_VB>>2)+i*6+3+1+1];
-        */
       }
       qDev.iarr.length=g_IBN;
       for(let i=0;i<g_IBN;i++){
-        qDev.iarr[i]=HEAP32[(g_VB>>2)+i];
+        qDev.iarr[i]=HEAP32[(g_IB>>2)+i];
       }
     };
     g_draw();
