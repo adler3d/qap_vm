@@ -38,14 +38,13 @@ public:
 public:
   //friend inline static vec2d Vec2dEx(const real&ang,const real&mag){return vec2d(cos(ang)*mag,sin(ang)*mag);}
 public:
-  friend inline static real dot(const vec2d&a,const vec2d&b){return a.x*b.x+a.y*b.y;}
-  friend inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
-public:
   #ifdef BOX2D_H
     operator b2Vec2()const{return b2Vec2(x,y);}
     vec2d(const b2Vec2& v):x(v.x),y(v.y){}
   #endif
 };
+inline static real dot(const vec2d&a,const vec2d&b){return a.x*b.x+a.y*b.y;}
+inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
 struct QapColor{
 public:
   typedef unsigned char byte;
