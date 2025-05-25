@@ -919,6 +919,7 @@ extern "C" {
   }
 }
 int main() {
+  EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
   vector<int> V={10,20,30};
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
@@ -941,7 +942,6 @@ int main() {
       //qDev.DrawQuad(rand()%1000-500,rand()%1000-500,512,512,);
     }
   }
-  EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V4';);
   EM_ASM({
     console.log('I received: ' + $0);
     g_data=$0;
