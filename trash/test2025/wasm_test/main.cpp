@@ -881,7 +881,7 @@ int main() {
   {
     QapDev::BatchScope Scope(qDev);
     for(int i=0;i<10;i++){
-      qDev.DrawQuad(rand()%1000-500,rand()%1000-500,200,200,(rand()%360)*Pi*2/360);
+      qDev.DrawQuad(rand()%1000-500,rand()%1000-500,512,512,(rand()%360)*Pi*2/360);
     }
   }
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V4';);
