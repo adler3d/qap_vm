@@ -908,8 +908,8 @@ int main() {
         qDev.carr[i*4+1]=HEAPU8[g_VB+i*6*4+3*4+1];
         qDev.carr[i*4+2]=HEAPU8[g_VB+i*6*4+3*4+2];
         qDev.carr[i*4+3]=HEAPU8[g_VB+i*6*4+3*4+3];
-        qDev.tarr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+3+1+0];
-        qDev.tarr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+3+1+1];
+        qDev.tarr[i*2+0]=HEAP32[(g_VB>>2)+i*6+3+1+0];
+        qDev.tarr[i*2+1]=HEAP32[(g_VB>>2)+i*6+3+1+1];
       }
       qDev.iarr.length=g_IBN;
       for(let i=0;i<g_IBN;i++){
