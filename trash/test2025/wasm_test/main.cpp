@@ -595,14 +595,14 @@ public:
       //Sys.pDev->CreateVertexBuffer(VCount*sizeof(Ver),D3DUSAGE_DYNAMIC,FVF,D3DPOOL_DEFAULT,&VB,NULL);
       //Sys.pDev->CreateIndexBuffer(ICount*sizeof(int),D3DUSAGE_DYNAMIC,D3DFMT_INDEX32,D3DPOOL_DEFAULT,&IB,NULL);
       VB.resize(VCount);
-      IV.resize(ICount);
+      IB.resize(ICount);
       VBA=0; IBA=0; VPos=0; IPos=0; DIPs=0; Verts=0; Tris=0;
       xf.set_ident();
       txf.set_ident();
     };
   }
   void Free(){
-    VB={};IB={};VPos=0;IPos=0;Batching=false;BlendMode=QapDX::BT_SUB;AlphaMode=QapDX::AM_NONE;
+    VB={};IB={};VPos=0;IPos=0;Batching=false;//BlendMode=QapDX::BT_SUB;AlphaMode=QapDX::AM_NONE;
   };
 public:
   void BeginBatch()
@@ -639,7 +639,7 @@ public:
   int GetVerts(){return Verts;}
   int GetTris(){return Tris;}
   const QapColor&GetColor(){return color;}
-  void NextFrame(){DIPs=0;Verts=0;Tris=0;SetBlendMode(BlendMode);SetAlphaMode(AlphaMode);}
+  void NextFrame(){DIPs=0;Verts=0;Tris=0;/*SetBlendMode(BlendMode);SetAlphaMode(AlphaMode);*/}
 public:
   void HackMode(bool Textured){this->Textured=Textured;}
   //virtual void BindTex(int Stage,QapDX::QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
@@ -660,7 +660,7 @@ public:
     IBA[IPos++]=C;
   };
 public:
-  inline void SetColor(const QapColor&C){color=C;QapDX::SetColor(C);}
+  inline void SetColor(const QapColor&C){color=C;}
   inline void SetTransform(b2Transform const&val){xf=val;}
   inline b2Transform GetTransform(){return xf;}
   inline void SetTextureTransform(b2Transform const&val){txf=val;}
@@ -708,7 +708,7 @@ public:
 public:
   void DrawCircleOld(const vec2d&pos,real r,real ang,real ls,int seg)
   {
-    static PointArray PA;
+    static vector<vec2d> PA;
     PA.resize(seg);
     for(int i=0;i<seg;i++)
     {
@@ -859,7 +859,7 @@ public:
     BatchScope Scope(*this);
     {
       int base=GetVPos();
-      static IntArray VID;VID.resize(VA.size());
+      static vector<int> VID;VID.resize(VA.size());
       for(int i=0;i<VA.size();i++)VID[i]=AddVertex(MakeVer(VA[i],color,p.x,p.y));
       for(int i=0;i<IA.size();i+=3)AddTris(VID[IA[i+0]],VID[IA[i+1]],VID[IA[i+2]]);
     }
