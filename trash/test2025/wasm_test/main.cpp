@@ -879,19 +879,21 @@ struct t_rec{
 };
 vector<t_rec> rarr;
 QapDev qDev;
-/*
+
 extern "C" {
-  int update(){
-    QapDev::BatchScope Scope(qDev);
-    for(auto&ex:rarr){
-      qDev.color=ex.c;
-      qDev.DrawQuad(ex.pos.x,ex.pos.y,512,512,ex.ang);
-      ex.ang+=ex.dang;
+  int update(int nope){
+    {
+      QapDev::BatchScope Scope(qDev);
+      for(auto&ex:rarr){
+        qDev.color=ex.c;
+        qDev.DrawQuad(ex.pos.x,ex.pos.y,512,512,ex.ang);
+        ex.ang+=ex.dang;
+      }
     }
     EM_ASM({
       g_VB=$0;g_VI=$1;g_VBN=$2;g_IBN=$3;
       //console.log({g_VB,g_VI,g_VBN,g_IBN});
-      g_draw=()=>{
+      g_draw2=()=>{
         //qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
         qDev.parr.length=g_VBN*2;
         qDev.carr.length=g_VBN*4;
@@ -914,12 +916,12 @@ extern "C" {
           qDev.iarr[i]=HEAP32[(g_VI>>2)+i];
         }
       };
-      g_draw();
+      g_draw2();
     },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
   }
   return 0;
 }
-*/
+
 int main() {
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
   vector<int> V={10,20,30};
