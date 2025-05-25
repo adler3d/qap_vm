@@ -583,7 +583,7 @@ public:
   b2Transform xf,txf;
   //static const DWORD FVF=D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1;
 public:
-  QapDev():color(0xFFFFFFFF),VB(NULL),IB(NULL),VBA(NULL),IBA(NULL),VPos(0),IPos(0),MaxVPos(0),MaxIPos(0),Batching(false),BlendMode(QapDX::BT_SUB),AlphaMode(QapDX::AM_NONE){DynRes.Owner=this;}
+  QapDev():color(0xFFFFFFFF),VB(NULL),IB(NULL),VBA(NULL),IBA(NULL),VPos(0),IPos(0),MaxVPos(0),MaxIPos(0),Batching(false)/*,BlendMode(QapDX::BT_SUB),AlphaMode(QapDX::AM_NONE)*/{}
   ~QapDev(){Free();}
 public:
   void ReInit(){Init(MaxVPos,MaxIPos);}
@@ -609,7 +609,7 @@ public:
   {
     Batching=true;Textured=true;
     VBA=0;IBA=0;VPos=0;IPos=0;//Test it
-    if(!IB||!VB)return;
+    if(!IB.size()||!VB.size())return;
     IBA=IB.data();
     VBA=VB.data();
     //IB->Lock(0,sizeof(int)*MaxIPos,(void **)&IBA,0);
