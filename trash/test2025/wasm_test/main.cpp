@@ -921,8 +921,8 @@ extern "C" {
     return 0;
   }
 }
-
-int main() {
+extern "C" {
+int main(int nope) {
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
   vector<int> V={10,20,30};
   qDev.Init(1024*64,1024*64*3);
@@ -991,4 +991,5 @@ int main() {
     g_draw();
   },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
   return 0;
+}
 }
