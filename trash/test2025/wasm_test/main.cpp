@@ -931,7 +931,7 @@ int qap_main(int nope) {
   srand(time(NULL));
   {
     QapDev::BatchScope Scope(qDev);
-    for(int i=0;i<5000;i++){
+    for(int i=0;i<1000;i++){
       rarr.push_back({});
       auto&b=rarr.back();
       b.pos=vec2d(rand()%1000-500,rand()%1000-500);
@@ -941,7 +941,7 @@ int qap_main(int nope) {
       b.c.g=rand()%255;
       b.c.b=rand()%255;
       b.c.a=255;
-      b.wh=(rand()%1000)*128/1000.0+64;
+      b.wh=(rand()%1000)*16/1000.0+16;
       qDev.color.r=rand()%255;
       qDev.color.g=rand()%255;
       qDev.color.b=rand()%255;
