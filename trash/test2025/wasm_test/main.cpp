@@ -879,9 +879,9 @@ struct t_rec{
 };
 vector<t_rec> rarr;
 QapDev qDev;
-
+/*
 extern "C" {
-  void update(){
+  int update(){
     QapDev::BatchScope Scope(qDev);
     for(auto&ex:rarr){
       qDev.color=ex.c;
@@ -917,7 +917,9 @@ extern "C" {
       g_draw();
     },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
   }
+  return 0;
 }
+*/
 int main() {
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
   vector<int> V={10,20,30};
