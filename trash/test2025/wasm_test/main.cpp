@@ -895,14 +895,14 @@ int main() {
     console.log({g_VB,g_VI,g_VBN,g_IBN});
     g_draw=()=>
     {
-      qDev.parr.length=g_VBN*3;
+      qDev.parr.length=g_VBN*2;
       qDev.carr.length=g_VBN;
       qDev.tarr.length=g_VBN*2;
       for(let i=0;i<g_VBN;i++){
         // vec3f,uint,vec2f -> 32*3,32,32*2 -> 32*6
         qDev.parr[i*3+0]=HEAPF32[(g_VB>>2)+i*6+0];
         qDev.parr[i*3+1]=HEAPF32[(g_VB>>2)+i*6+1];
-        qDev.parr[i*3+2]=HEAPF32[(g_VB>>2)+i*6+2];
+        //qDev.parr[i*3+2]=HEAPF32[(g_VB>>2)+i*6+2];
         qDev.carr[i]=HEAP32[(g_VB>>2)+i*6+3];
         qDev.tarr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+3+1+0];
         qDev.tarr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+3+1+1];
