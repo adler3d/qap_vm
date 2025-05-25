@@ -4,8 +4,11 @@ using namespace std;
 typedef double real;
 template<typename TYPE>inline TYPE Lerp(const TYPE&A,const TYPE&B,const real&v){return A+(B-A)*v;}
 template<class TYPE>inline TYPE Clamp(const TYPE&v,const TYPE&a,const TYPE&b){return max(a,min(v, b));}
-struct vec2d
-{
+const real Pi=3.14159265;
+const real Pi2=Pi*2;
+const real PiD2=Pi/2;
+const real PiD4=Pi/4;
+struct vec2d{
 public:
   real x,y;
   vec2d():x(0),y(0){}
@@ -43,6 +46,8 @@ public:
     vec2d(const b2Vec2& v):x(v.x),y(v.y){}
   #endif
 };
+inline vec2d Vec2dEx(const real&ang,const real&mag){return vec2d(cos(ang)*mag,sin(ang)*mag);}
+inline int round(const real&val){return int(val>=0?val+0.5:val-0.5);}//{return int(val);}
 inline static real dot(const vec2d&a,const vec2d&b){return a.x*b.x+a.y*b.y;}
 inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
 class QapColor
@@ -852,7 +857,7 @@ public:
       }
     }
   }
-  template<typename TYPE>
+  /*template<typename TYPE>
   void DrawMesh(const vector<TYPE>&VA,const vector<int>&IA)
   {
     if(VA.empty())return;
@@ -863,7 +868,7 @@ public:
       for(int i=0;i<VA.size();i++)VID[i]=AddVertex(MakeVer(VA[i],color,p.x,p.y));
       for(int i=0;i<IA.size();i+=3)AddTris(VID[IA[i+0]],VID[IA[i+1]],VID[IA[i+2]]);
     }
-  }
+  }*/
 };
 
 int main() {
