@@ -1,8 +1,8 @@
 #include <emscripten.h>
 #include <vector>
 using namespace std;
-typdef double real;
-typdef unsigned char byte;
+typedef double real;
+typedef unsigned char byte;
 template<typename TYPE>inline TYPE Lerp(const TYPE&A,const TYPE&B,const real&v){return A+(B-A)*v;}
 template<class TYPE>inline TYPE Clamp(const TYPE&v,const TYPE&a,const TYPE&b){return max(a,min(v, b));}
 struct QapColor
