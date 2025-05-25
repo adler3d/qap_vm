@@ -873,6 +873,7 @@ public:
 };
 struct t_rec{
   vec2d pos;
+  double wh;
   QapColor c;
   double ang;
   double dang;
@@ -886,7 +887,7 @@ extern "C" {
       QapDev::BatchScope Scope(qDev);
       for(auto&ex:rarr){
         qDev.color=ex.c;
-        qDev.DrawQuad(ex.pos.x,ex.pos.y,512,512,ex.ang);
+        qDev.DrawQuad(ex.pos.x,ex.pos.y,ex.wh,ex.wh,ex.ang);
         ex.ang+=ex.dang;
       }
     }
@@ -922,7 +923,7 @@ extern "C" {
   }
 }
 extern "C" {
-int main(int nope) {
+int qap_main(int nope) {
   EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
   vector<int> V={10,20,30};
   qDev.Init(1024*64,1024*64*3);
@@ -930,16 +931,17 @@ int main(int nope) {
   srand(time(NULL));
   {
     QapDev::BatchScope Scope(qDev);
-    for(int i=0;i<10;i++){
+    for(int i=0;i<30;i++){
       rarr.push_back({});
       auto&b=rarr.back();
       b.pos=vec2d(rand()%1000-500,rand()%1000-500);
       b.ang=(rand()%360)*Pi*2/360;
-      b.dang=(rand()%1000-500)*0.001;
+      b.dang=(rand()%1000-500)*0.0001;
       b.c.r=rand()%255;
       b.c.g=rand()%255;
       b.c.b=rand()%255;
       b.c.a=255;
+      qDev.wh=(rand()%1000)*128/1000.0+64;
       qDev.color.r=rand()%255;
       qDev.color.g=rand()%255;
       qDev.color.b=rand()%255;
