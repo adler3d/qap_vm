@@ -594,17 +594,15 @@ public:
   void ReInit(){Init(MaxVPos,MaxIPos);}
   void Init(int VCount,int ICount)
   {
-    if(!VB)
-    {
-      MaxVPos=VCount; MaxIPos=ICount;
-      //Sys.pDev->CreateVertexBuffer(VCount*sizeof(Ver),D3DUSAGE_DYNAMIC,FVF,D3DPOOL_DEFAULT,&VB,NULL);
-      //Sys.pDev->CreateIndexBuffer(ICount*sizeof(int),D3DUSAGE_DYNAMIC,D3DFMT_INDEX32,D3DPOOL_DEFAULT,&IB,NULL);
-      VB.resize(VCount);
-      IB.resize(ICount);
-      VBA=0; IBA=0; VPos=0; IPos=0; DIPs=0; Verts=0; Tris=0;
-      xf.set_ident();
-      txf.set_ident();
-    };
+    if(VB.size())return;
+    MaxVPos=VCount; MaxIPos=ICount;
+    //Sys.pDev->CreateVertexBuffer(VCount*sizeof(Ver),D3DUSAGE_DYNAMIC,FVF,D3DPOOL_DEFAULT,&VB,NULL);
+    //Sys.pDev->CreateIndexBuffer(ICount*sizeof(int),D3DUSAGE_DYNAMIC,D3DFMT_INDEX32,D3DPOOL_DEFAULT,&IB,NULL);
+    VB.resize(VCount);
+    IB.resize(ICount);
+    VBA=0; IBA=0; VPos=0; IPos=0; DIPs=0; Verts=0; Tris=0;
+    xf.set_ident();
+    txf.set_ident();
   }
   void Free(){
     VB={};IB={};VPos=0;IPos=0;Batching=false;//BlendMode=QapDX::BT_SUB;AlphaMode=QapDX::AM_NONE;
