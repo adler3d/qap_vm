@@ -1636,7 +1636,7 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
         };    
         for(int i=0;i<4;i++)AF[i]/=MartixSum*255.0;
         #define F(r,g,b,a)QapColor((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
-        QapColor PCC=F(AF[0],AF[1],AF[2],AF[3]);
+        QapColor PCC=F(AF[3],AF[0],AF[1],AF[2]);
         #undef F
         *PC=*((QapARGB*)&PCC);
       }
@@ -1795,6 +1795,7 @@ extern "C" {
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
     qDev.color=0xFFffFFff;
     */
+    qDev.color=0xFF000000;
     qDev.BindTex(0,BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
     qDev.BindTex(0,NormFont.Tex);
@@ -1840,7 +1841,7 @@ void init(){
   qDev.color=0xFFffFFff;
   auto*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
   auto*pBlurMem=pNormMem->Clone();
-  //BlurTexture(pBlurMem,4);
+  BlurTexture(pBlurMem,4);
   BlurFont=NormFont;
   NormFont.Tex=GenTextureMipMap(pNormMem,16);
   BlurFont.Tex=GenTextureMipMap(pBlurMem,16);
