@@ -671,6 +671,13 @@ public:
 void bindTex(/*QapDev&qDev,*/int Tex){
   EM_ASM({bindTex(qDev,$0);},Tex);
 }
+#ifdef _WIN32
+#else
+void RegTexMem(...){}
+void UnRegTexMem(...){}
+typedef unsigned int DWORD;
+#endif
+#ifdef _WIN32
 class QapTexMem
 {
 public:
@@ -1438,13 +1445,6 @@ public:
     }
   }*/
 };
-#ifdef _WIN32
-#else
-void RegTexMem(...){}
-void UnRegTexMem(...){}
-typedef unsigned int DWORD;
-#endif
-#ifdef _WIN32
 class IResource
 {
 public:
