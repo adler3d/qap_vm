@@ -1600,6 +1600,7 @@ struct t_rec{
 };
 vector<t_rec> rarr;
 QapDev qDev;
+QapFont NF;
 QapTex*NormFont=nullptr;
 void bindTex(QapDev&qDev,int Tex){
   EM_ASM({bindTex(qDev,$0);},Tex);
@@ -1622,79 +1623,31 @@ extern "C" {
     return 0;
   }
 }
-extern "C" {
-int qap_main(int nope) {
-  EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
-  vector<int> V={10,20,30};
+void init(){
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
-  QapFont NF;
   auto*pTexMem=NF.CreateFontMem("Arial",14,false,512);
   NormFont=GenTextureMipMap(pTexMem,16);
-  srand(time(NULL));
-  {
-    QapDev::BatchScope Scope(qDev);
-    for(int i=0;i<5000;i++){
-      rarr.push_back({});
-      auto&b=rarr.back();
-      b.pos=vec2d(rand()%1920-1920/2,rand()%1000-500);
-      b.ang=(rand()%360)*Pi*2/360;
-      b.dang=(rand()%1000-500)*0.0001;
-      b.c.r=rand()%255;
-      b.c.g=rand()%255;
-      b.c.b=rand()%255;
-      b.c.a=255;
-      b.wh=(rand()%1000)*32/1000.0+16;
-      qDev.color.r=rand()%255;
-      qDev.color.g=rand()%255;
-      qDev.color.b=rand()%255;
-      //qDev.DrawQuad(rand()%1000-500,rand()%1000-500,512,512,);
-    }
+  
+  for(int i=0;i<5000;i++){
+    rarr.push_back({});
+    auto&b=rarr.back();
+    b.pos=vec2d(rand()%1920-1920/2,rand()%1000-500);
+    b.ang=(rand()%360)*Pi*2/360;
+    b.dang=(rand()%1000-500)*0.0001;
+    b.c.r=rand()%255;
+    b.c.g=rand()%255;
+    b.c.b=rand()%255;
+    b.c.a=255;
+    b.wh=(rand()%1000)*32/1000.0+16;
   }
-  EM_ASM({
-    console.log('I received: ' + $0);
-    g_data=$0;
-    {
-      let a=HEAP32[(g_data>>2)+0];
-      let b=HEAP32[(g_data>>2)+1];
-      let c=HEAP32[(g_data>>2)+2];
-      console.log({a,b,c});
-      let x=HEAP8[g_data+0];
-      let y=HEAP8[g_data+4];
-      let z=HEAP8[g_data+8];
-      console.log({x,y,z});
-    }
-  }, int(V.data()));
-  EM_ASM(main(););
-  EM_ASM({
-    g_VB=$0;g_VI=$1;g_VBN=$2;g_IBN=$3;
-    //console.log({g_VB,g_VI,g_VBN,g_IBN});
-    g_draw=()=>
-    {
-      //qDev_old=JSON.parse(JSON.stringify(qDev,0,2));
-      qDev.parr.length=g_VBN*2;
-      qDev.carr.length=g_VBN*4;
-      qDev.tarr.length=g_VBN*2;
-      let inv_255=1.0/255;
-      for(let i=0;i<g_VBN;i++){
-        // vec3f,uint,vec2f -> 32*3,32,32*2 -> 32*6
-        qDev.parr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+0];
-        qDev.parr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+1];
-        //qDev.parr[i*3+2]=HEAPF32[(g_VB>>2)+i*6+2];
-        qDev.carr[i*4+0]=HEAPU8[g_VB+i*6*4+3*4+0]*inv_255;
-        qDev.carr[i*4+1]=HEAPU8[g_VB+i*6*4+3*4+1]*inv_255;
-        qDev.carr[i*4+2]=HEAPU8[g_VB+i*6*4+3*4+2]*inv_255;
-        qDev.carr[i*4+3]=HEAPU8[g_VB+i*6*4+3*4+3]*inv_255;
-        qDev.tarr[i*2+0]=HEAPF32[(g_VB>>2)+i*6+3+1+0];
-        qDev.tarr[i*2+1]=HEAPF32[(g_VB>>2)+i*6+3+1+1];
-      }
-      qDev.iarr.length=g_IBN;
-      for(let i=0;i<g_IBN;i++){
-        qDev.iarr[i]=HEAP32[(g_VI>>2)+i];
-      }
-    };
-    g_draw();
-  },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
-  return 0;
 }
+extern "C" {
+  int qap_main(int nope) {
+    EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
+    srand(time(NULL));
+    EM_ASM(main(););
+    init();
+    return 0;
+  }
 }
