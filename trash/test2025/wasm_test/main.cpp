@@ -3548,7 +3548,7 @@ extern "C" {
     qDev.color=0xFFffFFff;
     */
     qDev.color=0xFF000000;
-    qDev.BindTex(0,BlurFont.Tex);
+    qDev.BindTex(0,0);//BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,-512,512,Pi);
     qDev.BindTex(0,NormFont.Tex);
     qDev.color=0xFFffFFff;
