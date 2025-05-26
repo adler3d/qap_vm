@@ -4,6 +4,41 @@
 #include <time.h>
 using namespace std;
 #include "thirdparty/sweepline/sweepline.hpp"
+#ifdef _WIN32
+class QapClock{
+public:
+  typedef long long int int64;
+  int64 freq,beg,tmp;
+  bool run;
+public:
+  QapClock(){QueryPerformanceFrequency((LARGE_INTEGER*)&freq);run=false;tmp=0;Start();}
+  void Start(){QueryPerformanceCounter((LARGE_INTEGER*)&beg);run=true;}
+  void Stop(){QueryPerformanceCounter((LARGE_INTEGER*)&tmp);run=false;tmp-=beg;}
+  double Time(){if(run)QueryPerformanceCounter((LARGE_INTEGER*)&tmp);return run?double(tmp-beg)/double(freq):double(tmp)/double(freq);}
+  double MS()
+  {
+    double d1000=1000.0;
+    if(run)QueryPerformanceCounter((LARGE_INTEGER*)&tmp);
+    if(run)return (double(tmp-beg)*d1000)/double(freq);
+    if(!run)return (double(tmp)*d1000)/double(freq);
+    return 0;
+  }
+  static int64 qpc(){int64 tmp;QueryPerformanceCounter((LARGE_INTEGER*)&tmp);return tmp;}
+};
+#else
+class QapClock{
+public:
+  QapClock(){}
+  void Start(){}
+  void Stop(){}
+  double Time(){return 0;}
+  double MS()
+  {
+    return 0;
+  }
+  static int64 qpc(){return 0;}
+};
+#endif
 static bool file_put_contents(const string&FN,const string&mem){return true;}
 static string file_get_contents(const string&fn){return {};}
 template<class TYPE>
@@ -2749,7 +2784,7 @@ public:
     }
   }
   static void draw_shadow_quad(QapDev&qDev,QapAtlas::TFrame*pF,bool shadow,vec2d pos,vec2d wh,QapColor color,real ang=0){
-    qDev.SetColor(shadow?0xff000000:color);
+    qDev.color=shadow?QapColor(0xff000000):color;
     pF->Bind(&qDev);
     auto p=pos;
     if(shadow)p+=vec2d(1.0,-1.0);
@@ -2893,7 +2928,7 @@ public:
     CurID%=Items.size();
     const real dy=32;
     real y=+0.5*Items.size()*dy;
-    auto mp=kb.GetMousePos();
+    auto mp=kb.MousePos;
     vec2d hmis=vec2d(Game->FrameMenuItem->w,dy)*0.5;
     if(mp!=oldmp)
     {
