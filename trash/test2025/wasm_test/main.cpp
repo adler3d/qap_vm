@@ -677,7 +677,6 @@ void RegTexMem(...){}
 void UnRegTexMem(...){}
 typedef unsigned int DWORD;
 #endif
-#ifdef _WIN32
 class QapTexMem
 {
 public:
@@ -1445,6 +1444,7 @@ public:
     }
   }*/
 };
+#ifdef _WIN32
 class IResource
 {
 public:
