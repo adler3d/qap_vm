@@ -1840,7 +1840,7 @@ void init(){
   qDev.color=0xFFffFFff;
   auto*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
   auto*pBlurMem=pNormMem->Clone();
-  BlurTexture(pBlurMem,4);
+  //BlurTexture(pBlurMem,4);
   BlurFont=NormFont;
   NormFont.Tex=GenTextureMipMap(pNormMem,16);
   BlurFont.Tex=GenTextureMipMap(pBlurMem,16);
