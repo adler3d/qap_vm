@@ -1780,6 +1780,1273 @@ QapDev qDev;
 QapFont NormFont,BlurFont;
 //QapTex*NormFontTex=nullptr;
 //QapTex*BlurFontTex=nullptr;
+class QapAtlas{
+public:
+  int W,H;
+  int X,Y;
+  int Ident,dY;
+  QapTexMem*pMem;
+  QapTex*pTex;
+  struct TFrame{
+    QapAtlas*atlas;
+    int x,y,w,h;
+    TFrame():atlas(NULL),x(0),y(0),w(0),h(0){}
+    TFrame(QapAtlas*atlas,QapTexMem*Mem,int x,int y):atlas(atlas),x(x),y(y),w(Mem->W),h(Mem->H){}
+    void Bind(QapDev*RD){atlas->Bind(RD,this);}
+  };
+  QapPool<TFrame>pool;
+  vector<TFrame*>frames;
+public:
+  QapAtlas():pMem(NULL),pTex(NULL),W(2048),H(2048),X(0),Y(0),Ident(8),dY(0),pool(256){
+    pMem=new QapTexMem("Atlas.qap",W,H,new QapColor[W*H]);
+  }
+  TFrame*AddFrame(QapTexMem*Mem)
+  {
+    if(!Mem||!Mem->pBits)return NULL;
+    if(X<Ident||Ident+X+Mem->W>W)
+    {
+      QapAssert(W>=Mem->W);
+      X=Ident;Y+=dY+Ident;dY=Mem->H;
+      pMem->FillLine(Y-Ident/2,0xff000000);
+    }
+    {
+      TFrame*pFrame;
+      pool.NewInstance(pFrame);
+      *pFrame=TFrame(this,Mem,X,Y);
+      frames.push_back(pFrame);
+      pMem->FillBorder(X,Y,Mem);
+      pMem->FillMem(X,Y,Mem);
+      X+=Mem->W+Ident;dY=max(dY,Mem->H);
+      return pFrame;
+    }
+  }
+  QapTex*AddTex(QapTexMem*Mem)
+  {
+    AddFrame(Mem);
+    return GenTextureMipMap(Mem);
+  }
+  QapTex*GenTex(){return pTex=GenTextureMipMap(pMem);}
+  void Bind(QapDev*RD,TFrame*frame)
+  {
+    b2Transform xf;
+    float inv_w=1.f/float(W);
+    float inv_h=1.f/float(H);
+    xf.p=vec2f(float(frame->x)*inv_w,float(frame->y)*inv_h);
+    xf.r=MakeZoomTransform(vec2d(float(frame->w)*inv_w,float(frame->h)*inv_h)).r;
+    RD->SetTextureTransform(xf);
+  }
+};
+class TGame{
+public:
+  typedef QapAtlas::TFrame TFrame;
+public:
+  class ILevel{
+  public:
+    virtual void Render(QapDev*RD)=0;
+    virtual void Update(TGame*Game)=0;
+    virtual bool Win()=0;
+    virtual bool Fail()=0;
+    virtual void AddText(TextRender*TR){}
+    virtual ~ILevel(){}
+  };
+  class ILevelFactory{
+  public:
+    virtual ILevel*Build(TGame*Game)=0;
+  };
+  struct TLevelInfo{
+    string Name;
+    ILevelFactory&Factory;
+    TLevelInfo(const string&Name,ILevelFactory&Factory):Name(Name),Factory(Factory){}
+  };
+  template<typename TYPE>
+  class TLevelFactory:public ILevelFactory{
+  public:
+    virtual ILevel*Build(TGame*Game){
+      auto*Result=new TYPE();
+      Result->DoReset();
+      Result->Init(Game);
+      return Result;
+    }
+  };/*
+  template<typename TYPE>
+  class AutoPtr:public std::auto_ptr<TYPE>{
+  public:
+    TYPE*operator->(){return get();}
+    operator bool(){return 
+  };*/
+public:
+  #include "Entity.inl"
+  #include "LevelPack.inl"
+  #include "GameMenu.inl"
+public:
+  struct t_frame{
+    TFrame*pF=0;
+    TFrame*pS=0;
+    string name,file,fn;
+    int mode=0;
+  };
+public:
+#define FRAMESCOPE(F)\
+  F(Dot,"dot",2)\
+  F(BigDot,"bigdot",2)\
+  F(MenuItem,"MenuItem",0)\
+  F(Market,"market",0)\
+  F(Enemy,"enemy_v3_128",0)\
+  F(Obstacle,"obstacle_v4",0)\
+  //---
+#define ADDFRAME(NAME,FILE,MODE)TFrame*Frame##NAME;TFrame*Frame##NAME##_s;t_frame frame_##NAME={0,0,#NAME,FILE,"",MODE};
+  FRAMESCOPE(ADDFRAME)
+#undef ADDFRAME
+public:
+#define PRO_VARIABLE()\
+ADDVAR(TCounterIncEx,WaitWin,TCounterIncEx(0,0,Sys.UPS*2))\
+ADDVAR(TCounterIncEx,WaitFail,TCounterIncEx(0,0,Sys.UPS*2))\
+ADDVAR(TCounterInc,LevelCounter,TCounterInc(0,0,0))
+//=====+>>>>>TGame
+#include "GenVar.inl"
+//<<<<<+=====TGame
+public:
+  vector<TLevelInfo>LevelsInfo;
+  std::unique_ptr<ILevel>Level;
+  std::unique_ptr<TMenu>Menu;
+public:
+  QapAtlas Atlas;
+  QapDev RD;
+  QapDX::QapFont NormFont;
+  QapDX::QapFont BlurFont;
+  QapDX::QapTex*th_rt_tex;
+  QapDX::QapTex*th_rt_tex_full;
+public:
+  TGame(){DoReset();}
+public:
+  typedef QapDX::QapTexMem QapTexMem;
+  QapTexMem*AddBorder(QapTexMem*pMem,int dHS=8,const QapColor&Color=0xffffffff)
+  {
+    int dS=dHS*2;
+    QapDX::QapTexMem*sm=new QapDX::QapTexMem("ShadowBot",pMem->W+dS,pMem->H+dS,NULL);
+    sm->pBits=new QapColor[sm->W*sm->H];
+    sm->Clear(Color);
+    sm->FillMem(dHS,dHS,pMem);
+    //sm->FillBorder(dHS,dHS,pMem,dHS);
+    return sm;
+  }
+  QapTexMem*GenShadow(QapTexMem*pMem,int dHS=8)
+  {
+    int dS=dHS*2;
+    vec4f acc={0,0,0,0};
+    for(int x:{0,1})for(int y:{0,1})acc+=pMem->get_color_at(x*(pMem->W-1),y*(pMem->H-1));
+    acc*=0.25;
+    QapColor c=acc.GetColor();
+    auto*sm=AddBorder(pMem,dHS,c);
+    sm->CalcAlpha(0xffffffff);
+    sm->FillChannel(0x00ffffff,0x00ffffff);
+    QapDX::BlurTexture(sm,dHS);
+    return sm;
+  }
+  TFrame*GenShadowFrame(QapDX::QapTexMem*pMem,int dHS=8)
+  {
+    QapTexMem*sm=GenShadow(pMem,dHS);
+    TFrame*FrameX=Atlas.AddFrame(sm);
+    delete sm;
+    return FrameX;
+  }
+  void LoadFrames(bool need_save_atlas=0,bool need_rewrite_tex=0)
+  {
+    //auto*ball=QapDX::LoadTexture("GFX\\Ball.png");
+    //#define F(NAME)QapDX::LoadTexture("GFX\\"#NAME".png")->CopyAlpha(ball)->SaveToFile("GFX\\"#NAME".png");
+    auto LT=QapDX::LoadTexture;
+    auto m2=[&](QapTexMem*p){return p->CalcAlpha()->FillChannel(0xffffffff,0x00ffffff);};
+    if(bool hack=false)
+    {
+      auto f=[&](auto NAME,string FILE,auto MODE){
+        auto fn="GFX\\"+FILE+".png";
+        if(MODE==2){auto*p=m2(LT(fn));if(need_rewrite_tex)p->SaveToFile(fn);}
+        if(MODE==0){auto*p=LT(fn)->CalcAlpha(0xffffffff);if(need_rewrite_tex)p->SaveToFile(fn);}
+        if(MODE==1){auto*p=LT(fn)->CopyAlpha(LT("GFX\\"+FILE+"_a.png")->CalcAlpha());if(need_rewrite_tex)p->SaveToFile(fn);}
+      };
+      #define F(NAME,FILE,MODE)f(Frame##NAME,FILE,MODE);
+        FRAMESCOPE(F);
+        //QapDX::LoadTexture("GFX\\You.png")->CopyAlpha(QapDX::GenBall(32))->SaveToFile("GFX\\You.png");
+      #undef F
+    }
+
+    {
+      #define F(NAME,FILE,MODE){\
+        t_frame&f=frame_##NAME;f.fn="GFX\\"FILE".png";\
+        QapDX::QapTexMem*tmp=LT(f.fn);\
+        if(!tmp)QapDebugMsg("texture file not found - "+f.fn);\
+        if(MODE==2)tmp=m2(tmp);\
+        Frame##NAME=Atlas.AddFrame(tmp);\
+        if(MODE==2)tmp->CalcAlphaToRGB_and_set_new_alpha()->InvertRGB();\
+        if(MODE==2)Frame##NAME##_s=GenShadowFrame(tmp);\
+        f.pF=Frame##NAME;f.pS=Frame##NAME##_s;\
+        delete tmp;\
+      }
+      FRAMESCOPE(F);
+      #undef F
+    }
+    if(need_save_atlas)Atlas.pMem->SaveToFile("Atlas.png");
+    Atlas.GenTex();
+  }
+  void Init()
+  {
+    DoReset();
+    srand(time(NULL));
+    {
+      QapDX::QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
+      QapDX::QapTexMem*pBlurMem=pNormMem->Clone();
+      //pBlurMem->Blur(10);
+      //pBlurMem->Blur(4);
+      QapDX::BlurTexture(pBlurMem,4);
+      BlurFont=NormFont;
+      BlurFont.Tex=QapDX::GenTextureMipMap(pBlurMem);
+      NormFont.Tex=QapDX::GenTextureMipMap(pNormMem);
+      //SysFont=QapDX::FontCreate("Arial",16,false,512);
+    }
+    LoadFrames();
+    /*
+    {
+      auto*ptm=QapDX::LoadTexture("GFX\\tank_hodun_rt.png");
+      ptm->GenEdge
+      th_rt_tex_v2=QapDX::GenTextureMipMap(ptm);
+    }*/
+    if(0)
+    {
+      auto*ptm=QapDX::LoadTexture("GFX\\tank_hodun_rt.png");
+      if(bool red_is_transparent=true){
+        auto*p=ptm->pBits;
+        int n=ptm->W*ptm->H;
+        auto v=210;
+        auto c=QapColor(0,v,v,v);
+        for(int i=0;i<n;i++){auto&v=p[i];if(v==0xffff0000)v=c;}
+      }
+      th_rt_tex=QapDX::GenTextureMipMap(ptm);
+    }
+    if(1)
+    {
+      //auto*ptm=QapDX::LoadTexture("GFX\\tank512.png");
+      auto*ptm=QapDX::LoadTexture("GFX\\market_car_v2.png");
+      th_rt_tex=QapDX::GenTextureMipMap(ptm);
+      ptm=QapDX::LoadTexture("GFX\\market_car_v2_full.png");
+      th_rt_tex_full=QapDX::GenTextureMipMap(ptm);
+    }
+    RD.Init(1024*32,1024*32*2);
+    InitLevelsInfo();
+    //RestartLevel();
+    InitMenuSystem();
+  }
+  void InitLevelsInfo()
+  {
+    #define ADDLEVEL(CLASS){static TLevelFactory<CLASS>tmp;LevelsInfo.push_back(TLevelInfo(#CLASS,tmp));}
+    LEVEL_LIST(ADDLEVEL);
+    #undef ADDLEVEL
+    LevelCounter.Maximum=LevelsInfo.size();
+  }
+  void NewGame(){
+    LevelCounter.Value=0;
+    RestartLevel();
+  }
+  void RestartLevel()
+  {
+    if(!LevelCounter){
+      QapAssert(("Поздравляю вы полностью прошли игру!(Это не баг, это фича!).",false));
+      return;
+    };
+    Level.reset(LevelsInfo[LevelCounter.Value].Factory.Build(this));
+    WaitWin.Stop();
+    WaitFail.Stop();
+  }
+  void InitMenuSystem(){
+    static class TOnResume:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        EX->Game->Menu->Down();
+      }
+      virtual bool IsEnabled(TMenu*EX){return EX->Game->Level.get();}
+    } OnResume;
+    static class TOnRestartLevel:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        EX->Game->RestartLevel();
+        EX->Game->Menu->Down();
+      }
+      virtual bool IsEnabled(TMenu*EX){return EX->Game->LevelCounter.Value;}
+    } OnRestartLevel;
+    static class TOnNewGame:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        EX->Game->NewGame();
+        EX->Game->Menu->Down();
+      }
+    } OnNewGame;
+    static class TOnBack:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        EX->Back();
+      }
+    } OnBack;
+    static class TOnNothing:public IOnClick{
+    public:
+      void Call(TMenu*EX){}
+      virtual bool IsEnabled(TMenu*EX){return false;}
+    } OnNothing;
+    static class TOnSettings:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        auto&Menu=EX->Game->Menu;
+        auto OldMenu=std::unique_ptr<TMenu>(Menu.release());
+        Menu.reset(new TMenu(EX->Game,"Settings"));
+        Menu->Add("Under construction",&OnNothing);
+        Menu->Add("Back",&OnBack);
+        Menu->OldMenu=std::unique_ptr<TMenu>(OldMenu.release());
+        Menu->Up();
+      }
+      //virtual bool IsEnabled(TMenu*EX){return false;}
+    } OnSettings;
+    static class TOnLevel:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        auto&m=*EX->Game->Menu.get();
+        //auto&lvls=EX->Game->LevelsInfo;
+        //m.Items[m.CurID].Caption
+        EX->Game->LevelCounter.Value=m.CurID;
+        EX->Game->RestartLevel();
+        m.Down();
+      }
+      //virtual bool IsEnabled(TMenu*EX){return false;}
+    } TOnLevel;
+    static class TOnLevels:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        auto&Menu=EX->Game->Menu;
+        auto OldMenu=std::unique_ptr<TMenu>(Menu.release());
+        Menu.reset(new TMenu(EX->Game,"Levels"));
+        for(int i=0;i<EX->Game->LevelsInfo.size();i++){
+          auto&ex=EX->Game->LevelsInfo[i];
+          Menu->Add(ex.Name,&TOnLevel);
+        }
+        Menu->Add("Back",&OnBack);
+        Menu->OldMenu=std::unique_ptr<TMenu>(OldMenu.release());
+        Menu->Up();
+      }
+      //virtual bool IsEnabled(TMenu*EX){return false;}
+    } OnLevels;
+    static class TOnAbout:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        auto&Menu=EX->Game->Menu;
+        auto OldMenu=std::unique_ptr<TMenu>(Menu.release());
+        Menu.reset(new TMenu(EX->Game,"About"));
+        Menu->Add("^2Aut^2hor ^2: ^8Ad^8ler^33D",&OnNothing);
+        Menu->Add("^2Co^2de ^2: ^8Ad^8ler^33D",&OnNothing);
+        Menu->Add("^2A^2r^2t ^2: ^8Ad^8ler^33D",&OnNothing);
+        Menu->Add("Back",&OnBack);
+        Menu->OldMenu=std::unique_ptr<TMenu>(OldMenu.release());
+        Menu->Up();
+      }
+      //virtual bool IsEnabled(TMenu*EX){return false;}
+    } OnAbout;
+    static class TOnExit:public IOnClick{
+    public:
+      void Call(TMenu*EX){
+        Sys.Quit();
+      }
+    } OnExit;
+    Menu.reset(new TMenu(this,"Main menu"));
+    Menu->Add("Resume",&OnResume);
+    Menu->Add("Restart level",&OnRestartLevel);
+    Menu->Add("New game",&OnNewGame);
+    Menu->Add("Levels",&OnLevels);
+    Menu->Add("Settings",&OnSettings);
+    Menu->Add("About",&OnAbout);
+    Menu->Add("Exit",&OnExit);
+    LevelCounter.Value=0;
+    update_user_name();
+    RestartLevel();
+    Menu->Down();
+    //Menu->Up();
+  }
+  void Resume()
+  {
+
+  }
+  string user_name;
+  bool user_name_scene=true;
+  void InputUserNameRender(){
+    TextRender TE(&RD);
+    vec2d hs=vec2d((Sys.SM.W,1024,Sys.SM.W),Sys.SM.H)*0.5;
+    real ident=24.0;
+    real Y=0;
+    RD.SetColor(0xff000000);
+    TE.BeginScope(-hs.x+ident,+hs.y-ident,&NormFont,&BlurFont);
+    {
+      const string PreesR=" ^7(^3press ^2R^7)";
+      const string PreesSpace=" ^7(^3press ^2Space^7)";
+      const string PreesEnter=" ^7(^3press ^2Return^7)";
+      string BEG="^7";
+      string SEP=" ^2: ^8";
+      TE.AddText("^7The ^2Market Game");
+      TE.AddText("");
+      TE.AddText("^7Type your ^8user_name ^7and press enter!");
+      TE.AddText("^8user_name ^2: ^7"+user_name);
+    }
+    TE.EndScope();
+  }
+  bool need_init=true;
+  bool check_char(char c){
+    return InDip('a',c,'z')||InDip('A',c,'Z')||InDip('а',c,'я')||InDip('А',c,'Я')||InDip('0',c,'9')||c=='ё'||c=='Ё';
+  }
+  void update_user_name(){
+    user_name=file_get_contents(user_name_fn);
+    string un;
+    for(auto&c:user_name)if(check_char(c))un.push_back(c);
+    user_name=un;
+  }
+  string user_name_fn="user_name.txt";
+  void InputUserNameUpdate(){
+    if(need_init){
+      need_init=false;
+      update_user_name();
+      user_name_scene=user_name.empty();
+    }
+    if(QapInput::News){
+      auto c=QapInput::LastChar;
+      if(check_char(c))user_name.push_back(c);
+    }
+    if(QapInput::OnDown(VK_BACK))if(user_name.size())user_name.pop_back();
+    if(QapInput::Down[VK_RETURN]){
+      if(user_name.size()){
+        user_name_scene=false;
+        file_put_contents(user_name_fn,user_name);
+      }
+    }
+  }
+  void RenderScene()
+  {
+    /*
+    RD.BindTex(0,0);
+    RD.SetColor(0xff000000);
+    RD.DrawQuad(0,0,512,512);
+    if(!QapDX::EndScene())return;
+    QapDX::Present();
+    return;*/
+    if(user_name_scene)return InputUserNameRender();
+    if(bool need_draw_tank_hodun_rt=true)if(th_rt_tex)if(!Menu->InGame()){
+      RD.BindTex(0,th_rt_tex);
+      RD.SetColor(0xffffffff);
+      RD.DrawQuad(-512,0,th_rt_tex->W,th_rt_tex->H,0);
+      RD.BindTex(0,0);
+    }
+    if(QapInput::Down['A']&&!Menu->InGame()){
+      if(1){
+        RD.BindTex(0,0);
+        QapDX::SetColor(0xffffffff);
+        QapDX::DrawQuad(QapInput::MousePos.x,QapInput::MousePos.y,96,96,0);
+        QapDX::SetColor(0xffff0000);
+        QapDX::DrawQuad(QapInput::MousePos.x,QapInput::MousePos.y,64,64,0);
+      }
+      RD.BindTex(0,Atlas.pTex);
+      RD.SetBlendMode(QapDX::BT_SUB);
+      RD.SetColor(0xffffffff);
+      RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
+    }
+    QapAssert(Menu.get());
+    if(Menu->InGame())
+    {
+      if(Level.get()){
+        Level->Render(&RD);
+      }
+    }else{
+      TextRender TE(&RD);
+      RD.SetColor(0xff000000);
+      TE.BeginScope(0,0,&NormFont,&BlurFont);
+      Menu->Render(&RD,&TE);
+      TE.EndScope();
+    };
+    {
+      RenderText(RD);
+    }
+  }
+  void Render()
+  {
+    if(!QapDX::BeginScene())return;
+    QapDX::Set2D();
+    //QapDX::Clear2d(1?QapColor(180,180,180):0xffc8c8c8);
+    {int v=231*0+206*0+210;QapDX::Clear2d(QapColor(v,v,v));}
+    RD.NextFrame();
+    RenderScene();
+    if(!QapDX::EndScene())return;
+    QapDX::Present();
+  }
+  void RenderText(QapDev&RD)
+  {
+    TextRender TE(&RD);
+    vec2d hs=vec2d((Sys.SM.W,1024,Sys.SM.W),Sys.SM.H)*0.5;
+    real ident=24.0;
+    real Y=0;
+    RD.SetColor(0xff000000);
+    TE.BeginScope(-hs.x+ident,+hs.y-ident,&NormFont,&BlurFont);
+    {
+      const string PreesR=" ^7(^3press ^2R^7)";
+      const string PreesSpace=" ^7(^3press ^2Space^7)";
+      const string PreesEnter=" ^7(^3press ^2Return^7)";
+      string BEG="^7";
+      string SEP=" ^2: ^8";
+      TE.AddText("^7The ^2Game");
+      TE.AddText("");
+      TE.AddText("^8user_name ^2: ^7"+user_name);
+      TE.AddText("");
+      #define GOO(TEXT,VALUE)TE.AddText(string(BEG)+string(TEXT)+string(SEP)+string(VALUE));
+      GOO("Level",string(LevelCounter)+" ["+string(LevelCounter?LevelsInfo[LevelCounter.Value].Name:"noname")+"]");
+      #undef GOO
+      TE.AddText("");
+      if(Level.get())Level->AddText(&TE);
+      TE.AddText("");
+      if(WaitWin.Runned)TE.AddText("^2You win!"+PreesEnter);
+      if(WaitFail.Runned)TE.AddText("^1You lose!"+PreesR);
+      if(!WaitFail||!WaitWin){TE.AddText("^7game over!");}
+    }
+    TE.EndScope();
+    RD.color=0xFF000000;
+    RD.BindTex(0,BlurFont.Tex);
+    RD.DrawQuad(1.5,-0.5,-512,512,Pi);
+    RD.color=0xFFFFFFFF;
+    RD.BindTex(0,NormFont.Tex);
+    RD.DrawQuad(0.5,0.5,-512,512,Pi);
+  }
+  void Collide()
+  {    
+  }
+  void NextLevel()
+  {
+    LevelCounter++;
+    RestartLevel();
+  }
+  void OnWin(){
+    //Level.reset();
+  }
+  void OnFail(){
+    //Level.reset();
+  }
+  void Win(){WaitWin.Start();}
+  void Fail(){WaitFail.Start();}
+  void ReloadWinFail(){WaitFail.Stop();WaitWin.Stop();}
+  void Update()
+  {
+    if(user_name_scene)return InputUserNameUpdate();
+    QapAssert(Menu.get());
+    if(QapInput::Down[VK_ESCAPE]){if(Menu->InGame()){Menu->Up();}else{Menu->Down();}QapInput::Down[VK_ESCAPE]=false;}
+    QapInput::UpdateMouse();
+    if(Menu->InGame())
+    {
+      if(Level.get())
+      {
+        Level->Update(this);
+        {WaitFail++;WaitWin++;}
+        if(!WaitWin.Runned&&!WaitFail.Runned)
+        {
+          bool w=Level->Win();bool f=Level->Fail();
+          if(f)Fail();
+          if(w&&!f)Win();
+        }else{
+          if(!WaitFail)OnFail();
+          if(!WaitWin)OnWin();
+        }
+      };
+      if(QapInput::OnDown('R')){RestartLevel();}
+      if(WaitFail.Runned||WaitWin.Runned)
+      {
+        if(WaitWin.Runned&&QapInput::Down[VK_RETURN]){NextLevel();}
+      }
+    }else{
+      Menu->Update(this);
+    }
+  }
+  void Free()
+  {
+    /*FreeFont(NormFont);FreeFont(BlurFont);
+    UnloadTextures();*/
+  }
+  static string wget(const string&host,const string&dir){
+    /*DownLoader dl(host,dir,"");
+    dl.port=80;
+    dl.start();
+    for(;dl.update();){
+      Sleep(0);
+    }
+    auto s=dl.GetContent(dl.data,true);
+    dl.stop();
+    return s;*/
+    return "";
+  }
+  static string get_host(){
+    static auto host=wget("adler3d.github.io","/qap_vm/trash/test2025/game_host.txt");
+    if(host.size()&&host.back()=='\n')host.pop_back();
+    return host;
+  }
+};
+class Level_MarketGame:public TGame::ILevel{
+public:
+  struct t_item{
+    int id=0;
+    int amount=0;
+    int price=0;
+  };
+  struct t_market{
+    vec2d pos;
+    vector<t_item> items;
+  };
+  struct t_city{
+    vector<t_market> arr;
+  };
+  struct t_bookmark{
+    vector<t_item> items;
+  };
+  struct t_cargo_item{
+    int id=0;
+    int amount=0;
+  };
+  struct t_cargo{
+    vector<t_cargo_item> items;
+  };
+  struct t_car{
+    t_cargo cargo;
+    int money=1000;
+    vec2d pos;
+    vec2d v;
+    bool deaded=false;
+  };
+  struct t_dynamic_obstacle{
+    vec2d pos;
+    real ang=0;
+    real len=100;
+    real speed=1;
+    real r=8;
+    bool circle=false;
+    real dt=0;
+    real gang=0;
+    real gspd=0;
+  };
+  struct t_world{
+    int t=0;
+    real obstacle_r=48;
+    real tank_r=48;
+    real market_r=32;
+    t_car car;
+    t_city city;
+    vector<t_dynamic_obstacle> dyn_obs;
+    vector<vec2d> obstacles;
+  };
+  bool sell(t_world&w,int market_id,const t_cargo_item&item){
+    auto&cit=w.car.cargo.items[item.id];
+    if(cit.amount<item.amount)return false;
+    cit.amount-=item.amount;
+    auto&it=w.city.arr[market_id].items[item.id];
+    it.amount+=item.amount;
+    w.car.money+=it.price*item.amount;
+    return true;
+  }
+  bool buy(t_world&w,int market_id,const t_cargo_item&item){
+    auto&it=w.city.arr[market_id].items[item.id];
+    if(it.amount<item.amount)return false;
+    auto dm=it.price*item.amount;
+    if(w.car.money<dm)return false;
+    it.amount-=item.amount;
+    w.car.cargo.items[item.id].amount+=item.amount;
+    w.car.money-=dm;
+    return true;
+  }
+public:
+  t_world w;
+public:
+#define PRO_VARIABLE()\
+ADDVAR(TGame*,Game,NULL)\
+//=====+>>>>>Level_MarketGame
+#include "GenVar.inl"
+//<<<<<+=====Level_MarketGame
+public:
+  bool init_city(){
+    vector<int> base_price;
+    base_price.resize(5);
+    for(int i=0;i<5;i++){
+      base_price[i]=25+rand()%100+pow(3,i+1);
+    }
+    int try_count=0;
+    for(int i=0;i<10;i++){
+      t_market m;
+      m.pos=vec2d(rand()%1000-500,rand()%1000-500);
+      bool ignore=false;
+      for(auto&market:w.city.arr){
+        if((market.pos-m.pos).Mag()<w.market_r*10)ignore=true;
+      }
+      if(ignore){i--;try_count++;if(try_count>2000)return false;continue;}
+      m.items.resize(5);
+      for(int i=0;i<5;i++){m.items[i].id=i;m.items[i].price=base_price[i]+rand()%(50+int(pow(3,i+1)));m.items[i].amount=50+rand()%200;}
+      w.city.arr.push_back(m);
+    }
+    return true;
+  }
+  void init_cargo_items(){
+    w.car.cargo.items.resize(5);
+    for(int i=0;i<5;i++)w.car.cargo.items[i].id=i;
+  }
+  void init_obstacles(){
+    for(int i=0;i<20;i++){
+      vec2d p=vec2d(rand()%1000-500,rand()%1000-500);
+      if((p-w.car.pos).Mag()<w.obstacle_r+w.tank_r)continue;
+      bool ignore=false;
+      for(auto&ex:w.city.arr){
+        if((ex.pos-p).Mag()<w.obstacle_r+w.market_r)ignore=true;
+      }
+      if(ignore)continue;
+      w.obstacles.push_back(p);
+    }
+  }
+  bool init_dyn_obs_v2(){
+    vector<vec2d> PA;
+    for(auto&ex:w.city.arr){PA.push_back(ex.pos);}
+    auto EA=get_voronoi_edges(PA);edges=EA;
+    int try_count=0;
+    for(int i=0;i<EA.size();i++){
+      for(int j=0;j<3;j++){
+        auto&it=EA[i];
+        real k=(rand()%1000)/1000.0-0.5;
+        vec2d p=((it.a+it.b)*0.5+(it.b-it.a)*k);//(it.a+it.b)*0.5;
+        real r=18;//rand()%8+10;
+        t_dynamic_obstacle ex;
+        ex.circle=false;
+        ex.pos=p;
+        ex.ang=(rand()%(314*2))/100.0;
+        ex.len=ex.circle?rand()%100+w.tank_r*2+r:rand()%500+200;
+        ex.speed=(rand()%1000)/1000.0+1;
+        ex.r=r;
+        ex.gang=(rand()%1000)*Pi*2/1000.0;
+        ex.gspd=(rand()%2000)/1000.0-1;
+        ex.dt=(rand()%32000)*3.14*2*40/32000;
+        bool ignore=is_dangerous(ex,w.car.pos,w.tank_r*1.5);
+        for(auto&market:w.city.arr){
+          if(ignore)break;
+          if(is_dangerous(ex,market.pos,w.tank_r*1.5))ignore=true;
+        }
+        if(ignore){j--;try_count++;if(try_count>2000){j++;bad_edges.push_back(EA[i]);return false;}continue;}
+        w.dyn_obs.push_back(ex);
+      }
+    }
+    return bad_edges.empty();
+  }
+  void init_dyn_obs(){
+    int try_count=0;
+    for(int i=0;i<7+3+4;i++){
+      vec2d p=vec2d(rand()%500-250,rand()%500-250);
+      real r=rand()%8+10;
+      t_dynamic_obstacle ex;
+      ex.circle=i%2;
+      ex.pos=p;
+      ex.ang=(rand()%(314*2))/100.0;
+      ex.len=ex.circle?rand()%500+w.tank_r*2+r:rand()%500+200;
+      ex.speed=(rand()%1000)/1000.0+1;
+      ex.r=r;
+      ex.dt=rand();
+      bool ignore=is_dangerous(ex,w.car.pos,w.tank_r*1.5);
+      for(auto&market:w.city.arr){
+        if(is_dangerous(ex,market.pos,w.tank_r*1.5))ignore=true;
+      }
+      if(ignore){i--;try_count++;if(try_count>1000)i++;continue;}
+      w.dyn_obs.push_back(ex);
+    }
+  }
+  t_world world_at_begin;
+  void reinit_the_same_level(){
+    w=world_at_begin;
+    Game->ReloadWinFail();
+  }
+  bool init_attempt(){
+    static QapClock clock;
+    srand(seed=(clock.qpc()-clock.beg)%INT_MAX);
+    bad_edges.clear();
+    w={};
+    if(!init_city())return false;
+    init_cargo_items();
+    init_obstacles();
+    if(!init_dyn_obs_v2())return false;
+    //init_dyn_obs();
+    world_at_begin=w;
+    return true;
+  }
+  int init_attempts=1;
+  bool inited=false;
+  struct t_rec{
+    int place;
+    string user;
+    real sec;
+    string date;
+    int seed;
+    string game;
+    vector<string> to_str()const{
+      return {IToS(place),user,FToS(sec),date,IToS(seed)};
+    }
+  };
+  vector<t_rec> tops;
+  string ref="github";
+  void reinit_top20(){
+    tops={};
+    auto s=TGame::wget(TGame::get_host(),"/c/game_players_table.js?unique&csv&game=market&n=20&ref="+ref+"&user="+Game->user_name);
+    auto arr=split(s,"\n");
+    if(arr.size())QapPopFront(arr);
+    for(auto&ex:arr){
+      auto t=split(ex,",");
+      QapAssert(t.size()>=6);
+      t_rec r;
+      r.place=stoi(t[0]);
+      r.user=t[1];
+      r.sec=stof(t[2]);
+      r.date=t[3];
+      r.seed=stoi(t[4]);
+      r.game=t[5];
+      tops.push_back(r);
+    }
+  }
+  void Init(TGame*Game){
+    this->Game=Game;
+    inited=init_attempt();
+    if(!inited){Sys.UPS_enabled=false;}
+    reinit_top20();
+    //for(;;init_attempts++){
+    //  bool ok=init_attempt();
+    //  if(ok)break;
+    //}
+  }
+  bool is_dangerous(const t_dynamic_obstacle&ex,vec2d pos,real r){
+    for(int i=0;i<Sys.UPS*20;i++){
+      if((dyn_pos(ex,i)-pos).Mag()<ex.r+r)return true;
+    }
+    return false;
+  }
+  bool Win(){return w.car.money>60000/*||w.car.pos.x>10*/;}
+  bool Fail(){return w.car.deaded;}
+public:
+  struct t_edge{
+    vec2d a,b;
+  };
+  vector<t_edge> edges,bad_edges;
+  static vector<t_edge> get_voronoi_edges(vector<vec2d>&points){
+    double eps=1e-12;
+    using value_type=double;
+    struct t_hacked_vec2d:vec2d{
+      t_hacked_vec2d():vec2d(){}
+      t_hacked_vec2d(real x,real y):vec2d(x,y){}
+      bool operator<(const t_hacked_vec2d&p)const{return std::tie(x,y)<std::tie(p.x,p.y);}
+    };
+    using point=t_hacked_vec2d;
+    using t_points=std::vector<point>;
+    using site=typename t_points::const_iterator;
+    using sweepline_type=sweepline<site,point,value_type>;
+    auto arr=(vector<t_hacked_vec2d>&)points;
+    sweepline_type SL{eps};
+    // fill points_ with data
+    std::sort(std::begin(arr), std::end(arr));
+    //quick_sort(arr);
+    SL(std::cbegin(arr),std::cend(arr));
+    //SL.vertices_
+    vector<t_edge> edges;
+    edges.clear();
+    vector<vec2d> VA;
+    for(auto&ex:SL.vertices_)VA.push_back(ex.c);
+    for(auto&ex:SL.edges_){
+      if(ex.b==SL.inf&&ex.e==SL.inf)continue;
+      auto get=[&](size_t vid,int sign,size_t other){
+        if(vid!=SL.inf){
+          QapAssert(vid<VA.size());
+          return VA[vid];
+        }
+      };
+      //edges.push_back({VA[ex.b],VA[ex.e]});
+      edges.push_back({*ex.l,*ex.r});
+    }
+    return edges;
+  }
+public:
+  vec2d get_dir_from_keyboard_wasd_and_arrows()
+  {
+    vec2d dp=vec2d_zero;
+    auto dir_x=vec2d(1,0);
+    auto dir_y=vec2d(0,1);
+    #define F(dir,key_a,key_b)if(QapInput::Down[key_a]||QapInput::Down[key_b]){dp+=dir;}
+    F(-dir_x,VK_LEFT,'A');
+    F(+dir_x,VK_RIGHT,'D');
+    F(+dir_y,VK_UP,'W');
+    F(-dir_y,VK_DOWN,'S');
+    #undef F
+    return dp;
+  }
+  string id2str(int id){
+    static vector<string> arr={"wood","coal","gas","stell","copper"};
+    return arr[id];
+  }
+  int get_market_id(vec2d pos,bool ignore_r){
+    auto mpos=pos;//QapInput::MousePos
+    int market_id=0;
+    for(int i=0;i<w.city.arr.size();i++){
+      auto a=(mpos-w.city.arr[i].pos).Mag();
+      auto b=(mpos-w.city.arr[market_id].pos).Mag();
+      if(a<b)market_id=i;
+    }
+    auto dist=(mpos-w.city.arr[market_id].pos).Mag();
+    if(!ignore_r)if(dist>w.market_r)return -1;
+    return market_id;
+  }
+  void AddText(TextRender*TE){
+    string BEG="^7";
+    string SEP=" ^2: ^8";
+    #define GOO(TEXT,VALUE)TE->AddText(string(BEG)+string(TEXT)+string(SEP)+string(VALUE));
+    GOO("curr_t",FToS(w.t*1.0/Sys.UPS));
+    GOO("prev_best_t",FToS(prev_best_t*1.0/Sys.UPS));
+    GOO("curr_best_t",FToS(best_t*1.0/Sys.UPS));
+    GOO("px",IToS(QapInput::MousePos.x));
+    GOO("py",IToS(QapInput::MousePos.y));
+    GOO("init_attempts",IToS(init_attempts));
+    TE->AddText("^7---");
+    /*auto market_id=get_market_id();
+    for(auto&it:w.city.arr[market_id].items){
+      TE->AddText(BEG+id2str(it.id)+SEP+IToS(it.price)+SEP+IToS(it.amount));
+    }*/
+    GOO("Money",IToS(w.car.money));
+    TE->AddText("^8Need ^760000 ^8money to ^2win^8 in this game");
+    TE->AddText("^7---");
+    TE->AddText("^8Your cargo:");
+    for(auto&it:w.car.cargo.items){
+      TE->AddText(BEG+id2str(it.id)+SEP+IToS(it.amount));
+    }
+    TE->AddText("^7---");
+    TE->AddText("TOP20:");
+    vector<vector<string>> arr;
+    vector<int> lens;lens.resize(5);
+    for(auto&it:tops){
+      arr.push_back(it.to_str());
+    }
+    for(auto&it:arr){
+      for(int i=0;i<5;i++)lens[i]=max(lens[i],TE->text_len(it[i]));
+    }
+    auto seplen=TE->text_len("  ");
+    vector<string> c={"^8","^7","^8","^7","^8"};
+    for(auto&it:arr){
+      for(int i=0;i<3;i++){auto x=TE->x;TE->AddTextNext(c[i]+it[i]);TE->x=x+lens[i]+seplen;}
+      TE->BR();
+    }
+    #undef GOO
+  }
+  void RenderText(QapDev&RD)
+  {
+    TextRender TE(&RD);
+    vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
+    hs.x=100;
+    real ident=24.0;
+    real Y=0;
+    RD.SetColor(0xff000000);
+    TE.BeginScope(-hs.x+ident,+hs.y-ident,&Game->NormFont,&Game->BlurFont);
+    {
+      string BEG="^7";
+      string SEP=" ^2: ^8";
+      //TE.AddText("");
+      RenderText(&RD,&TE);
+    }
+    TE.EndScope();
+  }
+  //vector<TextRender::TextLine> tls;
+  void DrawMarketMenu(QapDev*RD,TextRender*TE,real text_posx,int mid,bool buttons)
+  {
+    if(w.car.cargo.items.empty())return;
+    if(mid<0)return;
+    string BEG="^7";
+    string SEP=" ^2: ^8";
+    const real dy=32;
+    auto&items=w.city.arr[mid].items;
+    TE->bx=text_posx;
+    TE->x=TE->bx;
+    TE->y=+0.5*items.size()*dy;
+    //RD->BindTex(0,Game->Atlas.pTex);
+    //Game->FrameMenuItem->Bind(RD);
+    //RD->SetColor(0x80ffffff);
+    //RD->DrawQuad(0,y-dy*CurID,Game->FrameMenuItem->w,Game->FrameMenuItem->h,0);
+    vector<string> tearr,idarr,pricearr,amountarr;
+    for(int i=0;i<items.size();i++){
+      idarr.push_back(BEG+id2str(i));
+      pricearr.push_back(IToS(items[i].price));
+      amountarr.push_back(IToS(items[i].amount));
+      tearr.push_back(BEG+id2str(i)+SEP+IToS(items[i].price)+SEP+IToS(items[i].amount));
+    }
+    auto get_maxlen=[&](vector<string>&arr){
+      int maxlen=0;
+      for(int i=0;i<arr.size();i++){
+        auto len=TE->text_len(arr[i]);
+        if(len>maxlen)maxlen=len;
+      }
+      return maxlen;
+    };
+    int idlen=get_maxlen(idarr);
+    int pricelen=get_maxlen(pricearr);
+    int amountlen=get_maxlen(amountarr);
+    int maxlen=get_maxlen(tearr);
+    int seplen=TE->text_len(SEP);
+    bt_buy_all={};bt_sell_all={};
+    for(int i=0;i<idarr.size();i++){
+      TE->AddTextNext(idarr[i]);
+      TE->x=TE->bx+idlen;
+      TE->AddTextNext(SEP);
+      TE->x=TE->bx+idlen+seplen+pricelen-TE->text_len(pricearr[i]);
+      TE->AddTextNext(pricearr[i]);
+      TE->x=TE->bx+idlen+seplen+pricelen;
+      TE->AddTextNext(SEP);
+      TE->x=TE->bx+idlen+seplen+pricelen+seplen+amountlen-TE->text_len(amountarr[i]);
+      TE->AddTextNext(amountarr[i]);
+      TE->x=TE->bx+idlen+seplen+pricelen+seplen+amountlen;
+      TE->AddTextNext(SEP);
+      //TE->x=TE->bx+maxlen;
+      if(buttons)
+      {
+        auto dpos=QapInput::MousePos-vec2d(TE->x,TE->y-TE->ident);
+        auto es=vec2d(TE->text_len(" ^7[BuyAll]"),TE->ident);
+        bool hovered=check_rect(dpos,es);
+        TE->AddTextNext(" "+string(hovered?"^8":"^7")+"[BuyAll]");
+        t_cargo_item ci;
+        ci.id=i;
+        ci.amount=w.car.money/items[i].price;
+        if(ci.amount>items[i].amount)ci.amount=items[i].amount;
+        if(hovered&&QapInput::Down[mbLeft]){/*buy(w,mid,ci);*/TE->LV.back().text=" ^2[BuyAll]";}
+        if(hovered){
+          if(QapInput::Down[mbLeft]){
+            int gg=1;
+          }
+          bt_buy_all={ci,mid,hovered};
+        }
+      }
+      if(buttons)
+      {
+        auto dpos=QapInput::MousePos-vec2d(TE->x,TE->y-TE->ident);
+        auto es=vec2d(TE->text_len(" ^7[SellAll]"),TE->ident);
+        bool hovered=check_rect(dpos,es);
+        TE->AddTextNext(" "+string(hovered?"^8":"^7")+"[SellAll]");
+        t_cargo_item ci;
+        ci.id=i;
+        ci.amount=w.car.cargo.items[i].amount;
+        if(hovered&&QapInput::Down[mbLeft]){/*sell(w,mid,ci);*/TE->LV.back().text=" ^2[SellAll]";}
+        if(hovered){bt_sell_all={ci,mid,hovered};}
+      }
+      TE->BR();
+    }
+    //tls=TE->LV;
+  }
+  struct t_button{t_cargo_item ci;int mid=0;bool hovered=false;};
+  t_button bt_buy_all;
+  t_button bt_sell_all;
+  bool check_rect(vec2d dpos,vec2d es){
+    return (dpos.x>0&&dpos.x<es.x)&&(dpos.y>0&&dpos.y<es.y);
+  }
+  void RenderText(QapDev*RD,TextRender*TE)
+  {
+    int mid=get_market_id(QapInput::MousePos,true);
+    int pid=get_market_id(w.car.pos,false);
+    DrawMarketMenu(RD,TE,400,mid,false);
+    DrawMarketMenu(RD,TE,0,pid,true);
+  }
+  vec2d dyn_pos(const t_dynamic_obstacle&ex,int dt=0)
+  {
+    vec2d offset=Vec2dEx(ex.ang,ex.len*sin(M_PI*2*ex.speed*(w.t+dt)/30/Sys.UPS));
+    vec2d offset2=Vec2dEx(M_PI*2*ex.speed*(w.t+dt+ex.dt)/30/Sys.UPS,ex.len);
+    return ex.pos+(ex.circle?offset2:offset);
+  }
+  bool need_draw_dyn_obs_lines=false;
+  void Render(QapDev*RD){
+    if(bool need_draw_rock0_as_thrt=true){
+      auto&qDev=*RD;
+      if(need_draw_dyn_obs_lines/*QapInput::Down['L']*/){
+        RD->BindTex(0,0);
+        qDev.SetColor(0xffbbbbbb);
+        for(auto&ex:w.dyn_obs){
+          auto d=Vec2dEx(ex.ang,ex.len);
+          DrawLine(qDev,ex.pos-d,ex.pos+d,ex.r*2);
+        }
+        qDev.SetColor(0xffbbbbff);
+        for(auto&ex:w.dyn_obs){
+          auto d=Vec2dEx(ex.ang,ex.len);
+          qDev.DrawQuad(ex.pos.x,ex.pos.y,8,8);
+        }
+      }
+      auto draw_shadow_quad_v2=[&](QapDev&qDev,const TGame::t_frame&f,vec2d pos,real r,QapColor c){
+        real zoom=r*2/real(f.pF->w);
+        draw_shadow_quad(qDev,f.pS,true,pos,vec2d(f.pS->w*zoom,f.pS->h*zoom),c);
+        draw_shadow_quad(qDev,f.pF,false,pos,vec2d(1,1)*r*2,c);
+      };
+      if(bool need_draw_obstacles=true){
+        //RD->BindTex(0,0);
+        qDev.SetColor(0xff888888);
+        RD->BindTex(0,Game->Atlas.pTex);
+        QapDev::BatchScope Scope(qDev);
+        auto&F=*Game->FrameObstacle;
+        qDev.SetColor(0xffffffff);
+        F.Bind(RD);
+        for(auto&ex:w.obstacles){
+          qDev.DrawQuad(ex.x,ex.y,F.w,F.h);
+          //qDev.DrawCircleEx(ex,0,w.obstacle_r,32,0);
+          //draw_shadow_quad_v2(qDev,Game->frame_BigDot,ex,w.obstacle_r,0xff77aa77);
+        }
+      }
+      if(bool need_draw_dyn_obs=true){
+        //qDev.SetColor(0xff777777);
+        qDev.SetColor(0xffffffff);
+        RD->BindTex(0,Game->Atlas.pTex);
+        Game->FrameEnemy->Bind(RD);
+        QapDev::BatchScope Scope(qDev);
+        for(auto&m:w.dyn_obs){
+          auto p=dyn_pos(m);
+          qDev.DrawQuad(p.x,p.y,128,128,m.gang);
+          //draw_shadow_quad_v2(qDev,Game->frame_BigDot,dyn_pos(m),m.r,0xff777777);
+        }
+        //for(auto&ex:w.dyn_obs){
+        //  RD->DrawCircleEx(dyn_pos(ex),0,ex.r,32,0);
+        //}
+      }
+      if(bool need_draw_tank=true){
+        bool cargo_empty=true;
+        for(auto&ex:w.car.cargo.items)if(ex.amount>0)cargo_empty=false;
+        auto*pF=cargo_empty?Game->th_rt_tex:Game->th_rt_tex_full;auto&qDev=*RD;
+        qDev.BindTex(0,pF);
+        qDev.SetColor(0xffffffff);
+        auto scale=0.5;
+        RD->DrawQuad(w.car.pos.x,w.car.pos.y,pF->W*scale,pF->H*scale,(-w.car.v.Ort()).GetAng());
+      }
+      if(bool need_draw_voronoi=QapInput::Down['V']){
+        RD->BindTex(0,0);
+        qDev.SetColor(0xff0000ff);
+        for(auto&ex:edges){
+          DrawLine(*RD,ex.a,ex.b,4);
+        }
+        qDev.SetColor(0xffff0000);
+        for(auto&ex:bad_edges){
+          DrawLine(*RD,ex.a,ex.b,4);
+        }
+      }
+      if(bool need_draw_markets=true){
+        qDev.SetColor(0xffffffff);
+        RD->BindTex(0,Game->Atlas.pTex);
+        QapDev::BatchScope Scope(qDev);
+        for(auto&m:w.city.arr){
+          //RD->DrawQuad(m.pos.x,m.pos.y,40,40);
+          Game->FrameMarket->Bind(RD);
+          RD->DrawQuad(m.pos.x,m.pos.y,128,128);
+          //draw_shadow_quad_v2(qDev,Game->frame_Dot,m.pos,16,0xFFffFFff);
+        }
+      }
+      int mid=get_market_id(QapInput::MousePos,true);
+      if(mid>=0){
+        auto mpos=w.city.arr[mid].pos;
+        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.SetColor(0xffff0000);
+        draw_shadow_quad_v2(qDev,Game->frame_Dot,mpos,16,0xffff0000);
+        //RD->DrawQuad(mpos.x,mpos.y,23,23);
+      }
+      int pid=get_market_id(w.car.pos,false);
+      if(pid>=0){
+        auto mpos=w.city.arr[pid].pos;
+        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.SetColor(0xff00ff00);
+        //RD->DrawQuad(mpos.x,mpos.y,20,20);
+        draw_shadow_quad_v2(qDev,Game->frame_Dot,mpos,16*0.45,0xff00ff00);
+      }
+      qDev.SetColor(0xffffffff);
+      RenderText(*RD);
+    }
+  }
+  static void draw_shadow_quad(QapDev&qDev,QapAtlas::TFrame*pF,bool shadow,vec2d pos,vec2d wh,QapColor color,real ang=0){
+    qDev.SetColor(shadow?0xff000000:color);
+    pF->Bind(&qDev);
+    auto p=pos;
+    if(shadow)p+=vec2d(1.0,-1.0);
+    qDev.DrawQuad(p.x,p.y,wh.x,wh.y,ang);
+  }
+  void DrawLine(QapDev&qDev,const vec2d&a,const vec2d&b,real line_size)
+  {
+    auto p=(b+a)*0.5;
+    qDev.DrawQuad(p.x,p.y,(b-a).Mag(),line_size,(b-a).GetAng());
+  }
+  bool colide(){
+    for(auto&ex:w.dyn_obs){
+      if((w.car.pos-dyn_pos(ex)).Mag()<ex.r+w.tank_r)return true;
+    }
+    return false;
+  }
+  void Update(TGame*Game){
+    if(!inited){
+      bool ok=init_attempt();
+      init_attempts++;
+      if(ok){inited=true;Sys.UPS_enabled=true;Sys.ResetClock();}else{return;}
+    }
+    {
+      auto&bt=bt_buy_all;
+      if(QapInput::OnDown(mbLeft)){
+        if(bt.hovered){
+          buy(w,bt.mid,bt.ci);
+        }
+      }
+    }
+    {
+      auto&bt=bt_sell_all;
+      if(bt.hovered&&QapInput::OnDown(mbLeft)){sell(w,bt.mid,bt.ci);}
+    }
+    for(auto&ex:w.dyn_obs){ex.gang+=Pi*0.9*ex.gspd/180;}
+    if(QapInput::OnDown('L'))need_draw_dyn_obs_lines=!need_draw_dyn_obs_lines;
+    //v+=get_dir_from_keyboard_wasd_and_arrows()*0.003;
+    auto dk=0.0;auto dAng=6.28*0.33/(2*Sys_UPD);
+    if(QapInput::OnDown(VK_F5)){reinit_the_same_level();}
+    if(QapInput::Down[VK_LEFT]||QapInput::Down['A']){dk=+1;}
+    if(QapInput::Down[VK_RIGHT]||QapInput::Down['D']){dk=-1;}
+    if(w.car.deaded)dk=0;
+    w.car.v=Vec2dEx(w.car.v.GetAng()+Clamp(dk,-5.0,+5.0)*dAng,1);
+    auto v2=vec2d_zero;
+    if(QapInput::Down[VK_UP]||QapInput::Down['W'])v2=+w.car.v;
+    if(QapInput::Down[VK_DOWN]||QapInput::Down['S'])v2=-w.car.v;
+    auto new_pos=w.car.pos+v2;
+    auto new_v2=vec2d(0,0);int n=0;
+    for(auto&ex:w.obstacles){
+      auto dist=w.obstacle_r+w.tank_r;
+      if((new_pos-ex).Mag()<dist){
+        //v2=vec2d_zero;
+        new_v2+=(new_pos-ex).SetMag(dist)+ex-w.car.pos;
+        n++;
+      }
+    }
+    v2=n?new_v2*(1.0/n):v2;
+    bool runned=!Win()&&!Fail();
+    if(runned)w.car.pos+=v2;
+    if(runned)w.t++;
+    if(colide())w.car.deaded=true;
+    on_win=false;
+    if(Win()){if(!wined)on_win=true;wined=true;}
+    if(bool need_best_t=true){
+      auto fn="score.txt";
+      if(w.t==1){
+        auto s=file_get_contents(fn);
+        prev_best_t=s.empty()?1e9:SToI(s);
+        best_t=prev_best_t;
+      }
+      if(on_win){
+        if(prev_best_t>w.t){best_t=w.t;file_put_contents(fn,IToS(w.t));}
+      }
+    }
+    if(on_win){
+      auto host=TGame::get_host();
+      TGame::wget(host,"/c/game_players_table.js?game=market&user="+Game->user_name+"&sec="+FToS(w.t*1.0/Sys.UPS)+"&seed="+IToS(seed)+"&ref="+ref);
+      //QapDebugMsg(s);
+      reinit_top20();
+    }
+  }
+
+  int seed=0;
+  int prev_best_t=0;
+  int best_t=0;
+  bool wined=false;
+  bool on_win=false;
+};
 extern "C" {
   int update(int nope){
     /*
