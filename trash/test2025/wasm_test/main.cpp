@@ -3295,7 +3295,7 @@ public:
     static class TOnExit:public IOnClick{
     public:
       void Call(TMenu*EX){
-        Sys.Quit();
+        //Sys.Quit();
       }
     } OnExit;
     Menu.reset(new TMenu(this,"Main menu"));
@@ -3428,7 +3428,7 @@ public:
   void RenderText(QapDev&RD)
   {
     TextRender TE(&RD);
-    vec2d hs=vec2d((Sys.SM.W,1024,Sys.SM.W),Sys.SM.H)*0.5;
+    vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     real ident=24.0;
     real Y=0;
     RD.SetColor(0xff000000);
