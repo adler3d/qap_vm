@@ -531,6 +531,116 @@ inline float dot(const vec3f&a,const vec3f&b){return a.dot(b);}
 //inline float dot(const vec3d&a,const vec3d&b){return a.dot(b);}
 inline vec3f cross(const vec3f&a,const vec3f&b){return a.cross(b);}
 //inline vec3d cross(const vec3d&a,const vec3d&b){return a.cross(b);}
+class vec2i
+{
+public:
+public:
+  typedef vec2i SelfClass;
+public:
+  int x;
+  int y;
+public:
+public:
+  vec2i():x(0),y(0) {}
+  vec2i(int x,int y):x(x),y(y) {};
+  friend vec2i operator*(int u,const vec2i&v)
+  {
+    return vec2i(u*v.x,u*v.y);
+  }
+  friend vec2i operator*(const vec2i&v,int u)
+  {
+    return vec2i(u*v.x,u*v.y);
+  }
+  friend vec2i operator/(const vec2i&v,int d)
+  {
+    return vec2i(v.x/d,v.y/d);
+  }
+  friend vec2i operator+(const vec2i&u,const vec2i&v)
+  {
+    return vec2i(u.x+v.x,u.y+v.y);
+  }
+  friend vec2i operator-(const vec2i&u,const vec2i&v)
+  {
+    return vec2i(u.x-v.x,u.y-v.y);
+  }
+  void operator+=(const vec2i&v)
+  {
+    x+=v.x;
+    y+=v.y;
+  }
+  void operator-=(const vec2i&v)
+  {
+    x-=v.x;
+    y-=v.y;
+  }
+  int SqrMag()
+  {
+    return x*x+y*y;
+  }
+  float Mag()
+  {
+    return sqrt(float(x*x+y*y));
+  }
+  operator vec2d()const
+  {
+    return vec2d(x,y);
+  }
+  operator vec2f()const
+  {
+    return vec2f(x,y);
+  }
+  vec2i operator+()const
+  {
+    return vec2i(+x,+y);
+  }
+  vec2i operator-()const
+  {
+    return vec2i(-x,-y);
+  }
+  friend bool operator==(const vec2i&u,const vec2i&v)
+  {
+    return (u.x==v.x)&&(u.y==v.y);
+  }
+  friend bool operator!=(const vec2i&u,const vec2i&v)
+  {
+    return (u.x!=v.x)||(u.y!=v.y);
+  }
+  static vec2i fromVec2d(const vec2d&v){return vec2i(v.x,v.y);}
+};
+struct Dip2i
+{
+public:
+  int a,b;
+  Dip2i(int a,int b):a(a),b(b) {};
+  void Take(int x)
+  {
+    a=min(a,x);
+    b=max(b,x);
+  }
+  Dip2i Norm()const
+  {
+    return Dip2i(min(a,b),max(a,b));
+  }
+  int Mag()const
+  {
+    return b-a;
+  }
+public:
+  struct Transform
+  {
+    float x,s;
+    Transform(float x,float s):x(x),s(s) {}
+    Transform(const Dip2i&from,const Dip2i&to)
+    {
+      s=float(to.Norm().Mag())/float(from.Norm().Mag());
+      x=to.a-from.a;
+    }
+    float operator*(int v)
+    {
+      return x+v*s;
+    }
+  };
+};
 class QapDev{
 public:
   QapColor color=0;
