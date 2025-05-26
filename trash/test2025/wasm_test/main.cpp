@@ -668,6 +668,9 @@ public:
   QapColor GetColor(){return QapColor(F(a),F(r),F(g),F(b));}
   #undef F
 };
+void bindTex(QapDev&qDev,int Tex){
+  EM_ASM({bindTex(qDev,$0);},Tex);
+}
 class QapDev{
 public:
   QapColor color=0;
@@ -813,6 +816,7 @@ public:
 public:
   void HackMode(bool Textured){this->Textured=Textured;}
   //virtual void BindTex(int Stage,QapDX::QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
+  void BindTex(int Stage,QapTex*Tex){bindTex(*this,Tex->Tex);txf.set_ident();}
 public:
   inline Ver&AddVertexRaw(){return VBA[VPos++];}
   inline int AddVertex(const Ver&Source)
@@ -1644,6 +1648,97 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
   #undef BlurLog
   return Tex;
 }
+void DrawQapText(QapDev*RD,QapFont&Font,float X,float Y,const string&Text)
+{
+  static QapColor CT[]={
+    0xFF252525,0xFFFF0000,0xFF00FF00,0xFFFFFF00,
+    0xFF0000FF,0xFFFF00FF,0xFF00FFFF,0xFFFFFFFF,
+    0xFFFFFFA8,0xFFFFA8FF,
+    0xFFFF8000,0xFF0080FF,0xFFA0A0A0,0xFF808080,0xFFF0F000,0xFF00F0F0,
+  };
+  bool _4it=!RD->IsBatching();
+  if(_4it)RD->BeginBatch();
+  int QuadCount=0;
+  int VPos=RD->GetVPos();
+  {
+    float xp=0; int i=0;
+    while(i<(int)Text.length())
+    {
+      if(Text[i]!='^')
+      {
+        int I=(byte)Text[i];
+        float s=((float)(I%16))/16,t=((float)(I/16))/16;
+        float cx=(float)Font.W[I],cy=(float)Font.H[I],ts=(float)Font.Size;
+        #define F(var,x,y,z,color,u,v)int var=RD->AddVertex(QapDev::Ver(X+x,Y+y,color,u,v));
+          F(A,xp+0,-cy,0,RD->GetColor(),s,1-t-cy/ts);
+          F(B,xp+cx,-cy,0,RD->GetColor(),s+cx/ts,1-t-cy/ts);
+          F(C,xp+cx,0,0,RD->GetColor(),s+cx/ts,1-t);
+          F(D,xp+0,0,0,RD->GetColor(),s,1-t);
+        #undef F
+        RD->AddTris(A,B,C);
+        RD->AddTris(C,D,A);
+        xp+=cx; QuadCount++; i++; continue;
+      };
+      i++; if(i>(int)Text.length())continue;
+      if((Text[i]>='0')&&(Text[i]<='9')){RD->SetColor(CT[Text[i]-'0']); i++; continue;};
+      if((Text[i]>='A')&&(Text[i]<='F')){RD->SetColor(CT[Text[i]-'A'+10]); i++; continue;};
+    }
+  };
+  if(_4it)RD->EndBatch();
+}
+class TextRender{
+public:
+  QapDev*RD;
+  struct TextLine{
+  public:
+    string text;
+    int x,y;
+  public:
+    TextLine(int x,int y,const string&text):x(x),y(y),text(text){}
+  public:
+    void DrawRaw(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,QapDX::Q3TextToNormal(text));}
+    void DrawSys(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,text);}
+  };
+  vector<TextLine> LV;
+  TextRender(QapDev*RD):RD(RD){}
+public:
+  int x,y,ident,bx;
+  QapFont*NormFont;
+  QapFont*BlurFont;
+public:
+  void BeginScope(int X,int Y,QapFont*NormFont,QapDX::QapFont*BlurFont){
+    bx=X;x=X;y=Y;ident=24;this->NormFont=NormFont;this->BlurFont=BlurFont;
+  }
+  void BR(){y-=ident;x=bx;}
+  void AddText(const string&text)
+  {
+    LV.push_back(TextLine(x,y,text));BR();
+  }
+  int text_len(const string&text){return QapDX::GetQ3TextLength(*NormFont,text);}
+  void AddTextNext(const string&text)
+  {
+    LV.push_back(TextLine(x,y,text));x+=QapDX::GetQ3TextLength(*NormFont,text);
+  }
+  void EndScope(){
+    //RD->SetBlendMode(QapDX::BT_SUB);
+    //RD->SetAlphaMode(QapDX::AM_NONE);
+    {
+      RD->BindTex(0,BlurFont->Tex);
+      RD->SetColor(0xff000000);
+      RD->BeginBatch();
+      for(int i=0;i<LV.size();i++)LV[i].DrawRaw(RD,BlurFont,1.0);
+      RD->EndBatch();
+    }
+    {
+      RD->BindTex(0,NormFont->Tex);
+      RD->SetColor(0xffffffff);
+      RD->BeginBatch();
+      for(int i=0;i<LV.size();i++)LV[i].DrawSys(RD,NormFont,0.0);
+      RD->EndBatch();
+    }
+    //RD->SetAlphaMode(QapDX::AM_NONE);
+  }
+};
 struct t_rec{
   vec2d pos;
   double wh;
@@ -1653,12 +1748,9 @@ struct t_rec{
 };
 vector<t_rec> rarr;
 QapDev qDev;
-QapFont NF;
-QapTex*NormFont=nullptr;
-QapTex*BlurFont=nullptr;
-void bindTex(QapDev&qDev,int Tex){
-  EM_ASM({bindTex(qDev,$0);},Tex);
-}
+QapFont NormFont;
+//QapTex*NormFontTex=nullptr;
+//QapTex*BlurFontTex=nullptr;
 extern "C" {
   int update(int nope){
     {
@@ -1672,11 +1764,42 @@ extern "C" {
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
     qDev.color=0xFFffFFff;
-    bindTex(qDev,BlurFont->Tex);
+    bindTex(qDev,BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
-    bindTex(qDev,NormFont->Tex);
+    bindTex(qDev,NormFont.Tex);
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(-500+0.5,0.5,512,512,0);
+    auto&RD=qDev;
+    TextRender TE(&RD);
+    
+    vec2d hs=vec2d(1920,1024)*0.5;
+    real ident=24.0;
+    real Y=0;
+    RD.SetColor(0xff000000);
+    TE.BeginScope(-hs.x+ident,+hs.y-ident,&NormFont,&BlurFont);
+    {
+      const string PreesR=" ^7(^3press ^2R^7)";
+      const string PreesSpace=" ^7(^3press ^2Space^7)";
+      const string PreesEnter=" ^7(^3press ^2Return^7)";
+      string BEG="^7";
+      string SEP=" ^2: ^8";
+      TE.AddText("^7The ^2Game");
+      TE.AddText("");
+      TE.AddText("^8user_name ^2: ^7Adler");
+      TE.AddText("");
+      //#define GOO(TEXT,VALUE)TE.AddText(string(BEG)+string(TEXT)+string(SEP)+string(VALUE));
+      //GOO("Level",string(LevelCounter)+" ["+string(LevelCounter?LevelsInfo[LevelCounter.Value].Name:"noname")+"]");
+      //#undef GOO
+      //TE.AddText("");
+      //if(Level.get())Level->AddText(&TE);
+      //TE.AddText("");
+      //if(WaitWin.Runned)TE.AddText("^2You win!"+PreesEnter);
+      //if(WaitFail.Runned)TE.AddText("^1You lose!"+PreesR);
+      //if(!WaitFail||!WaitWin){TE.AddText("^7game over!");}
+    }
+    TE.EndScope();
+    RD.BindTex(0,NormFont.Tex);
+    RD.DrawQuad(0.5,0.5,-512,512,Pi);
     return 0;
   }
 }
@@ -1686,8 +1809,9 @@ void init(){
   auto*pNormMem=NF.CreateFontMem("Arial",14,false,512);
   auto*pBlurMem=pNormMem->Clone();
   BlurTexture(pBlurMem,4);
-  NormFont=GenTextureMipMap(pNormMem,16);
-  BlurFont=GenTextureMipMap(pBlurMem,16);
+  BlurFont=NormFont;
+  NormFont.Tex=GenTextureMipMap(pNormMem,16);
+  BlurFont.Tex=GenTextureMipMap(pBlurMem,16);
   
   for(int i=0;i<5000;i++){
     rarr.push_back({});
