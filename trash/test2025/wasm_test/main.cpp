@@ -11,6 +11,8 @@ const real Pi=3.14159265;
 const real Pi2=Pi*2;
 const real PiD2=Pi/2;
 const real PiD4=Pi/4;
+template<typename TYPE>TYPE Sign(const TYPE&value){if(value>0){return TYPE(+1);}else{return TYPE(value<0?-1:0);};};
+template<typename TYPE>bool InDip(const TYPE&min,const TYPE&val,const TYPE&max){return (val>=min)&&(val<=max);};
 struct vec2d{
 public:
   real x,y;
@@ -1008,6 +1010,11 @@ public:
     }
   }*/
 };
+#ifdef _WIN32
+#else
+void RegTexMem(...){}
+void UnRegTexMem(...){}
+#endif
 class QapTexMem
 {
 public:
@@ -1021,7 +1028,7 @@ public:
   void SaveToFile(const string&FN);
   ~QapTexMem(){UnRegTexMem(this);delete[] pBits;};
   QapTexMem*Clone(){
-    return new QapTexMem(Name+".Clone",W,H,(QapColor*)memcpy(new QapColor[W*H],pBits,sizeof(QapColor)*W*H));
+    return new QapTexMem(Name+".Clone",W,H,(QapColor*)memcpy((void*)new QapColor[W*H],pBits,sizeof(QapColor)*W*H));
   }
   QapColor get_color_at(int x,int y)const{return pBits[x+y*W];}
 public:
