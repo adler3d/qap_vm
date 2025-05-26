@@ -1698,6 +1698,23 @@ string Q3TextToNormal(const string&Text)
   }
   return s;
 }
+int GetQ3TextLength(const QapFont &Font,const string &Text)
+{
+  float xp=0; int i=0;
+  while(i<(int)Text.size())
+  {
+    if(Text[i]!='^')
+    {
+      int I=(byte)Text[i];
+      float cx=(float)Font.W[I];
+      xp+=cx; i++; continue;
+    };
+    i++; if(i>(int)Text.size())continue;
+    if((Text[i]>='0')&&(Text[i]<='9')){i++; continue;};
+    if((Text[i]>='A')&&(Text[i]<='F')){i++; continue;};
+  }
+  return xp;
+}
 class TextRender{
 public:
   QapDev*RD;
@@ -1726,10 +1743,10 @@ public:
   {
     LV.push_back(TextLine(x,y,text));BR();
   }
-  int text_len(const string&text){return QapDX::GetQ3TextLength(*NormFont,text);}
+  int text_len(const string&text){return GetQ3TextLength(*NormFont,text);}
   void AddTextNext(const string&text)
   {
-    LV.push_back(TextLine(x,y,text));x+=QapDX::GetQ3TextLength(*NormFont,text);
+    LV.push_back(TextLine(x,y,text));x+=GetQ3TextLength(*NormFont,text);
   }
   void EndScope(){
     //RD->SetBlendMode(QapDX::BT_SUB);
@@ -1776,9 +1793,9 @@ extern "C" {
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
     qDev.color=0xFFffFFff;
-    bindTex(qDev,BlurFont.Tex);
+    bindTex(BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
-    bindTex(qDev,NormFont.Tex);
+    bindTex(NormFont.Tex);
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(-500+0.5,0.5,512,512,0);
     auto&RD=qDev;
