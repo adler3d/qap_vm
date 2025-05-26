@@ -2239,6 +2239,7 @@ public:
   }
 };
 QapKeyboard kb;
+QapTexMem*LoadTexture(string fn){return nullptr;}
 class TGame{
 public:
   typedef QapAtlas::TFrame TFrame;
@@ -2279,9 +2280,10 @@ public:
   };*/
 public:
   class TCounterInc{
-  int Value=0;
-  int Minimum=0;
-  int Maximum=32;
+  public:
+    int Value=0;
+    int Minimum=0;
+    int Maximum=32;
   public:
     TCounterInc(){;}
     TCounterInc(int Value,int Minimum,int Maximum){this->Value=Value;this->Minimum=Minimum;this->Maximum=Maximum;}
@@ -2294,10 +2296,11 @@ public:
     operator string(){return IToS(Value)+"/"+IToS(DipSize());}
   };  
   class TCounterIncEx{
-  int Value=0;
-  int Minimum=0;
-  int Maximum=32;
-  bool Runned=false;
+  public:
+    int Value=0;
+    int Minimum=0;
+    int Maximum=32;
+    bool Runned=false;
   public:
     TCounterIncEx(){;}
     TCounterIncEx(int Value,int Minimum,int Maximum){;this->Value=Value;this->Minimum=Minimum;this->Maximum=Maximum;}
@@ -2927,7 +2930,7 @@ public:
       auto fn="score.txt";
       if(w.t==1){
         auto s=file_get_contents(fn);
-        prev_best_t=s.empty()?1e9:SToI(s);
+        prev_best_t=s.empty()?1e9:stoi(s);
         best_t=prev_best_t;
       }
       if(on_win){
@@ -3166,27 +3169,8 @@ public:
       //SysFont=FontCreate("Arial",16,false,512);
     }
     LoadFrames();
-    /*
-    {
-      auto*ptm=LoadTexture("GFX\\tank_hodun_rt.png");
-      ptm->GenEdge
-      th_rt_tex_v2=GenTextureMipMap(ptm);
-    }*/
-    if(0)
-    {
-      auto*ptm=LoadTexture("GFX\\tank_hodun_rt.png");
-      if(bool red_is_transparent=true){
-        auto*p=ptm->pBits;
-        int n=ptm->W*ptm->H;
-        auto v=210;
-        auto c=QapColor(0,v,v,v);
-        for(int i=0;i<n;i++){auto&v=p[i];if(v==0xffff0000)v=c;}
-      }
-      th_rt_tex=GenTextureMipMap(ptm);
-    }
     if(1)
     {
-      //auto*ptm=LoadTexture("GFX\\tank512.png");
       auto*ptm=LoadTexture("GFX\\market_car_v2.png");
       th_rt_tex=GenTextureMipMap(ptm);
       ptm=LoadTexture("GFX\\market_car_v2_full.png");
@@ -3199,6 +3183,7 @@ public:
   }
   void InitLevelsInfo()
   {
+    #define LEVEL_LIST(F)F(Level_MarketGame);
     #define ADDLEVEL(CLASS){static TLevelFactory<CLASS>tmp;LevelsInfo.push_back(TLevelInfo(#CLASS,tmp));}
     LEVEL_LIST(ADDLEVEL);
     #undef ADDLEVEL
@@ -3211,7 +3196,6 @@ public:
   void RestartLevel()
   {
     if(!LevelCounter){
-      QapAssert(("Поздравляю вы полностью прошли игру!(Это не баг, это фича!).",false));
       return;
     };
     Level.reset(LevelsInfo[LevelCounter.Value].Factory.Build(this));
@@ -3499,7 +3483,7 @@ public:
     if(user_name_scene)return InputUserNameUpdate();
     QapAssert(Menu.get());
     if(kb.Down[VK_ESCAPE]){if(Menu->InGame()){Menu->Up();}else{Menu->Down();}kb.Down[VK_ESCAPE]=false;}
-    kb.UpdateMouse();
+    //kb.UpdateMouse();
     if(Menu->InGame())
     {
       if(Level.get())
