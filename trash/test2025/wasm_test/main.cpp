@@ -1338,9 +1338,9 @@ public:
     for(int i=0;i<H/2;i++)
     {
       int a(W*(i)),b(W*(H-i-1));
-      memcpy(line,&pBits[a],Size);
-      memcpy(&pBits[a],&pBits[b],Size);
-      memcpy(&pBits[b],line,Size);
+      memcpy((void*)line,&pBits[a],Size);
+      memcpy((void*)&pBits[a],&pBits[b],Size);
+      memcpy((void*)&pBits[b],line,Size);
     }
     delete[] line;
     return this;
@@ -1516,7 +1516,7 @@ struct QapFont
       }
       ReleaseDC(Sys.hWnd,DC);
     }
-    QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+IToS(TexSize),TexSize,TexSize,(QapColor*)pix);
+    QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+to_string(TexSize),TexSize,TexSize,(QapColor*)pix);
     return pMem;
   }
   #else
@@ -1528,7 +1528,7 @@ struct QapFont
     EM_ASM({
       initFont_v2(g_font,$0);
     },int(pix));
-    QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+IToS(TexSize),TexSize,TexSize,(QapColor*)pix);
+    QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+to_string(TexSize),TexSize,TexSize,(QapColor*)pix);
     return pMem;
   }
   #endif
@@ -1626,7 +1626,7 @@ int qap_main(int nope) {
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
   QapFont NF;
-  auto*pTexMem=NF.CreateFontMem(14,"Arial",512);
+  auto*pTexMem=NF.CreateFontMem("Arial",14,false,512);
   NormFont=GenTextureMipMap(pTexMem,16);
   srand(time(NULL));
   {
