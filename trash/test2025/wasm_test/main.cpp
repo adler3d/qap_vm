@@ -1533,7 +1533,7 @@ struct QapFont
       initFont_v2(g_font,$0,$1,$2);
     },int(pix),int(&W[0]),int(&H[0]));
     QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+to_string(TexSize),TexSize,TexSize,(QapColor*)pix);
-    pMem->InvertX();
+    //pMem->InvertX();
     return pMem;
   }
   #endif
@@ -1794,12 +1794,13 @@ extern "C" {
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
     qDev.color=0xFFffFFff;
+    */
     qDev.BindTex(0,BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
     qDev.BindTex(0,NormFont.Tex);
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(-500+0.5,0.5,512,512,0);
-    */
+    /**/
     auto&RD=qDev;
     TextRender TE(&RD);
     
