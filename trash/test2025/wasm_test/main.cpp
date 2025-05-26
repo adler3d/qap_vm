@@ -1533,7 +1533,7 @@ struct QapFont
       initFont_v2(g_font,$0,$1,$2);
     },int(pix),int(&W[0]),int(&H[0]));
     QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+to_string(TexSize),TexSize,TexSize,(QapColor*)pix);
-    //pMem->InvertY();
+    pMem->InvertX();
     return pMem;
   }
   #endif
