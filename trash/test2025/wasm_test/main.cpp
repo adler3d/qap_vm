@@ -987,7 +987,7 @@ public:
       QapColor*line=&pBits[i];
       for(int j=0;j<W/2;j++)
       {
-        int a(i),b(H-i-1);
+        int a(j),b(H-j-1);
         std::swap(line[a],line[b]);
       }
     }
