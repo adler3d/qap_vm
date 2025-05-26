@@ -2575,13 +2575,6 @@ public:
     for(auto&ex:SL.vertices_)VA.push_back(ex.c);
     for(auto&ex:SL.edges_){
       if(ex.b==SL.inf&&ex.e==SL.inf)continue;
-      auto get=[&](size_t vid,int sign,size_t other){
-        if(vid!=SL.inf){
-          QapAssert(vid<VA.size());
-          return VA[vid];
-        }
-      };
-      //edges.push_back({VA[ex.b],VA[ex.e]});
       edges.push_back({*ex.l,*ex.r});
     }
     return edges;
@@ -3042,8 +3035,8 @@ public:
       Items[CurID].OnClick->Call(this);
     }
     if(kb.Down[mbLeft]){
-      vec2d dy(0,0.5*Items.size()*dy-CurID*dy);
-      if(Items[CurID].OnClick->IsEnabled(this))if(CD_Rect2Point(-hmis+dy,hmis+dy,mp))
+      vec2d dY(0,0.5*Items.size()*dy-CurID*dy);
+      if(Items[CurID].OnClick->IsEnabled(this))if(CD_Rect2Point(-hmis+dY,hmis+dY,mp))
       {
         Items[CurID].OnClick->Call(this);
         kb.Down[mbLeft]=false;
@@ -3160,7 +3153,6 @@ public:
   }
   void Init()
   {
-    *this={};
     srand(time(NULL));
     {
       QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
@@ -3344,7 +3336,7 @@ public:
   bool user_name_scene=true;
   void InputUserNameRender(){
     TextRender TE(&RD);
-    vec2d hs=vec2d((Sys.SM.W,1024,Sys.SM.W),Sys.SM.H)*0.5;
+    vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     real ident=24.0;
     real Y=0;
     RD.SetColor(0xff000000);
@@ -3364,7 +3356,7 @@ public:
   }
   bool need_init=true;
   bool check_char(char c){
-    return InDip('a',c,'z')||InDip('A',c,'Z')||InDip('а',c,'я')||InDip('А',c,'Я')||InDip('0',c,'9')||c=='ё'||c=='Ё';
+    return InDip('a',c,'z')||InDip('A',c,'Z')||/*InDip('а',c,'я')||InDip('А',c,'Я')||*/InDip('0',c,'9');//||c=='ё'||c=='Ё';
   }
   void update_user_name(){
     user_name=file_get_contents(user_name_fn);
