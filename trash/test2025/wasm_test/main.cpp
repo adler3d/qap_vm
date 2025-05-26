@@ -36,6 +36,7 @@ inline int WinMessageBox(const string&caption,const string&text)
   #else
   #ifdef __EMSCRIPTEN__
   emscripten_run_script(string("alert('"+caption+"\\n"+text+"')").c_str());
+  return qmbrBreak;
   #endif
   #endif
 }
@@ -130,8 +131,8 @@ public:
     }
     QapAssert(pVar=NULL);
   }
-  template<typename TYPE>
-  void ForEach(TYPE&Func)
+  template<typename FUNC>
+  void ForEach(FUNC&Func)
   {
     int c=Size;
     for(int i=0;i<Arr.size();i++)
