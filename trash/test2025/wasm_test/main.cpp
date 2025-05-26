@@ -1705,7 +1705,7 @@ int GetQ3TextLength(const QapFont &Font,const string &Text)
   {
     if(Text[i]!='^')
     {
-      int I=(byte)Text[i];
+      int I=(uchar)Text[i];
       float cx=(float)Font.W[I];
       xp+=cx; i++; continue;
     };
@@ -1793,9 +1793,9 @@ extern "C" {
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
     qDev.color=0xFFffFFff;
-    bindTex(BlurFont.Tex);
+    qDev.BindTex(0,BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
-    bindTex(NormFont.Tex);
+    qDev.BindTex(0,NormFont.Tex);
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(-500+0.5,0.5,512,512,0);
     auto&RD=qDev;
