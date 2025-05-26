@@ -1673,7 +1673,7 @@ extern "C" {
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
     qDev.color=0xFFffFFff;
     bindTex(qDev,BlurFont->Tex);
-    qDev.DrawQuad(-500+1.5,1.5,512,512,0);
+    qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
     bindTex(qDev,NormFont->Tex);
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(-500+0.5,0.5,512,512,0);
