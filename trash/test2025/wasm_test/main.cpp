@@ -2,8 +2,147 @@
 #include <vector>
 #include <stdlib.h>
 #include <time.h>
-
 using namespace std;
+inline bool SysQapAssert(const string&exp,bool&ignore,const string&filename,const int line,const string&funcname);
+inline bool SysQapDebugMsg(const string&msg,bool&ignore,const string&filename,const int line,const string&funcname);
+#if(defined(_DEBUG)||defined(QAP_DEBUG))
+#define QapAssert(_Expression)if(!bool(_Expression)){static bool ignore=false;if(SysQapAssert((#_Expression),ignore,__FILE__,__LINE__,__FUNCTION__))__debugbreak();}
+#else
+#define QapAssert(_Expression)if(bool(_Expression)){};
+#endif
+#if(defined(_DEBUG)||defined(QAP_DEBUG))
+#define QapDebugMsg(_Message){static bool ignore=false;if(SysQapDebugMsg((_Message),ignore,__FILE__,__LINE__,__FUNCTION__))__debugbreak();}
+#else
+#define QapDebugMsg(_Message)
+#endif
+#if(defined(_DEBUG)||defined(QAP_DEBUG))
+#define QapNoWay(){QapDebugMsg("no way!");}
+#else
+#define QapNoWay()
+#endif
+enum QapMsgBoxRetval
+{
+  qmbrSkip,qmbrBreak,qmbrIgnore
+};
+inline int WinMessageBox(const string&caption,const string&text)
+{
+  #ifdef _WIN32
+  string full_text=text+"\n\n    [Skip]            [Break]            [Ignore]";
+  const int nCode=MessageBoxA(NULL,full_text.c_str(),caption.c_str(),MB_CANCELTRYCONTINUE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
+  QapMsgBoxRetval retval=qmbrSkip;
+  if(IDCONTINUE==nCode)retval=qmbrIgnore;
+  if(IDTRYAGAIN==nCode)retval=qmbrBreak;
+  return retval;
+  #else
+  #ifdef __EMSCRIPTEN__
+  emscripten_run_script(string("alert('"+caption+"\\n"+text+"')").c_str());
+  #endif
+  #endif
+}
+typedef int(*TQapMessageBox)(const string&caption,const string&text);
+struct TMessageBoxCaller
+{
+  static int Call(const string&caption,const string&text)
+  {
+    return Get()(caption,text);
+  }
+  static TQapMessageBox&Get()
+  {
+    static TQapMessageBox func=WinMessageBox;
+    return func;
+  }
+  struct t_hack
+  {
+    TQapMessageBox old;
+    t_hack(TQapMessageBox func)
+    {
+      old=Get();
+      Get()=func;
+    }
+    ~t_hack()
+    {
+      Get()=old;
+    }
+  };
+};
+inline bool SysQapAssert(const string&exp,bool&ignore,const string&filename,const int line,const string&funcname)
+{
+  if(ignore)return false;
+  std::string text="Source file :\n"+filename
+      +"\n\nLine : "+std::to_string(line)
+      +"\n\nFunction :\n"+funcname
+      +"\n\nAssertion failed :\n"+exp;
+  auto retval=(QapMsgBoxRetval)TMessageBoxCaller::Call("Assertion failed",text);
+  if(qmbrIgnore==retval)ignore=true;
+  return qmbrBreak==retval;
+}
+inline bool SysQapDebugMsg(const string&msg,bool&ignore,const string&filename,const int line,const string&funcname)
+{
+  if(ignore)return false;
+  std::string text="Source file :\n"+filename
+      +"\n\nLine : "+std::to_string(line)
+      +"\n\nFunction :\n"+funcname
+      +"\n\nDebug message :\n"+msg;
+  auto retval=(QapMsgBoxRetval)TMessageBoxCaller::Call("Debug message",text);
+  if(qmbrIgnore==retval)ignore=true;
+  return qmbrBreak==retval;
+}
+template<typename TYPE>
+class QapPool{
+public:
+  struct Rec
+  {
+    bool used;
+    TYPE data;
+    Rec():used(false){}
+  };
+  vector<Rec>Arr;
+  int Size;
+  int MaxSize;
+public:
+  QapPool(int MaxSize=0):Size(0),MaxSize(MaxSize){Arr.resize(MaxSize);}
+  void NewInstance(TYPE*&pVar)
+  {
+    QapAssert(Size<MaxSize);
+    for(int i=0;i<Arr.size();i++)
+    {
+      if(!Arr[i].used)
+      {
+        Arr[i].used=true;
+        Size++;
+        pVar=&Arr[i].data;
+        return;
+      }
+    }
+  }
+  void FreeInstance(TYPE*&pVar){
+    QapAssert(Size>0);
+    int id=int((int)pVar-(int)&Arr[0].data)/sizeof(Arr[0]);
+    for(int i=id;i<Arr.size();i++)
+    {
+      if(&Arr[i].data==pVar)
+      {
+        Arr[i].used=false;
+        Size--;
+        pVar=NULL;
+        return;
+      }
+    }
+    QapAssert(pVar=NULL);
+  }
+  template<typename TYPE>
+  void ForEach(TYPE&Func)
+  {
+    int c=Size;
+    for(int i=0;i<Arr.size();i++)
+    {
+      if(!c)break;
+      Rec&it=Arr[i];
+      if(it.used)
+        Func(&it.data);
+    }
+  }
+};
 typedef double real;
 template<typename TYPE>inline TYPE Lerp(const TYPE&A,const TYPE&B,const real&v){return A+(B-A)*v;}
 template<class TYPE>inline TYPE Clamp(const TYPE&v,const TYPE&a,const TYPE&b){return max(a,min(v, b));}
