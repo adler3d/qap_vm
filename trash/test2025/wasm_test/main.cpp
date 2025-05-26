@@ -1524,7 +1524,7 @@ struct QapFont
   {
     QapColor*pix=new QapColor[TexSize*TexSize];
     this->Size=TexSize;
-    emscripten_run_script("g_font=initFont("+to_string(fontSize)+",'"+fontFamily+"',"+to_string(texSize)+");");
+    emscripten_run_script("g_font=initFont("+to_string(Size)+",'"+Name+"',"+to_string(texSize)+");");
     EM_ASM({
       initFont_v2(g_font,$0);
     },int(pix));
@@ -1625,7 +1625,8 @@ int qap_main(int nope) {
   vector<int> V={10,20,30};
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
-  auto*pTexMem=CreateFontMem(14,"Arial",512);
+  QapFont NF;
+  auto*pTexMem=NF.CreateFontMem(14,"Arial",512);
   NormFont=GenTextureMipMap(pTexMem,16);
   srand(time(NULL));
   {
