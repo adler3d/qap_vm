@@ -46,7 +46,8 @@ static string join(const vector<string>&arr,const string&glue)
   for(int i=0;i<arr.size();i++){if(i)out+=glue;out+=arr[i];}
   return out;
 }
-struct TSys{int UPS=128;int SW=1920;int SH=1024;}; TSys Sys;
+struct TSys{int UPS=128;struct TSM{int W=1920,H=1024;};TSM SM;bool UPS_enabled=true;void ResetClock(){}}; TSys Sys;
+static const int Sys_UPD=64;
 inline string IToS(const int&val){return to_string(val);}
 inline string FToS(const double&val){return to_string(val);}
 inline string FToS(const float&val){return to_string(val);}
@@ -2094,6 +2095,7 @@ public:
   bool News=false;
   TKeyState Down;
   TKeyState Changed;
+  vec2d MousePos;
 public:
   void KeyUpdate(int Key,bool Value)
   {
