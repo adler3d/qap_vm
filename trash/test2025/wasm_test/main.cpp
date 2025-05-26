@@ -1272,14 +1272,14 @@ public:
   int DIPs;
   int Verts;
   int Tris;
-  //QapDX::BlendType BlendMode;
-  //QapDX::AlphaMode AlphaMode;
+  //BlendType BlendMode;
+  //AlphaMode AlphaMode;
   bool Batching;
   bool Textured;
   b2Transform xf,txf;
   //static const DWORD FVF=D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1;
 public:
-  QapDev():color(0xFFFFFFFF),VB(NULL),IB(NULL),VBA(NULL),IBA(NULL),VPos(0),IPos(0),MaxVPos(0),MaxIPos(0),Batching(false)/*,BlendMode(QapDX::BT_SUB),AlphaMode(QapDX::AM_NONE)*/{}
+  QapDev():color(0xFFFFFFFF),VB(NULL),IB(NULL),VBA(NULL),IBA(NULL),VPos(0),IPos(0),MaxVPos(0),MaxIPos(0),Batching(false)/*,BlendMode(BT_SUB),AlphaMode(AM_NONE)*/{}
   ~QapDev(){Free();}
 public:
   void ReInit(){Init(MaxVPos,MaxIPos);}
@@ -1296,7 +1296,7 @@ public:
     txf.set_ident();
   }
   void Free(){
-    VB={};IB={};VPos=0;IPos=0;Batching=false;//BlendMode=QapDX::BT_SUB;AlphaMode=QapDX::AM_NONE;
+    VB={};IB={};VPos=0;IPos=0;Batching=false;//BlendMode=BT_SUB;AlphaMode=AM_NONE;
   };
 public:
   void BeginBatch()
@@ -1363,7 +1363,7 @@ public:
   void NextFrame(){DIPs=0;Verts=0;Tris=0;/*SetBlendMode(BlendMode);SetAlphaMode(AlphaMode);*/}
 public:
   void HackMode(bool Textured){this->Textured=Textured;}
-  //virtual void BindTex(int Stage,QapDX::QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
+  //virtual void BindTex(int Stage,QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
   void BindTex(int Stage,QapTex*Tex){bindTex(/**this,*/Tex->Tex);txf.set_ident();}
 public:
   inline Ver&AddVertexRaw(){return VBA[VPos++];}
@@ -1389,10 +1389,10 @@ public:
   inline b2Transform GetTextureTransform(){return txf;}
   inline real GetZoom(){return vec2d(xf.r.col1).Mag();}
 public:
-  //QapDX::BlendType GetBlendMode(){return BlendMode;}
-  //QapDX::AlphaMode GetAlphaMode(){return AlphaMode;}
-  //void SetBlendMode(QapDX::BlendType Mode){QapDX::Blend(BlendMode=Mode);}
-  //void SetAlphaMode(QapDX::AlphaMode Mode){QapDX::Alpha(AlphaMode=Mode);}
+  //BlendType GetBlendMode(){return BlendMode;}
+  //AlphaMode GetAlphaMode(){return AlphaMode;}
+  //void SetBlendMode(BlendType Mode){Blend(BlendMode=Mode);}
+  //void SetAlphaMode(AlphaMode Mode){Alpha(AlphaMode=Mode);}
 public:
   inline int AddVertex(float x,float y,const QapColor&c,float u,float v)
   {
@@ -1892,8 +1892,8 @@ public:
     LV.push_back(TextLine(x,y,text));x+=GetQ3TextLength(*NormFont,text);
   }
   void EndScope(){
-    //RD->SetBlendMode(QapDX::BT_SUB);
-    //RD->SetAlphaMode(QapDX::AM_NONE);
+    //RD->SetBlendMode(BT_SUB);
+    //RD->SetAlphaMode(AM_NONE);
     {
       RD->BindTex(0,BlurFont->Tex);
       RD->SetColor(0xff000000);
@@ -1908,7 +1908,7 @@ public:
       for(int i=0;i<LV.size();i++)LV[i].DrawSys(RD,NormFont,0.0);
       RD->EndBatch();
     }
-    //RD->SetAlphaMode(QapDX::AM_NONE);
+    //RD->SetAlphaMode(AM_NONE);
   }
 };
 struct t_rec{
@@ -2842,7 +2842,7 @@ public:
     delete this;
   }
   void AddText(real&y,TextRender*TE,const string&s,const real dy=32){
-    real x=QapDX::GetQ3TextLength(*TE->NormFont,s);
+    real x=GetQ3TextLength(*TE->NormFont,s);
     TE->LV.push_back(TextRender::TextLine(-x*0.5,y+TE->NormFont->H[0]*0.5,s));y-=dy;
   };
   void Render(QapDev*RD,TextRender*TE)
@@ -2931,18 +2931,17 @@ public:
 public:
   QapAtlas Atlas;
   QapDev RD;
-  QapDX::QapFont NormFont;
-  QapDX::QapFont BlurFont;
-  QapDX::QapTex*th_rt_tex;
-  QapDX::QapTex*th_rt_tex_full;
+  QapFont NormFont;
+  QapFont BlurFont;
+  QapTex*th_rt_tex;
+  QapTex*th_rt_tex_full;
 public:
   TGame(){DoReset();}
 public:
-  typedef QapDX::QapTexMem QapTexMem;
   QapTexMem*AddBorder(QapTexMem*pMem,int dHS=8,const QapColor&Color=0xffffffff)
   {
     int dS=dHS*2;
-    QapDX::QapTexMem*sm=new QapDX::QapTexMem("ShadowBot",pMem->W+dS,pMem->H+dS,NULL);
+    QapTexMem*sm=new QapTexMem("ShadowBot",pMem->W+dS,pMem->H+dS,NULL);
     sm->pBits=new QapColor[sm->W*sm->H];
     sm->Clear(Color);
     sm->FillMem(dHS,dHS,pMem);
@@ -2959,10 +2958,10 @@ public:
     auto*sm=AddBorder(pMem,dHS,c);
     sm->CalcAlpha(0xffffffff);
     sm->FillChannel(0x00ffffff,0x00ffffff);
-    QapDX::BlurTexture(sm,dHS);
+    BlurTexture(sm,dHS);
     return sm;
   }
-  TFrame*GenShadowFrame(QapDX::QapTexMem*pMem,int dHS=8)
+  TFrame*GenShadowFrame(QapTexMem*pMem,int dHS=8)
   {
     QapTexMem*sm=GenShadow(pMem,dHS);
     TFrame*FrameX=Atlas.AddFrame(sm);
@@ -2971,9 +2970,9 @@ public:
   }
   void LoadFrames(bool need_save_atlas=0,bool need_rewrite_tex=0)
   {
-    //auto*ball=QapDX::LoadTexture("GFX\\Ball.png");
-    //#define F(NAME)QapDX::LoadTexture("GFX\\"#NAME".png")->CopyAlpha(ball)->SaveToFile("GFX\\"#NAME".png");
-    auto LT=QapDX::LoadTexture;
+    //auto*ball=LoadTexture("GFX\\Ball.png");
+    //#define F(NAME)LoadTexture("GFX\\"#NAME".png")->CopyAlpha(ball)->SaveToFile("GFX\\"#NAME".png");
+    auto LT=LoadTexture;
     auto m2=[&](QapTexMem*p){return p->CalcAlpha()->FillChannel(0xffffffff,0x00ffffff);};
     if(bool hack=false)
     {
@@ -2985,14 +2984,14 @@ public:
       };
       #define F(NAME,FILE,MODE)f(Frame##NAME,FILE,MODE);
         FRAMESCOPE(F);
-        //QapDX::LoadTexture("GFX\\You.png")->CopyAlpha(QapDX::GenBall(32))->SaveToFile("GFX\\You.png");
+        //LoadTexture("GFX\\You.png")->CopyAlpha(GenBall(32))->SaveToFile("GFX\\You.png");
       #undef F
     }
 
     {
       #define F(NAME,FILE,MODE){\
         t_frame&f=frame_##NAME;f.fn="GFX\\"FILE".png";\
-        QapDX::QapTexMem*tmp=LT(f.fn);\
+        QapTexMem*tmp=LT(f.fn);\
         if(!tmp)QapDebugMsg("texture file not found - "+f.fn);\
         if(MODE==2)tmp=m2(tmp);\
         Frame##NAME=Atlas.AddFrame(tmp);\
@@ -3012,26 +3011,26 @@ public:
     DoReset();
     srand(time(NULL));
     {
-      QapDX::QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
-      QapDX::QapTexMem*pBlurMem=pNormMem->Clone();
+      QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
+      QapTexMem*pBlurMem=pNormMem->Clone();
       //pBlurMem->Blur(10);
       //pBlurMem->Blur(4);
-      QapDX::BlurTexture(pBlurMem,4);
+      BlurTexture(pBlurMem,4);
       BlurFont=NormFont;
-      BlurFont.Tex=QapDX::GenTextureMipMap(pBlurMem);
-      NormFont.Tex=QapDX::GenTextureMipMap(pNormMem);
-      //SysFont=QapDX::FontCreate("Arial",16,false,512);
+      BlurFont.Tex=GenTextureMipMap(pBlurMem);
+      NormFont.Tex=GenTextureMipMap(pNormMem);
+      //SysFont=FontCreate("Arial",16,false,512);
     }
     LoadFrames();
     /*
     {
-      auto*ptm=QapDX::LoadTexture("GFX\\tank_hodun_rt.png");
+      auto*ptm=LoadTexture("GFX\\tank_hodun_rt.png");
       ptm->GenEdge
-      th_rt_tex_v2=QapDX::GenTextureMipMap(ptm);
+      th_rt_tex_v2=GenTextureMipMap(ptm);
     }*/
     if(0)
     {
-      auto*ptm=QapDX::LoadTexture("GFX\\tank_hodun_rt.png");
+      auto*ptm=LoadTexture("GFX\\tank_hodun_rt.png");
       if(bool red_is_transparent=true){
         auto*p=ptm->pBits;
         int n=ptm->W*ptm->H;
@@ -3039,15 +3038,15 @@ public:
         auto c=QapColor(0,v,v,v);
         for(int i=0;i<n;i++){auto&v=p[i];if(v==0xffff0000)v=c;}
       }
-      th_rt_tex=QapDX::GenTextureMipMap(ptm);
+      th_rt_tex=GenTextureMipMap(ptm);
     }
     if(1)
     {
-      //auto*ptm=QapDX::LoadTexture("GFX\\tank512.png");
-      auto*ptm=QapDX::LoadTexture("GFX\\market_car_v2.png");
-      th_rt_tex=QapDX::GenTextureMipMap(ptm);
-      ptm=QapDX::LoadTexture("GFX\\market_car_v2_full.png");
-      th_rt_tex_full=QapDX::GenTextureMipMap(ptm);
+      //auto*ptm=LoadTexture("GFX\\tank512.png");
+      auto*ptm=LoadTexture("GFX\\market_car_v2.png");
+      th_rt_tex=GenTextureMipMap(ptm);
+      ptm=LoadTexture("GFX\\market_car_v2_full.png");
+      th_rt_tex_full=GenTextureMipMap(ptm);
     }
     RD.Init(1024*32,1024*32*2);
     InitLevelsInfo();
@@ -3246,8 +3245,8 @@ public:
     RD.BindTex(0,0);
     RD.SetColor(0xff000000);
     RD.DrawQuad(0,0,512,512);
-    if(!QapDX::EndScene())return;
-    QapDX::Present();
+    if(!EndScene())return;
+    Present();
     return;*/
     if(user_name_scene)return InputUserNameRender();
     if(bool need_draw_tank_hodun_rt=true)if(th_rt_tex)if(!Menu->InGame()){
@@ -3259,13 +3258,13 @@ public:
     if(kb.Down['A']&&!Menu->InGame()){
       if(1){
         RD.BindTex(0,0);
-        QapDX::SetColor(0xffffffff);
-        QapDX::DrawQuad(kb.MousePos.x,kb.MousePos.y,96,96,0);
-        QapDX::SetColor(0xffff0000);
-        QapDX::DrawQuad(kb.MousePos.x,kb.MousePos.y,64,64,0);
+        RD.SetColor(0xffffffff);
+        RD.DrawQuad(kb.MousePos.x,kb.MousePos.y,96,96,0);
+        RD.SetColor(0xffff0000);
+        RD.DrawQuad(kb.MousePos.x,kb.MousePos.y,64,64,0);
       }
       RD.BindTex(0,Atlas.pTex);
-      RD.SetBlendMode(QapDX::BT_SUB);
+      //RD.SetBlendMode(BT_SUB);
       RD.SetColor(0xffffffff);
       RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
@@ -3286,6 +3285,7 @@ public:
       RenderText(RD);
     }
   }
+/*
   void Render()
   {
     if(!QapDX::BeginScene())return;
@@ -3296,7 +3296,7 @@ public:
     RenderScene();
     if(!QapDX::EndScene())return;
     QapDX::Present();
-  }
+  }*/
   void RenderText(QapDev&RD)
   {
     TextRender TE(&RD);
