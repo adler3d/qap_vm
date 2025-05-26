@@ -1599,7 +1599,7 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
   BlurLog("Blur \""+Tex->Name+"\" x"+IToS(PassCount),lml_HINT);
   struct QapARGB{uchar B,G,R,A;};
   static QapARGB VoidMem[2048*2048*4];
-  memcpy_s(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));//copy image
+  memcpy(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
   static int BBM[9]={
     1,2,1, 
     2,4,2, 
@@ -1611,6 +1611,7 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
     -W-1,-W,-W+1,
     -1,0,+1,
     +W-1,+W,+W+1};
+  float inv_255=1.0/255;
   for(int PassId=0;PassId<PassCount;PassId++)
   {
     QapARGB *PC=0;
@@ -1629,11 +1630,13 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
           AF[3]+=T.A*BBM[t];
         };    
         for(int i=0;i<4;i++)AF[i]/=MartixSum*255.0;
-        QapColor PCC=D3DCOLOR_COLORVALUE(AF[0],AF[1],AF[2],AF[3]);
+        #define F(r,g,b,a)QapColor((DWORD)((r)*255.f),(DWORD)((g)*255.f),(DWORD)((b)*255.f),(DWORD)((a)*255.f))
+        QapColor PCC=F(AF[0],AF[1],AF[2],AF[3]);
+        #undef F
         *PC=*((QapARGB*)&PCC);
       }
     //PassId++;
-    memcpy_s(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
+    memcpy(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
   }
   BlurLog("Blur \""+Tex->Name+"\" x"+IToS(PassCount),lml_HINT);
   #undef BlurLog
@@ -1678,10 +1681,10 @@ extern "C" {
 void init(){
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
-  auto*pTexMem=NF.CreateFontMem("Arial",14,false,512);
-  QapTexMem*pBlurMem=pNormMem->Clone();
+  auto*pNormMem=NF.CreateFontMem("Arial",14,false,512);
+  auto*pBlurMem=pNormMem->Clone();
   BlurTexture(pBlurMem,4);
-  NormFont=GenTextureMipMap(pTexMem,16);
+  NormFont=GenTextureMipMap(pNormMem,16);
   BlurFont=GenTextureMipMap(pBlurMem,16);
   
   for(int i=0;i<5000;i++){
