@@ -1730,7 +1730,7 @@ QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount=16)//only D3DFMT_A8R8G8
   return pTex;
 }
 #else
-QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount){
+QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount=16){
   int&W=Tex->W;int&H=Tex->H;QapColor*&pBits=Tex->pBits;
   auto tex=EM_ASM_INT({
     return makeTexture(qDev,$0,$1,$2);
@@ -2048,7 +2048,7 @@ public:
   int LastKey=0;
   char LastChar=0;
   bool News=false;
-  TKeyStat Down;
+  TKeyState Down;
   TKeyState Changed;
 public:
   void KeyUpdate(int Key,bool Value)
@@ -2075,25 +2075,6 @@ public:
   {
     return Changed[index]&&!Down[index];
   }
-  vec2d get_dir_from_wasd_and_arrows()const
-  {
-    vec2d dp=vec2d_zero;
-    auto dir_x=vec2d(1,0);
-    auto dir_y=vec2d(0,1);
-    #define F(dir,key_a,key_b)if(Down[key_a]||Down[key_b]){dp+=dir;}
-    F(-dir_x,VK_LEFT,'A');
-    F(+dir_x,VK_RIGHT,'D');
-    F(+dir_y,VK_UP,'W');
-    F(-dir_y,VK_DOWN,'S');
-    #undef F
-    return dp;
-  }
-};
-enum TMouseButton
-{
-  mbLeft=257,
-  mbRight=258,
-  mbMiddle=259,
 };
 QapKeyboard kb;
 class TGame{
@@ -2151,7 +2132,6 @@ public:
     operator string(){return IToS(Value)+"/"+IToS(DipSize());}
   };  
   class TCounterIncEx{
-  #define PRO_VARIABLE()\
   int Value=0;
   int Minimum=0;
   int Maximum=32;
@@ -2241,11 +2221,7 @@ public:
 public:
   t_world w;
 public:
-#define PRO_VARIABLE()\
-ADDVAR(TGame*,Game,NULL)\
-//=====+>>>>>Level_MarketGame
-#include "GenVar.inl"
-//<<<<<+=====Level_MarketGame
+  TGame*Game=nullptr;
 public:
   bool init_city(){
     vector<int> base_price;
