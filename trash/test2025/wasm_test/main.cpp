@@ -3021,7 +3021,7 @@ public:
 
     {
       #define F(NAME,FILE,MODE){\
-        t_frame&f=frame_##NAME;f.fn="GFX\\"FILE".png";\
+        t_frame&f=frame_##NAME;f.fn="GFX\\" FILE ".png";\
         QapTexMem*tmp=LT(f.fn);\
         if(!tmp)QapDebugMsg("texture file not found - "+f.fn);\
         if(MODE==2)tmp=m2(tmp);\
