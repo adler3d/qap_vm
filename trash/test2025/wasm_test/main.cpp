@@ -55,11 +55,11 @@ inline vec2d Vec2dEx(const real&ang,const real&mag){return vec2d(cos(ang)*mag,si
 inline int round(const real&val){return int(val>=0?val+0.5:val-0.5);}//{return int(val);}
 inline static real dot(const vec2d&a,const vec2d&b){return a.x*b.x+a.y*b.y;}
 inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
+typedef unsigned char uchar;
 class QapColor
 {
 public:
   typedef unsigned char byte;
-  typedef unsigned char uchar;
 public:
 public:
   typedef QapColor SelfClass;
@@ -1043,6 +1043,7 @@ public:
 #else
 void RegTexMem(...){}
 void UnRegTexMem(...){}
+typedef unsigned int DWORD;
 #endif
 class QapTexMem
 {
@@ -1085,7 +1086,7 @@ public:
   QapTexMem*GenEdge(const vec2i&p,const QapColor&color=0xFF000000)
   {
     //15:27 06.07.2011
-    QapDX::QapTexMem*pDest=Clone()->Clear(0xffffffff);
+    QapTexMem*pDest=Clone()->Clear(0xffffffff);
     class TraceVisitor:public ITraceVisitor{
     public:
       QapTexMem*pSrc;
@@ -1262,7 +1263,7 @@ public:
     for(int i=0;i<H;i++)pBits[W*i+Colomn]=Color;
     return this;
   }
-  QapTexMem*CalcAlphaToRGB_and_set_new_alpha(byte new_alpha=0xff){
+  QapTexMem*CalcAlphaToRGB_and_set_new_alpha(byte new_alpha=byte(0xff)){
     for(int i=0;i<W*H;i++){auto a=pBits[i].a;pBits[i]=QapColor(new_alpha,a,a,a);}
     return this;
   }
@@ -1318,9 +1319,9 @@ public:
     D2iXF arr[4]={D2iXF(Cur[0],norm),D2iXF(Cur[1],norm),D2iXF(Cur[2],norm),D2iXF(Cur[3],norm)};
     for(int i=0;i<W*H;i++){
       QapColor&C=pBits[i];
-      C.r=byte(xf*C.r);
-      C.g=byte(xf*C.g);
-      C.b=byte(xf*C.b);
+      C.r=uchar(xf*C.r);
+      C.g=uchar(xf*C.g);
+      C.b=uchar(xf*C.b);
     }
     return this;
   }
@@ -1331,7 +1332,7 @@ public:
     for(int i=0;i<W*H;i++)
     {
       QapColor&C=pBits[i];
-      C.a=byte(xf*C.a);
+      C.a=uchar(xf*C.a);
     }
     return this;
   }
