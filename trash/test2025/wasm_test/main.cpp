@@ -1599,7 +1599,8 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
   BlurLog("Blur \""+Tex->Name+"\" x"+IToS(PassCount),lml_HINT);
   struct QapARGB{uchar B,G,R,A;};
   static QapARGB VoidMem[2048*2048*4];
-  memcpy(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
+  #define qap_memcpy_s(DEST,DSIZE,SRC,SIZE)memcpy(DEST,SRC,SIZE)
+  qap_memcpy_s(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
   static int BBM[9]={
     1,2,1, 
     2,4,2, 
@@ -1636,7 +1637,8 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
         *PC=*((QapARGB*)&PCC);
       }
     //PassId++;
-    memcpy(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
+    qap_memcpy_s(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
+    #undef qap_memcpy_s
   }
   BlurLog("Blur \""+Tex->Name+"\" x"+IToS(PassCount),lml_HINT);
   #undef BlurLog
