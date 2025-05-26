@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
+struct TSys{int UPS=128;}; TSys Sys;
 inline string IToS(const int&val){return to_string(val);}
 inline string FToS(const double&val){return to_string(val);}
 inline string FToS(const float&val){return to_string(val);}
@@ -1998,7 +1999,7 @@ public:
     }
     void SetToDef()
     {
-      for (int i=0;i<MAX_KEY;i++)data[i]=false;
+      for(int i=0;i<MAX_KEY;i++)data[i]=false;
     }
     bool&operator[](int index)
     {
@@ -2104,7 +2105,7 @@ public:
   public:
     virtual ILevel*Build(TGame*Game){
       auto*Result=new TYPE();
-      Result->DoReset();
+      *Result={};
       Result->Init(Game);
       return Result;
     }
@@ -2424,19 +2425,6 @@ public:
     return edges;
   }
 public:
-  vec2d get_dir_from_keyboard_wasd_and_arrows()
-  {
-    vec2d dp=vec2d_zero;
-    auto dir_x=vec2d(1,0);
-    auto dir_y=vec2d(0,1);
-    #define F(dir,key_a,key_b)if(kb.Down[key_a]||kb.Down[key_b]){dp+=dir;}
-    F(-dir_x,VK_LEFT,'A');
-    F(+dir_x,VK_RIGHT,'D');
-    F(+dir_y,VK_UP,'W');
-    F(-dir_y,VK_DOWN,'S');
-    #undef F
-    return dp;
-  }
   string id2str(int id){
     static vector<string> arr={"wood","coal","gas","stell","copper"};
     return arr[id];
@@ -2760,7 +2748,7 @@ public:
     if(kb.Down[VK_RIGHT]||kb.Down['D']){dk=-1;}
     if(w.car.deaded)dk=0;
     w.car.v=Vec2dEx(w.car.v.GetAng()+Clamp(dk,-5.0,+5.0)*dAng,1);
-    auto v2=vec2d_zero;
+    auto v2=vec2d();
     if(kb.Down[VK_UP]||kb.Down['W'])v2=+w.car.v;
     if(kb.Down[VK_DOWN]||kb.Down['S'])v2=-w.car.v;
     auto new_pos=w.car.pos+v2;
