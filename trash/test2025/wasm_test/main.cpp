@@ -643,6 +643,35 @@ public:
     }
   };
 };
+struct vec4f{
+public:
+  float b,g,r,a;
+  //struct{float x,y,z,w;};
+  vec4f(){}
+  vec4f(float b,float g,float r,float a):b(b),g(g),r(r),a(a){}
+  vec4f(const QapColor&ref):b(ref.b/255.f),g(ref.g/255.f),r(ref.r/255.f),a(ref.a/255.f){}
+  vec4f&operator+=(const vec4f&v){b+=v.b;g+=v.g;r+=v.r;a+=v.a;return *this;}
+  vec4f&operator*=(const float&k){b*=k;g*=k;r*=k;a*=k;return *this;}
+  friend vec4f operator*(const float&u,const vec4f&v){return vec4f(u*v.b,u*v.g,u*v.r,u*v.a);}
+  friend vec4f operator+(const vec4f&u,const vec4f&v){return vec4f(u.b+v.b,u.g+v.g,u.r+v.r,u.a+v.a);}
+  #define F(r)Clamp(int(r*255),int(0),int(255))
+  QapColor GetColor(){return QapColor(F(a),F(r),F(g),F(b));}
+  #undef F
+};
+union vec4i{
+public:
+  struct{int x,y,z,w;};
+  struct{int b,g,r,a;};
+  vec4i(int b,int g,int r,int a):b(b),g(g),r(r),a(a){}
+  vec4i(const QapColor&ref):b(ref.b),g(ref.g),r(ref.r),a(ref.a){}
+  vec4i&operator+=(const vec4i&v){b+=v.b;g+=v.g;r+=v.r;a+=v.a;return *this;}
+  vec4i operator*(const int&v){return vec4i(x*v,y*v,z*v,w*v);}
+  vec4i operator/(const int&v){return vec4i(x/v,y/v,z/v,w/v);}
+  vec4i operator+(const vec4i&v){return vec4i(x+v.x,y+v.y,z+v.z,w+v.w);}
+  #define F(r)Clamp(int(r),int(0),int(255))
+  QapColor GetColor(){return QapColor(F(a),F(r),F(g),F(b));}
+  #undef F
+};
 class QapDev{
 public:
   QapColor color=0;
@@ -1338,7 +1367,7 @@ public:
     float sqrt_value=1.0/sqrt(2.0*M_PI*sigma_sqr);
     float exp_value=exp(-x_sqr/(2.0*sigma_sqr));
     return sqrt_value*exp_value;
-  }
+  }/*
   static void PascalRow(IntArray&arr,int n)
   {
     arr.resize(n+1);
@@ -1346,7 +1375,7 @@ public:
     int*c=&arr[0];
     c[0]=1;
     for(int j=1;j<n;j++)for(int i=j;i>=1;i--)c[i]=c[i-1]+c[i];
-  }
+  }*/
   private:
     inline vec4f tex2Df(vec4f*C,const vec2i&uv){return C[Clamp(uv.x,int(0),int(W-1))+W*Clamp(uv.y,int(0),int(H-1))];}
     inline vec4f tex2D(QapColor*C,const vec2i&uv){return vec4f(C[Clamp(uv.x,int(0),int(W-1))+W*Clamp(uv.y,int(0),int(H-1))]);}
