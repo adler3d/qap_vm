@@ -1782,6 +1782,7 @@ QapFont NormFont,BlurFont;
 //QapTex*BlurFontTex=nullptr;
 extern "C" {
   int update(int nope){
+    /*
     {
       QapDev::BatchScope Scope(qDev);
       for(auto&ex:rarr){
@@ -1792,7 +1793,6 @@ extern "C" {
     }
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
-    /*
     qDev.color=0xFFffFFff;
     qDev.BindTex(0,BlurFont.Tex);
     qDev.DrawQuad(-500+1.5,-1.5,512,512,0);
