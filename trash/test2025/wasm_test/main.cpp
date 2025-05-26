@@ -3,7 +3,50 @@
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
-struct TSys{int UPS=128;}; TSys Sys;
+#include "thirdparty/sweepline/sweepline.hpp"
+static bool file_put_contents(const string&FN,const string&mem){return true;}
+static string file_get_contents(const string&fn){return {};}
+template<class TYPE>
+void QapPopFront(vector<TYPE>&arr)
+{
+  int last=0;
+  for(int i=1;i<arr.size();i++)
+  {
+    auto&ex=arr[i];
+    if(last!=i)
+    {
+      auto&ax=arr[last];
+      ax=std::move(ex);
+    }
+    last++;
+  }
+  if(last==arr.size())return;
+  arr.resize(last);
+}
+static vector<string> split(const string&s,const string&needle)
+{
+  vector<string> arr;
+  if(s.empty())return arr;
+  size_t p=0;
+  for(;;){
+    auto pos=s.find(needle,p);
+    if(pos==std::string::npos){arr.push_back(s.substr(p));return arr;}
+    arr.push_back(s.substr(p,pos-p));
+    p=pos+needle.size();
+  }
+  return arr;
+}
+static string join(const vector<string>&arr,const string&glue)
+{
+  string out;
+  size_t c=0;
+  size_t dc=glue.size();
+  for(int i=0;i<arr.size();i++){if(i)c+=dc;c+=arr[i].size();}
+  out.reserve(c);
+  for(int i=0;i<arr.size();i++){if(i)out+=glue;out+=arr[i];}
+  return out;
+}
+struct TSys{int UPS=128;int SW=1920;int SH=1024;}; TSys Sys;
 inline string IToS(const int&val){return to_string(val);}
 inline string FToS(const double&val){return to_string(val);}
 inline string FToS(const float&val){return to_string(val);}
@@ -2122,7 +2165,7 @@ public:
   int Minimum=0;
   int Maximum=32;
   public:
-    TCounterInc(){DoReset();}
+    TCounterInc(){;}
     TCounterInc(int Value,int Minimum,int Maximum){this->Value=Value;this->Minimum=Minimum;this->Maximum=Maximum;}
     void Start(){Value=Minimum;}
     void Stop(){Value=Maximum;}
@@ -2138,8 +2181,8 @@ public:
   int Maximum=32;
   bool Runned=false;
   public:
-    TCounterIncEx(){DoReset();}
-    TCounterIncEx(int Value,int Minimum,int Maximum){DoReset();this->Value=Value;this->Minimum=Minimum;this->Maximum=Maximum;}
+    TCounterIncEx(){;}
+    TCounterIncEx(int Value,int Minimum,int Maximum){;this->Value=Value;this->Minimum=Minimum;this->Maximum=Maximum;}
     void Start(){Value=Minimum;Runned=true;}
     void Stop(){Value=Minimum;Runned=false;}
     operator bool(){return Value<Maximum;}
@@ -2924,7 +2967,7 @@ public:
   QapTex*th_rt_tex;
   QapTex*th_rt_tex_full;
 public:
-  TGame(){DoReset();}
+  TGame(){;}
 public:
   QapTexMem*AddBorder(QapTexMem*pMem,int dHS=8,const QapColor&Color=0xffffffff)
   {
@@ -2996,7 +3039,7 @@ public:
   }
   void Init()
   {
-    DoReset();
+    *this={};
     srand(time(NULL));
     {
       QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
