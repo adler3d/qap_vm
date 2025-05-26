@@ -1524,7 +1524,7 @@ struct QapFont
   {
     QapColor*pix=new QapColor[TexSize*TexSize];
     this->Size=TexSize;
-    emscripten_run_script("g_font=initFont("+to_string(Size)+",'"+Name+"',"+to_string(TexSize)+");");
+    emscripten_run_script(string("g_font=initFont("+to_string(Size)+",'"+Name+"',"+to_string(TexSize)+");").c_str());
     EM_ASM({
       initFont_v2(g_font,$0);
     },int(pix));
@@ -1601,6 +1601,9 @@ struct t_rec{
 vector<t_rec> rarr;
 QapDev qDev;
 QapTex*NormFont=nullptr;
+void bindTex(QapDev&qDev,int Tex){
+  EM_ASM({bindTex(qDev,$0);},Tex);
+}
 extern "C" {
   int update(int nope){
     {
