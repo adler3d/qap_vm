@@ -2921,13 +2921,9 @@ public:
   FRAMESCOPE(ADDFRAME)
 #undef ADDFRAME
 public:
-#define PRO_VARIABLE()\
-ADDVAR(TCounterIncEx,WaitWin,TCounterIncEx(0,0,Sys.UPS*2))\
-ADDVAR(TCounterIncEx,WaitFail,TCounterIncEx(0,0,Sys.UPS*2))\
-ADDVAR(TCounterInc,LevelCounter,TCounterInc(0,0,0))
-//=====+>>>>>TGame
-#include "GenVar.inl"
-//<<<<<+=====TGame
+  TCounterIncEx WaitWin=TCounterIncEx(0,0,Sys.UPS*2);
+  TCounterIncEx WaitFail=TCounterIncEx(0,0,Sys.UPS*2);
+  TCounterInc LevelCounter=TCounterInc(0,0,0);
 public:
   vector<TLevelInfo>LevelsInfo;
   std::unique_ptr<ILevel>Level;
