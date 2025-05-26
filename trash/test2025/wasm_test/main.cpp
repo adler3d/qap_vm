@@ -56,11 +56,7 @@ inline int round(const real&val){return int(val>=0?val+0.5:val-0.5);}//{return i
 inline static real dot(const vec2d&a,const vec2d&b){return a.x*b.x+a.y*b.y;}
 inline static real cross(const vec2d&a,const vec2d&b){return a.x*b.y-a.y*b.x;}
 typedef unsigned char uchar;
-class QapColor
-{
-public:
-  typedef unsigned char byte;
-public:
+class QapColor{
 public:
   typedef QapColor SelfClass;
 public:
@@ -71,8 +67,8 @@ public:
 public:
 public:
   QapColor():b(255),g(255),r(255),a(255) {}
-  QapColor(byte A,byte R,byte G,byte B):a(A),r(R),g(G),b(B) {}
-  QapColor(byte R,byte G,byte B):a(255),r(R),g(G),b(B) {}
+  QapColor(uchar A,uchar R,uchar G,uchar B):a(A),r(R),g(G),b(B) {}
+  QapColor(uchar R,uchar G,uchar B):a(255),r(R),g(G),b(B) {}
   QapColor(const QapColor& v):a(v.a),r(v.r),g(v.g),b(v.b) {}
   QapColor(const unsigned int&v){*this=(QapColor&)v;}
 public:
@@ -157,15 +153,15 @@ public:
   QapColor&operator*=(real f)
   {
     {
-      b=byte(Clamp(real(b)*f,0.0,255.0));
+      b=uchar(Clamp(real(b)*f,0.0,255.0));
     }
     ;
     {
-      g=byte(Clamp(real(g)*f,0.0,255.0));
+      g=uchar(Clamp(real(g)*f,0.0,255.0));
     }
     ;
     {
-      r=byte(Clamp(real(r)*f,0.0,255.0));
+      r=uchar(Clamp(real(r)*f,0.0,255.0));
     }
     ;
     return *this;
@@ -174,15 +170,15 @@ public:
   {
     real f=1.0/r;
     {
-      b=byte(Clamp(real(b)*f,0.0,255.0));
+      b=uchar(Clamp(real(b)*f,0.0,255.0));
     }
     ;
     {
-      g=byte(Clamp(real(g)*f,0.0,255.0));
+      g=uchar(Clamp(real(g)*f,0.0,255.0));
     }
     ;
     {
-      r=byte(Clamp(real(r)*f,0.0,255.0));
+      r=uchar(Clamp(real(r)*f,0.0,255.0));
     }
     ;
     return *this;
@@ -202,7 +198,7 @@ public:
   }
 public:
 public:
-  byte GetLuminance()const
+  uchar GetLuminance()const
   {
     return int(int(r)+int(g)+int(b))/int(3);
   }
@@ -218,16 +214,16 @@ public:
     real tB=ct;
     QapColor O;
     {
-      O.b=byte(Clamp(real(A.b)*tA+real(B.b)*tB,0.0,255.0));
+      O.b=uchar(Clamp(real(A.b)*tA+real(B.b)*tB,0.0,255.0));
     }
     {
-      O.g=byte(Clamp(real(A.g)*tA+real(B.g)*tB,0.0,255.0));
+      O.g=uchar(Clamp(real(A.g)*tA+real(B.g)*tB,0.0,255.0));
     }
     {
-      O.r=byte(Clamp(real(A.r)*tA+real(B.r)*tB,0.0,255.0));
+      O.r=uchar(Clamp(real(A.r)*tA+real(B.r)*tB,0.0,255.0));
     }
     {
-      O.a=byte(Clamp(real(A.a)*tA+real(B.a)*tB,0.0,255.0));
+      O.a=uchar(Clamp(real(A.a)*tA+real(B.a)*tB,0.0,255.0));
     }
     return O;
   }
@@ -1263,7 +1259,7 @@ public:
     for(int i=0;i<H;i++)pBits[W*i+Colomn]=Color;
     return this;
   }
-  QapTexMem*CalcAlphaToRGB_and_set_new_alpha(byte new_alpha=byte(0xff)){
+  QapTexMem*CalcAlphaToRGB_and_set_new_alpha(uchar new_alpha=uchar(0xff)){
     for(int i=0;i<W*H;i++){auto a=pBits[i].a;pBits[i]=QapColor(new_alpha,a,a,a);}
     return this;
   }
@@ -1548,7 +1544,7 @@ QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount)//only D3DFMT_A8R8G8B8
   int Levels=min(MaxLevelCount,min(SWC,SHC));
   IDirect3DTexture9 *tex;
   Sys.pDev->CreateTexture(SW,SH,Levels,0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&tex,NULL);
-  D3DLOCKED_RECT rect[16]; struct QapARGB{BYTE B,G,R,A;}; QapARGB* pBitsEx[16];
+  D3DLOCKED_RECT rect[16]; struct QapARGB{uchar B,G,R,A;}; QapARGB* pBitsEx[16];
   for(int i=0;i<Levels;i++){tex->LockRect(i,&rect[i],NULL,0);pBitsEx[i]=(QapARGB*)rect[i].pBits;};
   {
     QapColor* pDestBits=(QapColor*)rect[0].pBits;
