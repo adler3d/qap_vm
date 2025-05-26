@@ -1607,6 +1607,7 @@ void bindTex(QapDev&qDev,int Tex){
 }
 extern "C" {
   int update(int nope){
+    /*
     {
       QapDev::BatchScope Scope(qDev);
       for(auto&ex:rarr){
@@ -1617,6 +1618,7 @@ extern "C" {
     }
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
+    */
     bindTex(qDev,NormFont->Tex);
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(-500,0,512,512,0);
