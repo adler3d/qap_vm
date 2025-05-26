@@ -668,9 +668,33 @@ public:
   QapColor GetColor(){return QapColor(F(a),F(r),F(g),F(b));}
   #undef F
 };
-void bindTex(QapDev&qDev,int Tex){
+void bindTex(/*QapDev&qDev,*/int Tex){
   EM_ASM({bindTex(qDev,$0);},Tex);
 }
+class QapTex{
+public:
+  #ifdef _WIN32
+  IDirect3DTexture9*Tex;
+  #else
+  int Tex;
+  #endif
+  int W,H;
+  string Name;
+  int ID;
+public:
+  #ifdef _WIN32
+  QapTex(QapTexMem*TexMem,IDirect3DTexture9*Tex):Tex(Tex){W=TexMem->W;H=TexMem->H;Name=TexMem->Name;RegTex(this);};
+  ~QapTex(){
+    UnRegTex(this);
+    Tex->Release();
+    Tex=0;
+  };
+  #else
+  QapTex(QapTexMem*TexMem,int Tex):Tex(Tex){W=TexMem->W;H=TexMem->H;Name=TexMem->Name;/*RegTex(this);*/};
+  ~QapTex(){
+  };
+  #endif
+};
 class QapDev{
 public:
   QapColor color=0;
@@ -816,7 +840,7 @@ public:
 public:
   void HackMode(bool Textured){this->Textured=Textured;}
   //virtual void BindTex(int Stage,QapDX::QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
-  void BindTex(int Stage,QapTex*Tex){bindTex(*this,Tex->Tex);txf.set_ident();}
+  void BindTex(int Stage,QapTex*Tex){bindTex(/**this,*/Tex->Tex);txf.set_ident();}
 public:
   inline Ver&AddVertexRaw(){return VBA[VPos++];}
   inline int AddVertex(const Ver&Source)
@@ -1420,30 +1444,6 @@ public:
     return this;
   }
 };
-class QapTex{
-public:
-  #ifdef _WIN32
-  IDirect3DTexture9*Tex;
-  #else
-  int Tex;
-  #endif
-  int W,H;
-  string Name;
-  int ID;
-public:
-  #ifdef _WIN32
-  QapTex(QapTexMem*TexMem,IDirect3DTexture9*Tex):Tex(Tex){W=TexMem->W;H=TexMem->H;Name=TexMem->Name;RegTex(this);};
-  ~QapTex(){
-    UnRegTex(this);
-    Tex->Release();
-    Tex=0;
-  };
-  #else
-  QapTex(QapTexMem*TexMem,int Tex):Tex(Tex){W=TexMem->W;H=TexMem->H;Name=TexMem->Name;/*RegTex(this);*/};
-  ~QapTex(){
-  };
-  #endif
-};
 #ifdef _WIN32
 class IResource
 {
@@ -1666,7 +1666,7 @@ void DrawQapText(QapDev*RD,QapFont&Font,float X,float Y,const string&Text)
     {
       if(Text[i]!='^')
       {
-        int I=(byte)Text[i];
+        int I=(uchar)Text[i];
         float s=((float)(I%16))/16,t=((float)(I/16))/16;
         float cx=(float)Font.W[I],cy=(float)Font.H[I],ts=(float)Font.Size;
         #define F(var,x,y,z,color,u,v)int var=RD->AddVertex(QapDev::Ver(X+x,Y+y,color,u,v));
@@ -1686,6 +1686,18 @@ void DrawQapText(QapDev*RD,QapFont&Font,float X,float Y,const string&Text)
   };
   if(_4it)RD->EndBatch();
 }
+string Q3TextToNormal(const string&Text)
+{
+  string s; int i=0;
+  while(i<(int)Text.length())
+  {
+    if(Text[i]!='^'){s.push_back(Text[i++]);continue;}
+    i++;if(i>(int)Text.length())continue;
+    if((Text[i]>='0')&&(Text[i]<='9')){i++;continue;};
+    if((Text[i]>='A')&&(Text[i]<='F')){i++;continue;};
+  }
+  return s;
+}
 class TextRender{
 public:
   QapDev*RD;
@@ -1696,7 +1708,7 @@ public:
   public:
     TextLine(int x,int y,const string&text):x(x),y(y),text(text){}
   public:
-    void DrawRaw(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,QapDX::Q3TextToNormal(text));}
+    void DrawRaw(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,Q3TextToNormal(text));}
     void DrawSys(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,text);}
   };
   vector<TextLine> LV;
@@ -1706,7 +1718,7 @@ public:
   QapFont*NormFont;
   QapFont*BlurFont;
 public:
-  void BeginScope(int X,int Y,QapFont*NormFont,QapDX::QapFont*BlurFont){
+  void BeginScope(int X,int Y,QapFont*NormFont,QapFont*BlurFont){
     bx=X;x=X;y=Y;ident=24;this->NormFont=NormFont;this->BlurFont=BlurFont;
   }
   void BR(){y-=ident;x=bx;}
@@ -1748,7 +1760,7 @@ struct t_rec{
 };
 vector<t_rec> rarr;
 QapDev qDev;
-QapFont NormFont;
+QapFont NormFont,BlurFont;
 //QapTex*NormFontTex=nullptr;
 //QapTex*BlurFontTex=nullptr;
 extern "C" {
@@ -1806,7 +1818,7 @@ extern "C" {
 void init(){
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
-  auto*pNormMem=NF.CreateFontMem("Arial",14,false,512);
+  auto*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
   auto*pBlurMem=pNormMem->Clone();
   BlurTexture(pBlurMem,4);
   BlurFont=NormFont;
