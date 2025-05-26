@@ -1524,7 +1524,7 @@ struct QapFont
   {
     QapColor*pix=new QapColor[TexSize*TexSize];
     this->Size=TexSize;
-    emscripten_run_script("g_font=initFont("+to_string(Size)+",'"+Name+"',"+to_string(texSize)+");");
+    emscripten_run_script("g_font=initFont("+to_string(Size)+",'"+Name+"',"+to_string(TexSize)+");");
     EM_ASM({
       initFont_v2(g_font,$0);
     },int(pix));
