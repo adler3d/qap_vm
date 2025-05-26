@@ -1592,6 +1592,53 @@ QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount){
   return pTex;
 }
 #endif
+QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
+{
+  int &W=Tex->W;int &H=Tex->H;QapColor *&pBits=Tex->pBits;
+  #define BlurLog(X,Y)//MACRO_ADD_LOG(X,Y)
+  BlurLog("Blur \""+Tex->Name+"\" x"+IToS(PassCount),lml_HINT);
+  struct QapARGB{uchar B,G,R,A;};
+  static QapARGB VoidMem[2048*2048*4];
+  memcpy_s(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));//copy image
+  static int BBM[9]={
+    1,2,1, 
+    2,4,2, 
+    1,2,1};
+  #define INIT_STATIC_VAR(TYPE,VALUE,INIT_CODE)static TYPE VALUE;{static bool _STATIC_SYS_FLAG=true;if(_STATIC_SYS_FLAG){INIT_CODE;_STATIC_SYS_FLAG=false;};};
+    INIT_STATIC_VAR(int,MartixSum,for(int i=0;i<9;i++)MartixSum+=BBM[i];);
+  #undef INIT_STATIC_VAR
+  int PosRange[9]={
+    -W-1,-W,-W+1,
+    -1,0,+1,
+    +W-1,+W,+W+1};
+  for(int PassId=0;PassId<PassCount;PassId++)
+  {
+    QapARGB *PC=0;
+    QapARGB *VM=0;
+    for(int j=1;j<H-1;j++)
+      for(int i=1;i<W-1;i++)
+      {
+        PC=(QapARGB*)pBits+j*W+i; VM=(QapARGB*)VoidMem+j*W+i;
+        float AF[4]={0,0,0,0};
+        for(int t=0;t<9;t++)
+        {
+          QapARGB T=*(VM+PosRange[t]);
+          AF[0]+=T.R*BBM[t];
+          AF[1]+=T.G*BBM[t];
+          AF[2]+=T.B*BBM[t];
+          AF[3]+=T.A*BBM[t];
+        };    
+        for(int i=0;i<4;i++)AF[i]/=MartixSum*255.0;
+        QapColor PCC=D3DCOLOR_COLORVALUE(AF[0],AF[1],AF[2],AF[3]);
+        *PC=*((QapARGB*)&PCC);
+      }
+    //PassId++;
+    memcpy_s(VoidMem,sizeof(VoidMem),pBits,W*H*sizeof(QapARGB));
+  }
+  BlurLog("Blur \""+Tex->Name+"\" x"+IToS(PassCount),lml_HINT);
+  #undef BlurLog
+  return Tex;
+}
 struct t_rec{
   vec2d pos;
   double wh;
@@ -1603,6 +1650,7 @@ vector<t_rec> rarr;
 QapDev qDev;
 QapFont NF;
 QapTex*NormFont=nullptr;
+QapTex*BlurFont=nullptr;
 void bindTex(QapDev&qDev,int Tex){
   EM_ASM({bindTex(qDev,$0);},Tex);
 }
@@ -1618,9 +1666,12 @@ extern "C" {
     }
     qDev.color=0xFFffFFff;
     qDev.DrawQuad(0,0,128,128,rarr.back().ang);
+    qDev.color=0xFFffFFff;
+    bindTex(qDev,BlurFont->Tex);
+    qDev.DrawQuad(-500+1.5,1.5,512,512,0);
     bindTex(qDev,NormFont->Tex);
     qDev.color=0xFFffFFff;
-    qDev.DrawQuad(-500+0.5,0.0,512,512,0);
+    qDev.DrawQuad(-500+0.5,0.5,512,512,0);
     return 0;
   }
 }
@@ -1628,7 +1679,10 @@ void init(){
   qDev.Init(1024*64,1024*64*3);
   qDev.color=0xFFffFFff;
   auto*pTexMem=NF.CreateFontMem("Arial",14,false,512);
+  QapTexMem*pBlurMem=pNormMem->Clone();
+  BlurTexture(pBlurMem,4);
   NormFont=GenTextureMipMap(pTexMem,16);
+  BlurFont=GenTextureMipMap(pBlurMem,16);
   
   for(int i=0;i<5000;i++){
     rarr.push_back({});
