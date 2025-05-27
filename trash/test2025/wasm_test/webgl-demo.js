@@ -558,10 +558,30 @@ function start(){
     k.k.map(k=>g_kb_down[k]=0);
     k.k.map(k=>g_kb_changed[k]=1);
   });
-  Module.ccall('qap_main','int',["int"],[0]);
+  console.log({host:""+document.location.host});
+  Module.ccall('qap_main','int',["string"],[""+document.location.host]);
 }
+const fetchFile=async dataURL=>{
+  return await fetch(dataURL).then(response=>response.text())
+}
+function fetchFile_v2(dataURL){
+  let url=dataURL.split(" ").slice(1).join(" ");
+  let preview=async url=>{
+    let data=await fetchFile("http://"+url);
+    let s=data+"";
+    let p=stringToNewUTF8(s);
+    console.log({p,L:s.length,s});
+    let retval=Module.ccall(
+      'qap_on_load_url','number',
+      ['string','number','number'],
+      [dataURL,p,s.length]
+    );
+    Module._free(p);
+  };
+  preview(url);
+};
 
-function initShaderProgram(gl, vsSource, fsSource) {
+function initShaderProgram(gl,vsSource,fsSource){
   const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
   const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
   const shaderProgram = gl.createProgram();
@@ -579,7 +599,7 @@ function initShaderProgram(gl, vsSource, fsSource) {
   return shaderProgram;
 }
 
-function loadShader(gl, type, source) {
+function loadShader(gl,type,source){
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
