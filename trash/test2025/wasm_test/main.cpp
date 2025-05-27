@@ -2104,7 +2104,7 @@ public:
   QapPool<TFrame>pool;
   vector<TFrame*>frames;
 public:
-  QapAtlas():pMem(NULL),pTex(NULL),W(1024),H(1024),X(0),Y(0),Ident(8),dY(0),pool(256){
+  QapAtlas():pMem(NULL),pTex(NULL),W(1024*2),H(1024*2),X(0),Y(0),Ident(8),dY(0),pool(256){
     pMem=new QapTexMem("Atlas.qap",W,H,new QapColor[W*H]);
   }
   TFrame*AddFrame(QapTexMem*Mem)
@@ -3054,31 +3054,28 @@ public:
       oldmp=mp;
     }
     for(int i=CurID;i<CurID+Items.size();i++)if(Items[i%Items.size()].OnClick->IsEnabled(this)){CurID=i;break;}
-    if(kb.Down[VK_DOWN]){
+    if(kb.OnDown(VK_DOWN)){
       CurID++;
       for(int i=CurID;i<CurID+Items.size();i++)if(Items[i%Items.size()].OnClick->IsEnabled(this)){CurID=i;break;}
-      kb.Down[VK_DOWN]=false;
     }
-    if(kb.Down[VK_UP]){
+    if(kb.OnDown(VK_UP)){
       CurID--;
       for(int i=CurID+Items.size();i>CurID;i--)
         if(Items[i%Items.size()].OnClick->IsEnabled(this))
         {
           CurID=i;break;
         }
-      kb.Down[VK_UP]=false;
     }
     CurID+=Items.size();
     CurID%=Items.size();
     if(kb.OnDown(VK_RETURN)){
       Items[CurID].OnClick->Call(this);
     }
-    if(kb.Down[mbLeft]){
+    if(kb.OnDown(mbLeft)){
       vec2d dY(0,0.5*Items.size()*dy-CurID*dy);
       if(Items[CurID].OnClick->IsEnabled(this))if(CD_Rect2Point(-hmis+dY,hmis+dY,mp))
       {
         Items[CurID].OnClick->Call(this);
-        kb.Down[mbLeft]=false;
       }
     }
   }
@@ -3562,7 +3559,7 @@ public:
   {
     if(user_name_scene)return InputUserNameUpdate();
     QapAssert(Menu.get());
-    if(kb.Down[VK_ESCAPE]){if(Menu->InGame()){Menu->Up();}else{Menu->Down();}kb.Down[VK_ESCAPE]=false;}
+    if(kb.OnDown(VK_ESCAPE)){if(Menu->InGame()){Menu->Up();}else{Menu->Down();}}
     //kb.UpdateMouse();
     if(Menu->InGame())
     {
