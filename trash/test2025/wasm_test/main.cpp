@@ -3144,8 +3144,9 @@ public:
   {
     //auto*ball=LoadTexture("GFX\\Ball.png");
     //#define F(NAME)LoadTexture("GFX\\"#NAME".png")->CopyAlpha(ball)->SaveToFile("GFX\\"#NAME".png");
-    auto LT=LoadTexture;
+    //auto LT=LoadTexture;
     auto m2=[&](QapTexMem*p){return p->CalcAlpha()->FillChannel(0xffffffff,0x00ffffff);};
+    /*
     if(bool hack=false)
     {
       auto f=[&](auto NAME,string FILE,auto MODE){
@@ -3158,7 +3159,7 @@ public:
         FRAMESCOPE(F);
         //LoadTexture("GFX\\You.png")->CopyAlpha(GenBall(32))->SaveToFile("GFX\\You.png");
       #undef F
-    }
+    }*/
     static int frames=0;
     {
       static auto on_load=[&](){
