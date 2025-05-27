@@ -3614,7 +3614,7 @@ public:
   }
   template<class FUNC>
   static string wget(const string&host,const string&dir,FUNC&&cb){
-    emscripten_run_script(string("console.log('"+host+"');").c_str());
+    //emscripten_run_script(string("console.log('host = "+host+"');").c_str());
     static int counter=0;counter++;
     auto url=host+dir;
     auto fn=std::to_string(counter)+" "+url;
