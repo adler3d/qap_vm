@@ -3532,12 +3532,14 @@ public:
       if(!WaitFail||!WaitWin){TE.AddText("^7game over!");}
     }
     TE.EndScope();
-    RD.color=0xFF000000;
-    RD.BindTex(0,BlurFont.Tex);
-    RD.DrawQuad(1.5,-0.5,-512,512,Pi);
-    RD.color=0xFFFFFFFF;
-    RD.BindTex(0,NormFont.Tex);
-    RD.DrawQuad(0.5,0.5,-512,512,Pi);
+    if(bool need_draw_font=false){
+      RD.color=0xFF000000;
+      RD.BindTex(0,BlurFont.Tex);
+      RD.DrawQuad(1.5,-0.5,-512,512,Pi);
+      RD.color=0xFFFFFFFF;
+      RD.BindTex(0,NormFont.Tex);
+      RD.DrawQuad(0.5,0.5,-512,512,Pi);
+    }
   }
   void Collide()
   {    
@@ -3617,6 +3619,7 @@ extern "C" {
     EM_ASM({update_kb($0,$1);},int(&kb.Down[0]),int(&kb.Changed[0]));
     kb.MousePos.x=EM_ASM_INT({return g_mpos.x;})-Sys.SM.W/2;
     kb.MousePos.y=EM_ASM_INT({return g_mpos.y;})-Sys.SM.H/2;
+    Game.Update();
     Game.Update();
     return 0;
     /*
