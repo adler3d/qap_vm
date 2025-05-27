@@ -2937,7 +2937,7 @@ public:
     if(kb.OnDown('L'))need_draw_dyn_obs_lines=!need_draw_dyn_obs_lines;
     //v+=get_dir_from_keyboard_wasd_and_arrows()*0.003;
     auto dk=0.0;auto dAng=6.28*0.33/(2*Sys_UPD);
-    if(kb.OnDown(VK_F5)){reinit_the_same_level();}
+    if(kb.OnDown(VK_F9)){reinit_the_same_level();}
     if(kb.Down[VK_LEFT]||kb.Down['A']){dk=+1;}
     if(kb.Down[VK_RIGHT]||kb.Down['D']){dk=-1;}
     if(w.car.deaded)dk=0;
@@ -3613,13 +3613,17 @@ public:
   }
 };
 TGame Game;
+void update_kb(){
+  EM_ASM({update_kb($0,$1);},int(&kb.Down[0]),int(&kb.Changed[0]));
+  kb.MousePos.x=+EM_ASM_INT({return g_mpos.x;})-Sys.SM.W/2;
+  kb.MousePos.y=-EM_ASM_INT({return g_mpos.y;})+Sys.SM.H/2;
+}
 extern "C" {
   int update(int nope){
     Game.RenderScene();
-    EM_ASM({update_kb($0,$1);},int(&kb.Down[0]),int(&kb.Changed[0]));
-    kb.MousePos.x=+EM_ASM_INT({return g_mpos.x;})-Sys.SM.W/2;
-    kb.MousePos.y=-EM_ASM_INT({return g_mpos.y;})+Sys.SM.H/2;
+    update_kb();
     Game.Update();
+    update_kb();
     Game.Update();
     return 0;
     /*
@@ -3703,8 +3707,9 @@ void init(){
 extern "C" {
   int qap_main(int nope){
     EM_ASM({let d=document.body;d.innerHTML='<canvas id="glcanvas" width="'+window.innerWidth+'" height="'+window.innerHeight+'"></canvas>';});
-    Sys.SM.W=EM_ASM_INT({return document.body.clientWidth;});
-    Sys.SM.H=EM_ASM_INT({return document.body.clientHeight;});
+    //EM_ASM({let d=document.body;d.innerHTML='<canvas id="glcanvas" width="'+d.Width+'" height="'+d.height+'"></canvas>';});
+    Sys.SM.W=EM_ASM_INT({return window.innerWidth;});
+    Sys.SM.H=EM_ASM_INT({return window.innerHeight;});
     srand(time(NULL));
     EM_ASM(main(););
     init();
