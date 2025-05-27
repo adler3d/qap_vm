@@ -3577,6 +3577,7 @@ public:
 TGame Game;
 extern "C" {
   int update(int nope){
+    Game.RenderScene();
     /*
     {
       QapDev::BatchScope Scope(qDev);
