@@ -3358,7 +3358,7 @@ public:
   {
 
   }
-  string user_name;
+  string user_name="Adler";
   bool user_name_scene=true;
   void InputUserNameRender(){
     TextRender TE(&RD);
@@ -3578,6 +3578,7 @@ TGame Game;
 extern "C" {
   int update(int nope){
     Game.RenderScene();
+    return 0;
     /*
     {
       QapDev::BatchScope Scope(qDev);
