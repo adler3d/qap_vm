@@ -2251,7 +2251,7 @@ extern "C" {
     string fn=pfn;
     auto it=g_global_imgs.find(fn);
     if(it==g_global_imgs.end())return 0;
-    it.second.on_load(fn,ptr,w,h);
+    it->second.on_load(fn,ptr,w,h);
   }
 }
 template<class FUNC>
