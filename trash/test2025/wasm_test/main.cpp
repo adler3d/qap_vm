@@ -3425,6 +3425,7 @@ public:
       RD.DrawQuad(-512,0,th_rt_tex->W,th_rt_tex->H,0);
       RD.BindTex(0,0);
     }
+    EM_ASM({console.log("before kb.A");});
     if(kb.Down['A']&&!Menu->InGame()){
       if(1){
         RD.BindTex(0,0);
@@ -3438,10 +3439,12 @@ public:
       RD.SetColor(0xffffffff);
       RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
+    EM_ASM({console.log("after kb.A");});
     QapAssert(Menu.get());
     if(Menu->InGame())
     {
       if(Level.get()){
+        EM_ASM({console.log("before Level->Render");});
         Level->Render(&RD);
       }
     }else{
@@ -3452,7 +3455,10 @@ public:
       TE.EndScope();
     };
     {
+      
+      EM_ASM({console.log("before RenderText");});
       RenderText(RD);
+      EM_ASM({console.log("after RenderText");});
     }
   }
 /*
