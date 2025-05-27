@@ -2252,6 +2252,7 @@ extern "C" {
     auto it=g_global_imgs.find(fn);
     if(it==g_global_imgs.end())return 0;
     it->second.on_load(fn,ptr,w,h);
+    return 0;
   }
 }
 template<class FUNC>
@@ -3181,6 +3182,8 @@ public:
   void Init()
   {
     srand(time(NULL));
+    
+    EM_ASM({console.log("before CreateFontMem");});
     {
       QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
       QapTexMem*pBlurMem=pNormMem->Clone();
@@ -3192,7 +3195,10 @@ public:
       NormFont.Tex=GenTextureMipMap(pNormMem);
       //SysFont=FontCreate("Arial",16,false,512);
     }
+    EM_ASM({console.log("before LoadFrames");});
     LoadFrames();
+    
+    EM_ASM({console.log("before LoadTexture");});
     if(1)
     {
       LoadTexture("GFX\\market_car_v2.png",[&](const string&fn,int ptr,int w,int h){
@@ -3208,10 +3214,14 @@ public:
       //ptm=LoadTexture("GFX\\market_car_v2_full.png");
       //th_rt_tex_full=GenTextureMipMap(ptm);
     }
+    EM_ASM({console.log("before RD.Init();");});
     RD.Init(1024*32,1024*32*2);
+    EM_ASM({console.log("after RD.Init();");});
     InitLevelsInfo();
     //RestartLevel();
     InitMenuSystem();
+    
+    EM_ASM({console.log("after init");});
   }
   void InitLevelsInfo()
   {
