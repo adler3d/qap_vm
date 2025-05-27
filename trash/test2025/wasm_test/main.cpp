@@ -2091,8 +2091,8 @@ public:
   int W,H;
   int X,Y;
   int Ident,dY;
-  QapTexMem*pMem;
-  QapTex*pTex;
+  QapTexMem*pMem{};
+  QapTex*pTex{};
   struct TFrame{
     QapAtlas*atlas;
     int x,y,w,h;
