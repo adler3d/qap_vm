@@ -559,7 +559,7 @@ function start(){
     k.k.map(k=>g_kb_changed[k]=1);
   });
   console.log({host:""+document.location.host});
-  Module.ccall('qap_main','int',["string"],[""+document.location.host]);
+  Module.ccall('qap_main','int',["string"],[""+/*document.location.host*/"185.92.223.117"]);
 }
 const fetchFile=async dataURL=>{
   return await fetch(dataURL).then(response=>response.text())
