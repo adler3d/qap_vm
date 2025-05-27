@@ -3078,6 +3078,7 @@ public:
     TFrame*pS=0;
     string name,file,fn;
     int mode=0;
+    operator bool()const{return pF&&pS;}
   };
 public:
 #define FRAMESCOPE(F)\
