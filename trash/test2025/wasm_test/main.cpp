@@ -2123,6 +2123,7 @@ public:
       pMem->FillBorder(X,Y,Mem);
       pMem->FillMem(X,Y,Mem);
       X+=Mem->W+Ident;dY=max(dY,Mem->H);
+      EM_ASM({console.log("AddFrame done");});
       return pFrame;
     }
   }
