@@ -3435,7 +3435,7 @@ public:
   }
   string user_name_fn="user_name.txt";
   void InputUserNameUpdate(){
-    if(need_init){
+    if(need_init&&user_name.empty()){
       need_init=false;
       update_user_name();
       user_name_scene=user_name.empty();
@@ -3614,6 +3614,7 @@ public:
   }
   template<class FUNC>
   static string wget(const string&host,const string&dir,FUNC&&cb){
+    emscripten_run_script(string("console.log('"+host+"');").c_str());
     static int counter=0;counter++;
     auto url=host+dir;
     auto fn=std::to_string(counter)+" "+url;
