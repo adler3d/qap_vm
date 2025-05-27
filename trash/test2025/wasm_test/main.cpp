@@ -1839,7 +1839,7 @@ struct QapFont
       initFont_v2(g_font,$0,$1,$2);
     },int(pix),int(&W[0]),int(&H[0]));
     QapTexMem*pMem=new QapTexMem("Font_"+Name+"_"+to_string(TexSize),TexSize,TexSize,(QapColor*)pix);
-    //pMem->InvertX();
+    pMem->InvertY();
     return pMem;
   }
   #endif
@@ -1894,7 +1894,6 @@ QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount=16)//only D3DFMT_A8R8G8
 }
 #else
 QapTex*GenTextureMipMap(QapTexMem*&pMem,int MaxLevelCount=16){
-  pMem->InvertY();
   int&W=pMem->W;int&H=pMem->H;QapColor*&pBits=pMem->pBits;
   auto tex=EM_ASM_INT({
     return makeTexture(qDev,$0,$1,$2);
