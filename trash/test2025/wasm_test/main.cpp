@@ -2244,6 +2244,7 @@ QapKeyboard kb;
 struct t_global_img{
   string fn;
   std::function<void(const string&,int,int,int)> on_load;
+  bool done=false;
 };
 map<string,t_global_img> g_global_imgs;
 extern "C" {
@@ -2255,6 +2256,7 @@ extern "C" {
     EM_ASM({console.log("on_load_bef:"+UTF8ToString($0));},int(fn.c_str()));
     it->second.on_load(fn,ptr,w,h);
     EM_ASM({console.log("on_load_aft:"+UTF8ToString($0));},int(fn.c_str()));
+    it->second.done=true;
     return 0;
   }
 }
@@ -3457,7 +3459,11 @@ public:
     QapAssert(Menu.get());
     if(Menu->InGame())
     {
-      if(Level.get()){
+      auto check_frames=[&](){
+        for(auto&ex:g_global_imgs)if(!ex.second.done)return false;
+        return true;
+      };
+      if(Level.get())if(check_frames()){
         if(RenderScene_debug)EM_ASM({console.log("before Level->Render");});
         Level->Render(&RD);
       }
