@@ -3699,7 +3699,7 @@ extern "C" {
     EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V6';);
     srand(time(NULL));
     EM_ASM(main(););
-    init();B
+    init();
     return 0;
   }
 }
