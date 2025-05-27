@@ -31,15 +31,14 @@ public:
 class QapClock{
 public:
   typedef long long int int64;
-  QapClock(){}
-  void Start(){}
-  void Stop(){}
-  double Time(){return 0;}
-  double MS()
-  {
-    return 0;
+  QapClock(){Start();}
+  void Start(){beg=qpc();run=true;}
+  void Stop(){run=false;tmp=qpc()-beg;}
+  double MS(){
+    if(run){tmp=qpc();return (tmp-beg)*0.001;}
+    return tmp*0.001;
   }
-  static int64 qpc(){return 0;}
+  static int64 qpc(){return EM_ASM_INT({return (1000*performance.now())|0;});}
 };
 #define VK_SLEEP          0x5F
 
@@ -2535,8 +2534,7 @@ public:
   }
   bool init_attempt(){
     static QapClock clock;
-    static int counter=0;counter++;
-    srand(seed=counter);
+    srand(seed=int(clock.MS()*1000));
     bad_edges.clear();
     w={};
     if(!init_city())return false;
@@ -2564,7 +2562,7 @@ public:
   string ref="github";
   void reinit_top20(){
     tops={};
-    auto s=TGame::wget(g_host,"/c/game_players_table.js?unique&csv&game=market&n=20&ref="+ref+"&user="+Game->user_name,[&](const string&url,int p,int size){
+    auto s=TGame::wget(g_host,"/c/game_players_table.js?unique&csv&game=market&n=15&ref="+ref+"&user="+Game->user_name,[&](const string&url,int p,int size){
       string s;
       s.resize(size);
       for(int i=0;i<size;i++)s[i]=((char*)p)[i];
@@ -2676,7 +2674,7 @@ public:
       TE->AddText(BEG+id2str(it.id)+SEP+IToS(it.amount));
     }
     TE->AddText("^7---");
-    TE->AddText("TOP20:");
+    TE->AddText("TOP15:");
     vector<vector<string>> arr;
     vector<int> lens;lens.resize(5);
     for(auto&it:tops){
