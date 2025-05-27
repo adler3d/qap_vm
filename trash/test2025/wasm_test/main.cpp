@@ -3172,9 +3172,9 @@ public:
         LoadTexture(f.fn,[&](const string&fn,int ptr,int w,int h){\
           QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);\
           if(MODE==2)pMem=m2(pMem);\
-          Frame##NAME=Atlas.AddFrame(tmp);\
-          if(MODE==2)tmp->CalcAlphaToRGB_and_set_new_alpha()->InvertRGB();\
-          if(MODE==2)Frame##NAME##_s=GenShadowFrame(tmp);\
+          Frame##NAME=Atlas.AddFrame(pMem);\
+          if(MODE==2)pMem->CalcAlphaToRGB_and_set_new_alpha()->InvertRGB();\
+          if(MODE==2)Frame##NAME##_s=GenShadowFrame(pMem);\
           f.pF=Frame##NAME;f.pS=Frame##NAME##_s;\
           delete pMem;\
           on_load();\
