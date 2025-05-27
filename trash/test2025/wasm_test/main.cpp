@@ -3182,7 +3182,7 @@ public:
       #define F(NAME,FILE,MODE){\
         t_frame&f=frame_##NAME;f.fn="GFX\\" FILE ".png";\
         LoadTexture(f.fn,[&](const string&fn,int ptr,int w,int h){\
-          EM_ASM({console.log("on_LoadTexture:"+UTF8ToString($0));},int(fn.c_str()));\
+          EM_ASM({console.log("on_LoadTexture:"+UTF8ToString($0)+" "+$1+" "+$2);},int(fn.c_str()),w,h);\
           QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);\
           if(MODE==2)pMem=m2(pMem);\
           Frame##NAME=Atlas.AddFrame(pMem);\
