@@ -3701,8 +3701,10 @@ void init(){
   }
 }
 extern "C" {
-  int qap_main(int nope) {
-    EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V6';);
+  int qap_main(int nope){
+    EM_ASM({let d=document.body;d.innerHTML='<canvas id="glcanvas" width="'+d.clientWidth+'" height="'+d.clientHeight+'"></canvas>';});
+    Sys.SM.W=EM_ASM_INT({return document.body.clientWidth;});
+    Sys.SM.H=EM_ASM_INT({return document.body.clientHeight;});
     srand(time(NULL));
     EM_ASM(main(););
     init();
