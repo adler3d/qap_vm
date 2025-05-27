@@ -2248,7 +2248,13 @@ struct t_global_img{
   std::function<void(const string&,int,int,int)> on_load;
   bool done=false;
 };
+struct t_global_url{
+  string url;
+  std::function<void(const string&,int,int)> on_load;
+  bool done=false;
+};
 map<string,t_global_img> g_global_imgs;
+map<string,t_global_url> g_global_urls;
 extern "C" {
   int qap_on_load_img(char*pfn,int ptr,int w,int h){
     string fn=pfn;
@@ -2258,6 +2264,17 @@ extern "C" {
     EM_ASM({console.log("on_load_bef:"+UTF8ToString($0));},int(fn.c_str()));
     it->second.on_load(fn,ptr,w,h);
     EM_ASM({console.log("on_load_aft:"+UTF8ToString($0));},int(fn.c_str()));
+    it->second.done=true;
+    return 0;
+  }
+  int qap_on_load_url(char*purl,int ptr,int size){
+    string url=purl;
+    EM_ASM({console.log("on_load_url:"+UTF8ToString($0));},int(url.c_str()));
+    auto it=g_global_urls.find(url);
+    if(it==g_global_urls.end())return 0;
+    EM_ASM({console.log("on_load_url_bef:"+UTF8ToString($0));},int(url.c_str()));
+    it->second.on_load(url,ptr,size);
+    EM_ASM({console.log("on_load_url_aft:"+UTF8ToString($0));},int(url.c_str()));
     it->second.done=true;
     return 0;
   }
@@ -2272,6 +2289,7 @@ QapTexMem*LoadTexture(string fn,FUNC&&func){
   },int(fn.c_str()));
   return nullptr;
 }
+string g_host="";
 class TGame{
 public:
   typedef QapAtlas::TFrame TFrame;
@@ -2546,21 +2564,25 @@ public:
   string ref="github";
   void reinit_top20(){
     tops={};
-    auto s=TGame::wget(TGame::get_host(),"/c/game_players_table.js?unique&csv&game=market&n=20&ref="+ref+"&user="+Game->user_name);
-    auto arr=split(s,"\n");
-    if(arr.size())QapPopFront(arr);
-    for(auto&ex:arr){
-      auto t=split(ex,",");
-      QapAssert(t.size()>=6);
-      t_rec r;
-      r.place=stoi(t[0]);
-      r.user=t[1];
-      r.sec=stof(t[2]);
-      r.date=t[3];
-      r.seed=stoi(t[4]);
-      r.game=t[5];
-      tops.push_back(r);
-    }
+    auto s=TGame::wget(g_host,"/c/game_players_table.js?unique&csv&game=market&n=20&ref="+ref+"&user="+Game->user_name,[&](const string&url,int p,int size){
+      string s;
+      s.resize(size);
+      for(int i=0;i<size;i++)s[i]=((char*)p)[i];
+      auto arr=split(s,"\n");
+      if(arr.size())QapPopFront(arr);
+      for(auto&ex:arr){
+        auto t=split(ex,",");
+        QapAssert(t.size()>=6);
+        t_rec r;
+        r.place=stoi(t[0]);
+        r.user=t[1];
+        r.sec=stof(t[2]);
+        r.date=t[3];
+        r.seed=stoi(t[4]);
+        r.game=t[5];
+        tops.push_back(r);
+      }
+    });
   }
   void Init(TGame*Game){
     this->Game=Game;
@@ -2974,8 +2996,7 @@ public:
       }
     }
     if(on_win){
-      auto host=TGame::get_host();
-      TGame::wget(host,"/c/game_players_table.js?game=market&user="+Game->user_name+"&sec="+FToS(w.t*1.0/Sys.UPS)+"&seed="+IToS(seed)+"&ref="+ref);
+      TGame::wget(g_host,"/c/game_players_table.js?game=market&user="+Game->user_name+"&sec="+FToS(w.t*1.0/Sys.UPS)+"&seed="+IToS(seed)+"&ref="+ref,[](const string&url,int ptr,int size){});
       //QapDebugMsg(s);
       reinit_top20();
     }
@@ -3591,7 +3612,17 @@ public:
     /*FreeFont(NormFont);FreeFont(BlurFont);
     UnloadTextures();*/
   }
-  static string wget(const string&host,const string&dir){
+  template<class FUNC>
+  static string wget(const string&host,const string&dir,FUNC&&cb){
+    static int counter=0;counter++;
+    auto url=host+dir;
+    auto fn=std::to_string(counter)+" "+url;
+    auto&m=g_global_urls[fn];
+    m.fn=fn;
+    m.on_load=std::move(cb);
+    EM_ASM({
+      fetchFile_v2(UTF8ToString($0));
+    },int(fn.c_str()));
     /*DownLoader dl(host,dir,"");
     dl.port=80;
     dl.start();
@@ -3604,7 +3635,11 @@ public:
     return "";
   }
   static string get_host(){
-    static auto host=wget("adler3d.github.io","/qap_vm/trash/test2025/game_host.txt");
+    static string host="185.92.223.117";static bool need_init=true;
+    if(need_init){
+      //wget("adler3d.github.io","/qap_vm/trash/test2025/game_host.txt",cb);
+    }
+    need_init=false;
     if(host.size()&&host.back()=='\n')host.pop_back();
     return host;
   }
@@ -3702,7 +3737,8 @@ void init(){
   }
 }
 extern "C" {
-  int qap_main(int nope){
+  int qap_main(char*phost){
+    g_host=phost;
     EM_ASM({let d=document.body;d.innerHTML='<canvas id="glcanvas" width="'+window.innerWidth+'" height="'+window.innerHeight+'"></canvas>';});
     //EM_ASM({let d=document.body;d.innerHTML='<canvas id="glcanvas" width="'+d.Width+'" height="'+d.height+'"></canvas>';});
     Sys.SM.W=EM_ASM_INT({return window.innerWidth;});
