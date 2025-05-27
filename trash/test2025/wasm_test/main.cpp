@@ -3618,7 +3618,7 @@ public:
     auto url=host+dir;
     auto fn=std::to_string(counter)+" "+url;
     auto&m=g_global_urls[fn];
-    m.fn=fn;
+    m.url=fn;
     m.on_load=std::move(cb);
     EM_ASM({
       fetchFile_v2(UTF8ToString($0));
