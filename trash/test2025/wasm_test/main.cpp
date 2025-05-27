@@ -1893,12 +1893,14 @@ QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount=16)//only D3DFMT_A8R8G8
   return pTex;
 }
 #else
-QapTex*GenTextureMipMap(QapTexMem*&Tex,int MaxLevelCount=16){
-  int&W=Tex->W;int&H=Tex->H;QapColor*&pBits=Tex->pBits;
+QapTex*GenTextureMipMap(QapTexMem*&pMem,int MaxLevelCount=16){
+  pMem->InvertY();
+  int&W=pMem->W;int&H=pMem->H;QapColor*&pBits=pMem->pBits;
   auto tex=EM_ASM_INT({
     return makeTexture(qDev,$0,$1,$2);
   },W,H,int(pBits));
-  auto*pTex=new QapTex(Tex,tex);
+  auto*pTex=new QapTex(pMem,tex);
+  delete pMem;pMem=NULL;
   return pTex;
 }
 #endif
@@ -2888,11 +2890,11 @@ public:
         //RD->DrawQuad(mpos.x,mpos.y,20,20);
         draw_shadow_quad_v2(qDev,Game->frame_Dot,mpos,16*0.45,0xff00ff00);
       }
-      if(Game->Atlas.pTex){
+      /*if(Game->Atlas.pTex){
         qDev.SetColor(0xffffffff);
         RD->BindTex(0,Game->Atlas.pTex);
         RD->DrawQuad(+500,0,1024,1024);
-      }
+      }*/
       RenderText(*RD);
     }
   }
@@ -3697,7 +3699,7 @@ extern "C" {
     EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V6';);
     srand(time(NULL));
     EM_ASM(main(););
-    init();
+    init();B
     return 0;
   }
 }
