@@ -3359,7 +3359,7 @@ public:
 
   }
   string user_name="Adler";
-  bool user_name_scene=true;
+  bool user_name_scene=false;
   void InputUserNameRender(){
     TextRender TE(&RD);
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
