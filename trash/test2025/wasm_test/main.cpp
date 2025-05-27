@@ -1,5 +1,7 @@
 #include <emscripten.h>
 #include <vector>
+#include <map>
+#include <functional>
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
@@ -1508,7 +1510,7 @@ public:
         for(let i=0;i<g_IBN;i++){
           qDev.iarr[i]=HEAP32[(g_VI>>2)+i];
         }
-        if(qDev.gl&&qDev.prog/*&&qDev.parr_buff&&qDev.carr_buff&&qDev.tarr_buff&&qDev.iarr_buff*/)qDev.DIP(qDev);
+        if(qDev.gl&&qDev.prog)qDev.DIP(qDev);
       };
       g_draw2();
     },int(qDev.VB.data()),int(qDev.IB.data()),qDev.VPos,qDev.IPos);
@@ -1525,7 +1527,7 @@ public:
 public:
   void HackMode(bool Textured){this->Textured=Textured;}
   //virtual void BindTex(int Stage,QapTex*Tex){Sys.pDev->SetTexture(Stage,Tex?Tex->Tex:NULL);txf.set_ident();}
-  void BindTex(int Stage,QapTex*Tex){bindTex(/**this,*/Tex->Tex);txf.set_ident();}
+  void BindTex(int Stage,QapTex*pTex){bindTex(pTex?pTex->Tex:0);txf.set_ident();}
 public:
   inline Ver&AddVertexRaw(){return VBA[VPos++];}
   inline int AddVertex(const Ver&Source)
@@ -2239,7 +2241,29 @@ public:
   }
 };
 QapKeyboard kb;
-QapTexMem*LoadTexture(string fn){return nullptr;}
+struct t_global_img{
+  string fn;
+  std::function<void(const string&,int,int,int)> on_load;
+};
+map<string,t_global_img> g_global_imgs;
+extern "C" {
+  int qap_on_load_img(char*pfn,int ptr,int w,int h){
+    string fn=pfn;
+    auto it=g_global_imgs.find(fn);
+    if(it==g_global_imgs.end())return 0;
+    it->on_load(fn,ptr,w,h);
+  }
+}
+template<class FUNC>
+QapTexMem*LoadTexture(string fn,FUNC&&func){
+  auto&m=g_global_imgs[fn];
+  m.fn=fn;
+  m.on_load=std::move(func);
+  EM_ASM({
+    loadTexture_v2(UTF8ToString($0));
+  },int(fn.c_str());
+  return nullptr;
+}
 class TGame{
 public:
   typedef QapAtlas::TFrame TFrame;
@@ -3079,10 +3103,10 @@ public:
   QapDev RD;
   QapFont NormFont;
   QapFont BlurFont;
-  QapTex*th_rt_tex;
-  QapTex*th_rt_tex_full;
+  QapTex*th_rt_tex{};
+  QapTex*th_rt_tex_full{};
 public:
-  TGame(){;}
+  TGame(){}
 public:
   QapTexMem*AddBorder(QapTexMem*pMem,int dHS=8,const QapColor&Color=0xffffffff)
   {
@@ -3171,10 +3195,18 @@ public:
     LoadFrames();
     if(1)
     {
-      auto*ptm=LoadTexture("GFX\\market_car_v2.png");
-      th_rt_tex=GenTextureMipMap(ptm);
-      ptm=LoadTexture("GFX\\market_car_v2_full.png");
-      th_rt_tex_full=GenTextureMipMap(ptm);
+      LoadTexture("GFX\\market_car_v2.png",[&](const string&fn,int ptr,int w,int h){
+        QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);
+        th_rt_tex=GenTextureMipMap(pMem);
+      });
+      //th_rt_tex=GenTextureMipMap(ptm);
+      
+      LoadTexture("GFX\\market_car_v2_full.png",[&](const string&fn,int ptr,int w,int h){
+        QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);
+        th_rt_tex_full=GenTextureMipMap(pMem);
+      });
+      //ptm=LoadTexture("GFX\\market_car_v2_full.png");
+      //th_rt_tex_full=GenTextureMipMap(ptm);
     }
     RD.Init(1024*32,1024*32*2);
     InitLevelsInfo();
@@ -3532,6 +3564,7 @@ public:
     return host;
   }
 };
+TGame Game;
 extern "C" {
   int update(int nope){
     /*
@@ -3598,6 +3631,7 @@ void init(){
   NormFont.Tex=GenTextureMipMap(pNormMem,16);
   BlurFont.Tex=GenTextureMipMap(pBlurMem,16);
   
+  Game.Init();
   for(int i=0;i<5000;i++){
     rarr.push_back({});
     auto&b=rarr.back();
