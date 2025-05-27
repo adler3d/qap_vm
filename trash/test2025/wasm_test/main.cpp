@@ -2251,7 +2251,7 @@ extern "C" {
     string fn=pfn;
     auto it=g_global_imgs.find(fn);
     if(it==g_global_imgs.end())return 0;
-    it->on_load(fn,ptr,w,h);
+    it.second.on_load(fn,ptr,w,h);
   }
 }
 template<class FUNC>
@@ -2261,7 +2261,7 @@ QapTexMem*LoadTexture(string fn,FUNC&&func){
   m.on_load=std::move(func);
   EM_ASM({
     loadTexture_v2(UTF8ToString($0));
-  },int(fn.c_str());
+  },int(fn.c_str()));
   return nullptr;
 }
 class TGame{
