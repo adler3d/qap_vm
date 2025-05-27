@@ -31,6 +31,9 @@ public:
 class QapClock{
 public:
   typedef long long int int64;
+  int64 freq,beg,tmp;
+  bool run;
+public:
   QapClock(){Start();}
   void Start(){beg=qpc();run=true;}
   void Stop(){run=false;tmp=qpc()-beg;}
