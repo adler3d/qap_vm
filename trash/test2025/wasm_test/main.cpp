@@ -2103,7 +2103,7 @@ public:
   QapPool<TFrame>pool;
   vector<TFrame*>frames;
 public:
-  QapAtlas():pMem(NULL),pTex(NULL),W(2048),H(2048),X(0),Y(0),Ident(8),dY(0),pool(256){
+  QapAtlas():pMem(NULL),pTex(NULL),W(1024),H(1024),X(0),Y(0),Ident(8),dY(0),pool(256){
     pMem=new QapTexMem("Atlas.qap",W,H,new QapColor[W*H]);
   }
   TFrame*AddFrame(QapTexMem*Mem)
@@ -2888,7 +2888,11 @@ public:
         //RD->DrawQuad(mpos.x,mpos.y,20,20);
         draw_shadow_quad_v2(qDev,Game->frame_Dot,mpos,16*0.45,0xff00ff00);
       }
-      qDev.SetColor(0xffffffff);
+      if(Game->Atlas.pTex){
+        qDev.SetColor(0xffffffff);
+        RD->BindTex(0,Game->Atlas.pTex);
+        RD->DrawQuad(+500,0,1024,1024);
+      }
       RenderText(*RD);
     }
   }
