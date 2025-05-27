@@ -3083,7 +3083,6 @@ public:
 public:
 #define FRAMESCOPE(F)\
   F(Dot,"dot",2)\
-  F(BigDot,"bigdot",2)\
   F(MenuItem,"MenuItem",0)\
   F(Market,"market",0)\
   F(Enemy,"enemy_v3_128",0)\
@@ -3160,11 +3159,12 @@ public:
         //LoadTexture("GFX\\You.png")->CopyAlpha(GenBall(32))->SaveToFile("GFX\\You.png");
       #undef F
     }*/
-    static int frames=0;
+    static int frames=0;static bool done=false;
     {
       static auto on_load=[&](){
         frames--;
-        if(frames)return;
+        if(frames||done)return;
+        done=true;
         Atlas.GenTex();
       };
       #define F(NAME,FILE,MODE){\
