@@ -3166,11 +3166,14 @@ public:
     }*/
     static int frames=0;static bool done=false;
     {
-      static auto on_load=[&](){
+      static auto on_load_tex=[&](string fn){
         frames--;
+        EM_ASM({console.log("on_load_tex:"+UTF8ToString($0));},int(fn.c_str()));
         if(frames||done)return;
+        EM_ASM({console.log("on_load_tex_done_at:"+UTF8ToString($0));},int(fn.c_str()));
         done=true;
         Atlas.GenTex();
+        EM_ASM({console.log("on_load_tex_done_at_aft_GenTex:"+UTF8ToString($0));},int(fn.c_str()));
       };
       #define F(NAME,FILE,MODE)frames++;
       FRAMESCOPE(F);
@@ -3185,7 +3188,7 @@ public:
           if(MODE==2)Frame##NAME##_s=GenShadowFrame(pMem);\
           f.pF=Frame##NAME;f.pS=Frame##NAME##_s;\
           delete pMem;\
-          on_load();\
+          on_load_tex(fn);\
         });\
       }
       FRAMESCOPE(F);
