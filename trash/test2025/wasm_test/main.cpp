@@ -2249,12 +2249,12 @@ map<string,t_global_img> g_global_imgs;
 extern "C" {
   int qap_on_load_img(char*pfn,int ptr,int w,int h){
     string fn=pfn;
-    emscripten_run_script(string("on_load:"+fn).c_str());
+    emscripten_run_script(string("console.log('on_load:"+fn+"');").c_str());
     auto it=g_global_imgs.find(fn);
     if(it==g_global_imgs.end())return 0;
-    emscripten_run_script(string("on_load_bef:"+fn).c_str());
+    emscripten_run_script(string("console.log('on_load_bef:"+fn+"');").c_str());
     it->second.on_load(fn,ptr,w,h);
-    emscripten_run_script(string("on_load_aft:"+fn).c_str());
+    emscripten_run_script(string("console.log('on_load_aft:"+fn+"');").c_str());
     return 0;
   }
 }
