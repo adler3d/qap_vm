@@ -3142,7 +3142,6 @@ public:
   }
   void LoadFrames(bool need_save_atlas=0,bool need_rewrite_tex=0)
   {
-    /*
     //auto*ball=LoadTexture("GFX\\Ball.png");
     //#define F(NAME)LoadTexture("GFX\\"#NAME".png")->CopyAlpha(ball)->SaveToFile("GFX\\"#NAME".png");
     auto LT=LoadTexture;
@@ -3160,25 +3159,32 @@ public:
         //LoadTexture("GFX\\You.png")->CopyAlpha(GenBall(32))->SaveToFile("GFX\\You.png");
       #undef F
     }
-
+    static int frames=0;
     {
+      static auto on_load=[&](){
+        frames--;
+        if(frames)return;
+        Atlas.GenTex();
+      };
       #define F(NAME,FILE,MODE){\
         t_frame&f=frame_##NAME;f.fn="GFX\\" FILE ".png";\
-        QapTexMem*tmp=LT(f.fn);\
-        if(!tmp)QapDebugMsg("texture file not found - "+f.fn);\
-        if(MODE==2)tmp=m2(tmp);\
-        Frame##NAME=Atlas.AddFrame(tmp);\
-        if(MODE==2)tmp->CalcAlphaToRGB_and_set_new_alpha()->InvertRGB();\
-        if(MODE==2)Frame##NAME##_s=GenShadowFrame(tmp);\
-        f.pF=Frame##NAME;f.pS=Frame##NAME##_s;\
-        delete tmp;\
+        LoadTexture(f.fn,[&](const string&fn,int ptr,int w,int h){\
+          QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);\
+          if(MODE==2)pMem=m2(pMem);\
+          Frame##NAME=Atlas.AddFrame(tmp);\
+          if(MODE==2)tmp->CalcAlphaToRGB_and_set_new_alpha()->InvertRGB();\
+          if(MODE==2)Frame##NAME##_s=GenShadowFrame(tmp);\
+          f.pF=Frame##NAME;f.pS=Frame##NAME##_s;\
+          delete pMem;\
+          on_load();
+        });\
+        frames++;\
       }
       FRAMESCOPE(F);
       #undef F
     }
-    if(need_save_atlas)Atlas.pMem->SaveToFile("Atlas.png");
-    */
-    Atlas.GenTex();
+    //if(need_save_atlas)Atlas.pMem->SaveToFile("Atlas.png");
+    //Atlas.GenTex();
   }
   void Init()
   {
@@ -3410,6 +3416,7 @@ public:
       }
     }
   }
+  bool RenderScene_debug=false;
   void RenderScene()
   {
     /*
@@ -3426,7 +3433,7 @@ public:
       RD.DrawQuad(-512,0,th_rt_tex->W,th_rt_tex->H,0);
       RD.BindTex(0,0);
     }
-    EM_ASM({console.log("before kb.A");});
+    if(RenderScene_debug)EM_ASM({console.log("before kb.A");});
     if(kb.Down['A']&&!Menu->InGame()){
       if(1){
         RD.BindTex(0,0);
@@ -3440,12 +3447,12 @@ public:
       RD.SetColor(0xffffffff);
       RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
-    EM_ASM({console.log("after kb.A");});
+    if(RenderScene_debug)EM_ASM({console.log("after kb.A");});
     QapAssert(Menu.get());
     if(Menu->InGame())
     {
       if(Level.get()){
-        EM_ASM({console.log("before Level->Render");});
+        if(RenderScene_debug)EM_ASM({console.log("before Level->Render");});
         Level->Render(&RD);
       }
     }else{
@@ -3457,9 +3464,9 @@ public:
     };
     {
       
-      EM_ASM({console.log("before RenderText");});
+      if(RenderScene_debug)EM_ASM({console.log("before RenderText");});
       RenderText(RD);
-      EM_ASM({console.log("after RenderText");});
+      if(RenderScene_debug)EM_ASM({console.log("after RenderText");});
     }
   }
 /*
