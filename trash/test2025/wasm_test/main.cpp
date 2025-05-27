@@ -3176,7 +3176,7 @@ public:
           if(MODE==2)Frame##NAME##_s=GenShadowFrame(tmp);\
           f.pF=Frame##NAME;f.pS=Frame##NAME##_s;\
           delete pMem;\
-          on_load();
+          on_load();\
         });\
         frames++;\
       }
