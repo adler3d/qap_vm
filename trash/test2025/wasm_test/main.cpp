@@ -3181,6 +3181,7 @@ public:
       #define F(NAME,FILE,MODE){\
         t_frame&f=frame_##NAME;f.fn="GFX\\" FILE ".png";\
         LoadTexture(f.fn,[&](const string&fn,int ptr,int w,int h){\
+          EM_ASM({console.log("on_LoadTexture:"+UTF8ToString($0));},int(fn.c_str()));\
           QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);\
           if(MODE==2)pMem=m2(pMem);\
           Frame##NAME=Atlas.AddFrame(pMem);\
@@ -3688,7 +3689,7 @@ void init(){
 }
 extern "C" {
   int qap_main(int nope) {
-    EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V5';);
+    EM_ASM(document.body.innerHTML='<canvas id="glcanvas" width="1920" height="1024"></canvas>V6';);
     srand(time(NULL));
     EM_ASM(main(););
     init();
