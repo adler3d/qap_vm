@@ -3614,6 +3614,7 @@ TGame Game;
 extern "C" {
   int update(int nope){
     Game.RenderScene();
+    Game.Update();
     return 0;
     /*
     {
