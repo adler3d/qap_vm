@@ -2249,12 +2249,12 @@ map<string,t_global_img> g_global_imgs;
 extern "C" {
   int qap_on_load_img(char*pfn,int ptr,int w,int h){
     string fn=pfn;
-    emscripten_run_script(string("console.log('on_load:"+fn+"');").c_str());
+    EM_ASM({console.log("on_load:"+UTF8ToString($0));},int(fn.c_str()));
     auto it=g_global_imgs.find(fn);
     if(it==g_global_imgs.end())return 0;
-    emscripten_run_script(string("console.log('on_load_bef:"+fn+"');").c_str());
+    EM_ASM({console.log("on_load_bef:"+UTF8ToString($0));},int(fn.c_str()));
     it->second.on_load(fn,ptr,w,h);
-    emscripten_run_script(string("console.log('on_load_aft:"+fn+"');").c_str());
+    EM_ASM({console.log("on_load_aft:"+UTF8ToString($0));},int(fn.c_str()));
     return 0;
   }
 }
@@ -3170,6 +3170,9 @@ public:
         done=true;
         Atlas.GenTex();
       };
+      #define F(NAME,FILE,MODE)frames++;
+      FRAMESCOPE(F);
+      #undef F
       #define F(NAME,FILE,MODE){\
         t_frame&f=frame_##NAME;f.fn="GFX\\" FILE ".png";\
         LoadTexture(f.fn,[&](const string&fn,int ptr,int w,int h){\
@@ -3182,7 +3185,6 @@ public:
           delete pMem;\
           on_load();\
         });\
-        frames++;\
       }
       FRAMESCOPE(F);
       #undef F
