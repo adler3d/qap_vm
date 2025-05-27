@@ -2806,7 +2806,7 @@ public:
         draw_shadow_quad(qDev,f.pS,true,pos,vec2d(f.pS->w*zoom,f.pS->h*zoom),c);
         draw_shadow_quad(qDev,f.pF,false,pos,vec2d(1,1)*r*2,c);
       };
-      if(bool need_draw_obstacles=true){
+      if(bool need_draw_obstacles=Game->FrameObstacle){
         //RD->BindTex(0,0);
         qDev.SetColor(0xff888888);
         RD->BindTex(0,Game->Atlas.pTex);
@@ -2820,7 +2820,7 @@ public:
           //draw_shadow_quad_v2(qDev,Game->frame_BigDot,ex,w.obstacle_r,0xff77aa77);
         }
       }
-      if(bool need_draw_dyn_obs=true){
+      if(bool need_draw_dyn_obs=Game->FrameEnemy){
         //qDev.SetColor(0xff777777);
         qDev.SetColor(0xffffffff);
         RD->BindTex(0,Game->Atlas.pTex);
@@ -2835,7 +2835,7 @@ public:
         //  RD->DrawCircleEx(dyn_pos(ex),0,ex.r,32,0);
         //}
       }
-      if(bool need_draw_tank=true){
+      if(bool need_draw_tank=Game->th_rt_tex&&Game->th_rt_tex_full){
         bool cargo_empty=true;
         for(auto&ex:w.car.cargo.items)if(ex.amount>0)cargo_empty=false;
         auto*pF=cargo_empty?Game->th_rt_tex:Game->th_rt_tex_full;auto&qDev=*RD;
@@ -2855,19 +2855,19 @@ public:
           DrawLine(*RD,ex.a,ex.b,4);
         }
       }
-      if(bool need_draw_markets=true){
+      if(bool need_draw_markets=Game->FrameMarket){
         qDev.SetColor(0xffffffff);
         RD->BindTex(0,Game->Atlas.pTex);
         QapDev::BatchScope Scope(qDev);
+        Game->FrameMarket->Bind(RD);
         for(auto&m:w.city.arr){
           //RD->DrawQuad(m.pos.x,m.pos.y,40,40);
-          Game->FrameMarket->Bind(RD);
           RD->DrawQuad(m.pos.x,m.pos.y,128,128);
           //draw_shadow_quad_v2(qDev,Game->frame_Dot,m.pos,16,0xFFffFFff);
         }
       }
       int mid=get_market_id(kb.MousePos,true);
-      if(mid>=0){
+      if(mid>=0&&Game->frame_Dot){
         auto mpos=w.city.arr[mid].pos;
         RD->BindTex(0,Game->Atlas.pTex);
         qDev.SetColor(0xffff0000);
@@ -2875,7 +2875,7 @@ public:
         //RD->DrawQuad(mpos.x,mpos.y,23,23);
       }
       int pid=get_market_id(w.car.pos,false);
-      if(pid>=0){
+      if(pid>=0&&Game->frame_Dot){
         auto mpos=w.city.arr[pid].pos;
         RD->BindTex(0,Game->Atlas.pTex);
         qDev.SetColor(0xff00ff00);
