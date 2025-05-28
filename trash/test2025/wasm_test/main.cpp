@@ -164,13 +164,13 @@ static string file_get_contents(const string&fn){
   },fn.c_str(),out.data(),length);
   return out;
 }
-static bool file_put_contents(const string&FN,const string&mem){
+static bool file_put_contents(const string&fn,const string&mem){
   QAP_EM_LOG("file_put_contents:"+fn);
   EM_ASM({
     let key=UTF8ToString($0);
     let val=UTF8ToString($1);
     localStorage.setItem(key,val);
-  },FN.c_str(),mem.c_str());
+  },fn.c_str(),mem.c_str());
   return true;
 }
 #else
