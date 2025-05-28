@@ -3461,8 +3461,8 @@ public:
   {
 
   }
-  string user_name="Adler";
-  bool user_name_scene=false;
+  string user_name;
+  bool user_name_scene=true;
   void InputUserNameRender(){
     TextRender TE(&RD);
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
@@ -3707,10 +3707,27 @@ public:
   }
 };
 TGame Game;
+void update_last_char_from_keyboard(QapKeyboard&kb){
+  for(int key=0;key<QapKeyboard::TKeyState::MAX_KEY;key++){
+    if(!(kb.Changed[key]&&kb.Down[key]))continue;
+    if((key>='A'&&key<='Z')||(key>='a'&&key<='z')){
+      bool shift=kb.Down[VK_SHIFT];
+      char c=shift?toupper(key):tolower(key);
+      kb.LastChar=c;kb.News=true;
+      return;
+    }
+    if(key>='0'&&key<='9'){kb.LastChar=(char)key;kb.News=true;return;}
+    if(key==VK_SPACE){kb.LastChar=' ';kb.News=true;return;}
+    // printable ascii
+    if(key>=32&&key<=126){kb.LastChar=char(key);kb.News=true;return;}
+    if(key>=VK_NUMPAD0&&key<=VK_NUMPAD9){kb.LastChar='0'+(key-VK_NUMPAD0);kb.News=true;return;}
+  }
+}
 void update_kb(){
   EM_ASM({update_kb($0,$1);},int(&kb.Down[0]),int(&kb.Changed[0]));
   kb.MousePos.x=+EM_ASM_INT({return g_mpos.x;})-Sys.SM.W/2;
   kb.MousePos.y=-EM_ASM_INT({return g_mpos.y;})+Sys.SM.H/2;
+  update_last_char_from_keyboard(kb);
 }
 extern "C" {
   int update(int nope){
