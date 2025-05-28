@@ -6,6 +6,7 @@
 #include <time.h>
 using namespace std;
 #include "thirdparty/sweepline/sweepline.hpp"
+#define QAP_DEBUG
 #ifdef _WIN32
 class QapClock{
 public:
@@ -3555,6 +3556,7 @@ public:
         Level->Render(&RD);
       }
     }else{
+      QAP_EM_LOG("Menu->InGame() == false");
       TextRender TE(&RD);
       RD.SetColor(0xff000000);
       TE.BeginScope(0,0,&NormFont,&BlurFont);
