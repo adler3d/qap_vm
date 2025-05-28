@@ -2136,18 +2136,7 @@ public:
     //RD->SetAlphaMode(AM_NONE);
   }
 };
-struct t_rec{
-  vec2d pos;
-  double wh;
-  QapColor c;
-  double ang;
-  double dang;
-};
-vector<t_rec> rarr;
 QapDev qDev;
-QapFont NormFont,BlurFont;
-//QapTex*NormFontTex=nullptr;
-//QapTex*BlurFontTex=nullptr;
 class QapAtlas{
 public:
   int W,H;
@@ -3734,92 +3723,22 @@ void update_kb(){
   update_last_char_from_keyboard(kb);
 }
 extern "C" {
+  int render(int nope){
+    Game.RenderScene();
+    return 0;
+  }
   int update(int nope){
     //QAP_EM_LOG("Game.RenderScene();");
-    Game.RenderScene();
+    //Game.RenderScene();
     //QAP_EM_LOG("update_kb();");
     update_kb();
     Game.Update();
-    update_kb();
-    Game.Update();
-    return 0;
-    /*
-    {
-      QapDev::BatchScope Scope(qDev);
-      for(auto&ex:rarr){
-        qDev.color=ex.c;
-        qDev.DrawQuad(ex.pos.x,ex.pos.y,ex.wh,ex.wh,ex.ang);
-        ex.ang+=ex.dang;
-      }
-    }
-    qDev.color=0xFFffFFff;
-    qDev.DrawQuad(0,0,128,128,rarr.back().ang);
-    qDev.color=0xFFffFFff;
-    */
-    qDev.color=0xFF000000;
-    qDev.BindTex(0,BlurFont.Tex);
-    qDev.DrawQuad(-500+1.5,-1.5,-512,512,Pi);
-    qDev.BindTex(0,NormFont.Tex);
-    qDev.color=0xFFffFFff;
-    qDev.DrawQuad(-500+0.5,0.5,-512,512,Pi);
-    /**/
-    auto&RD=qDev;
-    TextRender TE(&RD);
-    
-    vec2d hs=vec2d(1920,1024)*0.5;
-    real ident=24.0;
-    real Y=0;
-    RD.SetColor(0xff000000);
-    TE.BeginScope(-hs.x+ident,+hs.y-ident,&NormFont,&BlurFont);
-    {
-      const string PreesR=" ^7(^3press ^2R^7)";
-      const string PreesSpace=" ^7(^3press ^2Space^7)";
-      const string PreesEnter=" ^7(^3press ^2Return^7)";
-      string BEG="^7";
-      string SEP=" ^2: ^8";
-      TE.AddText("^7The ^2Game");
-      TE.AddText("");
-      TE.AddText("^8user_name ^2: ^7Adler");
-      TE.AddText("");
-      //#define GOO(TEXT,VALUE)TE.AddText(string(BEG)+string(TEXT)+string(SEP)+string(VALUE));
-      //GOO("Level",string(LevelCounter)+" ["+string(LevelCounter?LevelsInfo[LevelCounter.Value].Name:"noname")+"]");
-      //#undef GOO
-      //TE.AddText("");
-      //if(Level.get())Level->AddText(&TE);
-      //TE.AddText("");
-      //if(WaitWin.Runned)TE.AddText("^2You win!"+PreesEnter);
-      //if(WaitFail.Runned)TE.AddText("^1You lose!"+PreesR);
-      //if(!WaitFail||!WaitWin){TE.AddText("^7game over!");}
-    }
-    TE.EndScope();
-    //RD.BindTex(0,NormFont.Tex);
-    //RD.DrawQuad(0.5,0.5,-512,512,Pi);
     return 0;
   }
 }
 void init(){
   qDev.Init(1024*64,1024*64*3);
-  qDev.color=0xFFffFFff;
-  auto*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
-  auto*pBlurMem=pNormMem->Clone();
-  BlurTexture(pBlurMem,4);
-  BlurFont=NormFont;
-  NormFont.Tex=GenTextureMipMap(pNormMem,16);
-  BlurFont.Tex=GenTextureMipMap(pBlurMem,16);
-  
   Game.Init();
-  for(int i=0;i<5000;i++){
-    rarr.push_back({});
-    auto&b=rarr.back();
-    b.pos=vec2d(rand()%1920-1920/2,rand()%1000-500);
-    b.ang=(rand()%360)*Pi*2/360;
-    b.dang=(rand()%1000-500)*0.0001;
-    b.c.r=rand()%255;
-    b.c.g=rand()%255;
-    b.c.b=rand()%255;
-    b.c.a=255;
-    b.wh=(rand()%1000)*32/1000.0+16;
-  }
 }
 extern "C" {
   int qap_main(char*phost){
