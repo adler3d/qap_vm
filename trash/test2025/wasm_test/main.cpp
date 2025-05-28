@@ -148,6 +148,7 @@ public:
 #endif
 #ifdef __EMSCRIPTEN__
 static string file_get_contents(const string&fn){
+  QAP_EM_LOG("file_get_contents:"+fn);
   int length=EM_ASM_INT({
     let key=UTF8ToString($0);
     let val=localStorage.getItem(key);
@@ -164,6 +165,7 @@ static string file_get_contents(const string&fn){
   return out;
 }
 static bool file_put_contents(const string&FN,const string&mem){
+  QAP_EM_LOG("file_put_contents:"+fn);
   EM_ASM({
     let key=UTF8ToString($0);
     let val=UTF8ToString($1);
@@ -3504,7 +3506,7 @@ public:
       }
     }
   }
-  bool RenderScene_debug=false;
+  bool RenderScene_debug=true;
   void RenderScene()
   {
     /*
@@ -3638,7 +3640,9 @@ public:
     {
       if(Level.get())
       {
+        QAP_EM_LOG("bef_update_level");
         Level->Update(this);
+        QAP_EM_LOG("aft_update_level");
         {WaitFail++;WaitWin++;}
         if(!WaitWin.Runned&&!WaitFail.Runned)
         {
@@ -3705,7 +3709,9 @@ void update_kb(){
 }
 extern "C" {
   int update(int nope){
+    QAP_EM_LOG("Game.RenderScene();");
     Game.RenderScene();
+    QAP_EM_LOG("update_kb();");
     update_kb();
     Game.Update();
     update_kb();
