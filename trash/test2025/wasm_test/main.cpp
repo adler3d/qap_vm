@@ -28,6 +28,30 @@ public:
   static int64 qpc(){int64 tmp;QueryPerformanceCounter((LARGE_INTEGER*)&tmp);return tmp;}
 };
 #else
+#ifndef __EMSCRIPTEN__
+//https://github.com/copilot/share/c05603ac-4240-8476-b813-be01a48a201d
+#include <chrono>
+class QapClock{
+public:
+  typedef long long int int64;
+  int64 freq,beg,tmp;
+  bool run;
+  typedef std::chrono::high_resolution_clock clock;
+  typedef std::chrono::time_point<clock> time_point;
+  time_point t_beg,t_tmp;
+public:
+  QapClock(){Start();}
+  #define F(diff)std::chrono::duration_cast<std::chrono::microseconds>(diff).count()
+  void Start(){t_beg=clock::now();run=true;}
+  void Stop(){t_tmp=clock::now();run=false;tmp=F(t_tmp-t_beg);}
+  double MS(){
+    if(run){t_tmp=clock::now();return F(t_tmp-t_beg)*0.001;}
+    return double(tmp)*0.001;
+  }
+  static int64 qpc(){return F(clock::now().time_since_epoch());}
+  #undef F
+};
+#else
 class QapClock{
 public:
   typedef long long int int64;
@@ -43,8 +67,10 @@ public:
   }
   static int64 qpc(){return EM_ASM_INT({return (1000*performance.now())|0;});}
 };
+#endif //__EMSCRIPTEN__
+#endif //_WIN32
+#ifndef _WIN32
 #define VK_SLEEP          0x5F
-
 #define VK_NUMPAD0        0x60
 #define VK_NUMPAD1        0x61
 #define VK_NUMPAD2        0x62
