@@ -2768,7 +2768,7 @@ public:
     TE.x=TE.bx;
     TE.y=+0.5*items.size()*dy;
     //qDev.BindTex(0,Game->Atlas.pTex);
-    //Game->FrameMenuItem->Bind(RD);
+    //Game->FrameMenuItem->Bind(qDev);
     //qDev.SetColor(0x80ffffff);
     //qDev.DrawQuad(0,y-dy*CurID,Game->FrameMenuItem->w,Game->FrameMenuItem->h,0);
     vector<string> tearr,idarr,pricearr,amountarr;
@@ -3541,10 +3541,10 @@ public:
       };
       if(Level.get())if(check_frames()){
         if(RenderScene_debug)QAP_EM_LOG("before Level->Render");
-        Level->Render(&RD);
+        Level->Render(qDev);
       }
     }else{
-      TextRender TE(&RD);
+      TextRender TE(&qDev);
       qDev.SetColor(0xff000000);
       TE.BeginScope(0,0,&NormFont,&BlurFont);
       Menu->Render(qDev,TE);
@@ -3552,7 +3552,7 @@ public:
     };
     {
       if(RenderScene_debug)QAP_EM_LOG("before RenderText");
-      RenderText(RD);
+      RenderText(qDev);
       if(RenderScene_debug)QAP_EM_LOG("after RenderText");
     }
   }
@@ -3568,9 +3568,9 @@ public:
     if(!QapDX::EndScene())return;
     QapDX::Present();
   }*/
-  void RenderText(QapDev&RD)
+  void RenderText(QapDev&qDev)
   {
-    TextRender TE(&RD);
+    TextRender TE(&qDev);
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     real ident=24.0;
     real Y=0;
