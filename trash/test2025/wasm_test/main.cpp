@@ -3288,6 +3288,8 @@ public:
     InitLevelsInfo();
     //RestartLevel();
     InitMenuSystem();
+    update_user_name();
+    RestartLevel();
     
     QAP_EM_LOG("after init");
   }
@@ -3417,8 +3419,6 @@ public:
     Menu->Add("About",&OnAbout);
     Menu->Add("Exit",&OnExit);
     LevelCounter.Value=0;
-    update_user_name();
-    RestartLevel();
     Menu->Down();
     //Menu->Up();
   }
