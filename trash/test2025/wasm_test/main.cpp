@@ -2965,7 +2965,7 @@ public:
   }
   static void draw_shadow_quad(QapDev&qDev,QapAtlas::TFrame*pF,bool shadow,vec2d pos,vec2d wh,QapColor color,real ang=0){
     qDev.color=shadow?QapColor(0xff000000):color;
-    pF->Bind(&qDev);
+    pF->Bind(qDev);
     auto p=pos;
     if(shadow)p+=vec2d(1.0,-1.0);
     qDev.DrawQuad(p.x,p.y,wh.x,wh.y,ang);
@@ -3450,7 +3450,7 @@ public:
   string user_name;
   bool user_name_scene=true;
   void InputUserNameRender(){
-    TextRender TE(&RD);
+    TextRender TE(&qDev);
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     real ident=24.0;
     real Y=0;
@@ -3547,7 +3547,7 @@ public:
       TextRender TE(&RD);
       qDev.SetColor(0xff000000);
       TE.BeginScope(0,0,&NormFont,&BlurFont);
-      Menu->Render(&RD,&TE);
+      Menu->Render(qDev,TE);
       TE.EndScope();
     };
     {
@@ -3590,7 +3590,7 @@ public:
       GOO("Level",string(LevelCounter)+" ["+string(LevelCounter?LevelsInfo[LevelCounter.Value].Name:"noname")+"]");
       #undef GOO
       TE.AddText("");
-      if(Level.get())Level->AddText(&TE);
+      if(Level.get())Level->AddText(TE);
       TE.AddText("");
       if(WaitWin.Runned)TE.AddText("^2You win!"+PreesEnter);
       if(WaitFail.Runned)TE.AddText("^1You lose!"+PreesR);
