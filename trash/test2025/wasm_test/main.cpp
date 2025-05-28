@@ -3495,7 +3495,7 @@ public:
   }
   string user_name_fn="user_name.txt";
   void InputUserNameUpdate(){
-    if(need_init&&user_name.empty()){
+    if(need_init){
       need_init=false;
       update_user_name();
       user_name_scene=user_name.empty();
