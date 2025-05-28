@@ -146,7 +146,7 @@ public:
 #define VK_CAPITAL        0x14
 
 #endif
-$ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
 static string file_get_contents(const string&fn){
   int length=EM_ASM_INT({
     let key=UTF8ToString($0);
