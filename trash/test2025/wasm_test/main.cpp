@@ -3545,6 +3545,7 @@ public:
         for(auto&ex:g_global_imgs)if(!ex.second.done)return false;
         return true;
       };
+      QAP_EM_LOG("before check_frames()");
       if(Level.get())if(check_frames()){
         if(RenderScene_debug)QAP_EM_LOG("before Level->Render");
         Level->Render(&RD);
