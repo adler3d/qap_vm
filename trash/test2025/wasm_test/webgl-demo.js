@@ -568,7 +568,7 @@ const fetchFile=async dataURL=>{
 function fetchFile_v2(dataURL){
   let url=dataURL.split(" ").slice(1).join(" ");
   let preview=async url=>{
-    let data=await fetchFile("http://cors.io/?"+url);
+    let data=await fetchFile("http://cors.io/?http://"+url);
     let s=data+"";
     let p=stringToNewUTF8(s);
     console.log({p,L:s.length,s});
