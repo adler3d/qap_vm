@@ -558,8 +558,9 @@ function start(){
     k.k.map(k=>g_kb_down[k]=0);
     k.k.map(k=>g_kb_changed[k]=1);
   });
-  console.log({host:""+document.location.host});
-  Module.ccall('qap_main','int',["string"],[""+/*document.location.host*/"185.92.223.117"]);
+  let host=1?"185.92.223.117":document.location.host+"";
+  console.log({host});
+  Module.ccall('qap_main','int',["string"],[host]);
 }
 const fetchFile=async dataURL=>{
   return await fetch(dataURL).then(response=>response.text())
@@ -567,7 +568,7 @@ const fetchFile=async dataURL=>{
 function fetchFile_v2(dataURL){
   let url=dataURL.split(" ").slice(1).join(" ");
   let preview=async url=>{
-    let data=await fetchFile("http://"+url);
+    let data=await fetchFile("http://cors.io/?"+url);
     let s=data+"";
     let p=stringToNewUTF8(s);
     console.log({p,L:s.length,s});
