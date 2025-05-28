@@ -2181,14 +2181,14 @@ public:
     return GenTextureMipMap(Mem);
   }
   QapTex*GenTex(){return pTex=GenTextureMipMap(pMem);}
-  void Bind(QapDev*RD,TFrame*frame)
+  void Bind(QapDev&qDev,TFrame*frame)
   {
     b2Transform xf;
     float inv_w=1.f/float(W);
     float inv_h=1.f/float(H);
     xf.p=vec2f(float(frame->x)*inv_w,float(frame->y)*inv_h);
     xf.r=MakeZoomTransform(vec2d(float(frame->w)*inv_w,float(frame->h)*inv_h)).r;
-    RD->SetTextureTransform(xf);
+    qDev.SetTextureTransform(xf);
   }
 };
 enum TMouseButton
@@ -2709,33 +2709,33 @@ public:
     GOO("px",IToS(kb.MousePos.x));
     GOO("py",IToS(kb.MousePos.y));
     GOO("init_attempts",IToS(init_attempts));
-    TE->AddText("^7---");
+    TE.AddText("^7---");
     /*auto market_id=get_market_id();
     for(auto&it:w.city.arr[market_id].items){
-      TE->AddText(BEG+id2str(it.id)+SEP+IToS(it.price)+SEP+IToS(it.amount));
+      TE.AddText(BEG+id2str(it.id)+SEP+IToS(it.price)+SEP+IToS(it.amount));
     }*/
     GOO("Money",IToS(w.car.money));
-    TE->AddText("^8Need ^760000 ^8money to ^2win^8 in this game");
-    TE->AddText("^7---");
-    TE->AddText("^8Your cargo:");
+    TE.AddText("^8Need ^760000 ^8money to ^2win^8 in this game");
+    TE.AddText("^7---");
+    TE.AddText("^8Your cargo:");
     for(auto&it:w.car.cargo.items){
-      TE->AddText(BEG+id2str(it.id)+SEP+IToS(it.amount));
+      TE.AddText(BEG+id2str(it.id)+SEP+IToS(it.amount));
     }
-    TE->AddText("^7---");
-    TE->AddText("TOP15:");
+    TE.AddText("^7---");
+    TE.AddText("TOP15:");
     vector<vector<string>> arr;
     vector<int> lens;lens.resize(5);
     for(auto&it:tops){
       arr.push_back(it.to_str());
     }
     for(auto&it:arr){
-      for(int i=0;i<5;i++)lens[i]=max(lens[i],TE->text_len(it[i]));
+      for(int i=0;i<5;i++)lens[i]=max(lens[i],TE.text_len(it[i]));
     }
-    auto seplen=TE->text_len("  ");
+    auto seplen=TE.text_len("  ");
     vector<string> c={"^8","^7","^8","^7","^8"};
     for(auto&it:arr){
-      for(int i=0;i<3;i++){auto x=TE->x;TE->AddTextNext(c[i]+it[i]);TE->x=x+lens[i]+seplen;}
-      TE->BR();
+      for(int i=0;i<3;i++){auto x=TE.x;TE.AddTextNext(c[i]+it[i]);TE.x=x+lens[i]+seplen;}
+      TE.BR();
     }
     #undef GOO
   }
@@ -2764,13 +2764,13 @@ public:
     string SEP=" ^2: ^8";
     const real dy=32;
     auto&items=w.city.arr[mid].items;
-    TE->bx=text_posx;
-    TE->x=TE->bx;
-    TE->y=+0.5*items.size()*dy;
-    //RD->BindTex(0,Game->Atlas.pTex);
+    TE.bx=text_posx;
+    TE.x=TE.bx;
+    TE.y=+0.5*items.size()*dy;
+    //qDev.BindTex(0,Game->Atlas.pTex);
     //Game->FrameMenuItem->Bind(RD);
-    //RD->SetColor(0x80ffffff);
-    //RD->DrawQuad(0,y-dy*CurID,Game->FrameMenuItem->w,Game->FrameMenuItem->h,0);
+    //qDev.SetColor(0x80ffffff);
+    //qDev.DrawQuad(0,y-dy*CurID,Game->FrameMenuItem->w,Game->FrameMenuItem->h,0);
     vector<string> tearr,idarr,pricearr,amountarr;
     for(int i=0;i<items.size();i++){
       idarr.push_back(BEG+id2str(i));
@@ -2781,7 +2781,7 @@ public:
     auto get_maxlen=[&](vector<string>&arr){
       int maxlen=0;
       for(int i=0;i<arr.size();i++){
-        auto len=TE->text_len(arr[i]);
+        auto len=TE.text_len(arr[i]);
         if(len>maxlen)maxlen=len;
       }
       return maxlen;
@@ -2790,32 +2790,32 @@ public:
     int pricelen=get_maxlen(pricearr);
     int amountlen=get_maxlen(amountarr);
     int maxlen=get_maxlen(tearr);
-    int seplen=TE->text_len(SEP);
+    int seplen=TE.text_len(SEP);
     bt_buy_all={};bt_sell_all={};
     for(int i=0;i<idarr.size();i++){
-      TE->AddTextNext(idarr[i]);
-      TE->x=TE->bx+idlen;
-      TE->AddTextNext(SEP);
-      TE->x=TE->bx+idlen+seplen+pricelen-TE->text_len(pricearr[i]);
-      TE->AddTextNext(pricearr[i]);
-      TE->x=TE->bx+idlen+seplen+pricelen;
-      TE->AddTextNext(SEP);
-      TE->x=TE->bx+idlen+seplen+pricelen+seplen+amountlen-TE->text_len(amountarr[i]);
-      TE->AddTextNext(amountarr[i]);
-      TE->x=TE->bx+idlen+seplen+pricelen+seplen+amountlen;
-      TE->AddTextNext(SEP);
-      //TE->x=TE->bx+maxlen;
+      TE.AddTextNext(idarr[i]);
+      TE.x=TE.bx+idlen;
+      TE.AddTextNext(SEP);
+      TE.x=TE.bx+idlen+seplen+pricelen-TE.text_len(pricearr[i]);
+      TE.AddTextNext(pricearr[i]);
+      TE.x=TE.bx+idlen+seplen+pricelen;
+      TE.AddTextNext(SEP);
+      TE.x=TE.bx+idlen+seplen+pricelen+seplen+amountlen-TE.text_len(amountarr[i]);
+      TE.AddTextNext(amountarr[i]);
+      TE.x=TE.bx+idlen+seplen+pricelen+seplen+amountlen;
+      TE.AddTextNext(SEP);
+      //TE.x=TE.bx+maxlen;
       if(buttons)
       {
-        auto dpos=kb.MousePos-vec2d(TE->x,TE->y-TE->ident);
-        auto es=vec2d(TE->text_len(" ^7[BuyAll]"),TE->ident);
+        auto dpos=kb.MousePos-vec2d(TE.x,TE.y-TE.ident);
+        auto es=vec2d(TE.text_len(" ^7[BuyAll]"),TE.ident);
         bool hovered=check_rect(dpos,es);
-        TE->AddTextNext(" "+string(hovered?"^8":"^7")+"[BuyAll]");
+        TE.AddTextNext(" "+string(hovered?"^8":"^7")+"[BuyAll]");
         t_cargo_item ci;
         ci.id=i;
         ci.amount=w.car.money/items[i].price;
         if(ci.amount>items[i].amount)ci.amount=items[i].amount;
-        if(hovered&&kb.Down[mbLeft]){/*buy(w,mid,ci);*/TE->LV.back().text=" ^2[BuyAll]";}
+        if(hovered&&kb.Down[mbLeft]){/*buy(w,mid,ci);*/TE.LV.back().text=" ^2[BuyAll]";}
         if(hovered){
           if(kb.Down[mbLeft]){
             int gg=1;
@@ -2825,19 +2825,19 @@ public:
       }
       if(buttons)
       {
-        auto dpos=kb.MousePos-vec2d(TE->x,TE->y-TE->ident);
-        auto es=vec2d(TE->text_len(" ^7[SellAll]"),TE->ident);
+        auto dpos=kb.MousePos-vec2d(TE.x,TE.y-TE.ident);
+        auto es=vec2d(TE.text_len(" ^7[SellAll]"),TE.ident);
         bool hovered=check_rect(dpos,es);
-        TE->AddTextNext(" "+string(hovered?"^8":"^7")+"[SellAll]");
+        TE.AddTextNext(" "+string(hovered?"^8":"^7")+"[SellAll]");
         t_cargo_item ci;
         ci.id=i;
         ci.amount=w.car.cargo.items[i].amount;
-        if(hovered&&kb.Down[mbLeft]){/*sell(w,mid,ci);*/TE->LV.back().text=" ^2[SellAll]";}
+        if(hovered&&kb.Down[mbLeft]){/*sell(w,mid,ci);*/TE.LV.back().text=" ^2[SellAll]";}
         if(hovered){bt_sell_all={ci,mid,hovered};}
       }
-      TE->BR();
+      TE.BR();
     }
-    //tls=TE->LV;
+    //tls=TE.LV;
   }
   struct t_button{t_cargo_item ci;int mid=0;bool hovered=false;};
   t_button bt_buy_all;
@@ -2859,11 +2859,10 @@ public:
     return ex.pos+(ex.circle?offset2:offset);
   }
   bool need_draw_dyn_obs_lines=false;
-  void Render(QapDev*RD){
+  void Render(QapDev&qDev){
     if(bool need_draw_rock0_as_thrt=true){
-      auto&qDev=*RD;
       if(need_draw_dyn_obs_lines/*kb.Down['L']*/){
-        RD->BindTex(0,0);
+        qDev.BindTex(0,0);
         qDev.SetColor(0xffbbbbbb);
         for(auto&ex:w.dyn_obs){
           auto d=Vec2dEx(ex.ang,ex.len);
@@ -2881,9 +2880,9 @@ public:
         draw_shadow_quad(qDev,f.pF,false,pos,vec2d(1,1)*r*2,c);
       };
       if(bool need_draw_obstacles=Game->FrameObstacle){
-        //RD->BindTex(0,0);
+        //qDev.BindTex(0,0);
         qDev.SetColor(0xff888888);
-        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.BindTex(0,Game->Atlas.pTex);
         QapDev::BatchScope Scope(qDev);
         auto&F=*Game->FrameObstacle;
         qDev.SetColor(0xffffffff);
@@ -2897,7 +2896,7 @@ public:
       if(bool need_draw_dyn_obs=Game->FrameEnemy){
         //qDev.SetColor(0xff777777);
         qDev.SetColor(0xffffffff);
-        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.BindTex(0,Game->Atlas.pTex);
         Game->FrameEnemy->Bind(RD);
         QapDev::BatchScope Scope(qDev);
         for(auto&m:w.dyn_obs){
@@ -2906,7 +2905,7 @@ public:
           //draw_shadow_quad_v2(qDev,Game->frame_BigDot,dyn_pos(m),m.r,0xff777777);
         }
         //for(auto&ex:w.dyn_obs){
-        //  RD->DrawCircleEx(dyn_pos(ex),0,ex.r,32,0);
+        //  qDev.DrawCircleEx(dyn_pos(ex),0,ex.r,32,0);
         //}
       }
       if(bool need_draw_tank=Game->th_rt_tex&&Game->th_rt_tex_full){
@@ -2916,10 +2915,10 @@ public:
         qDev.BindTex(0,pF);
         qDev.SetColor(0xffffffff);
         auto scale=0.5;
-        RD->DrawQuad(w.car.pos.x,w.car.pos.y,pF->W*scale,pF->H*scale,(-w.car.v.Ort()).GetAng());
+        qDev.DrawQuad(w.car.pos.x,w.car.pos.y,pF->W*scale,pF->H*scale,(-w.car.v.Ort()).GetAng());
       }
       if(bool need_draw_voronoi=kb.Down['V']){
-        RD->BindTex(0,0);
+        qDev.BindTex(0,0);
         qDev.SetColor(0xff0000ff);
         for(auto&ex:edges){
           DrawLine(*RD,ex.a,ex.b,4);
@@ -2931,35 +2930,35 @@ public:
       }
       if(bool need_draw_markets=Game->FrameMarket){
         qDev.SetColor(0xffffffff);
-        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.BindTex(0,Game->Atlas.pTex);
         QapDev::BatchScope Scope(qDev);
         Game->FrameMarket->Bind(RD);
         for(auto&m:w.city.arr){
-          //RD->DrawQuad(m.pos.x,m.pos.y,40,40);
-          RD->DrawQuad(m.pos.x,m.pos.y,128,128);
+          //qDev.DrawQuad(m.pos.x,m.pos.y,40,40);
+          qDev.DrawQuad(m.pos.x,m.pos.y,128,128);
           //draw_shadow_quad_v2(qDev,Game->frame_Dot,m.pos,16,0xFFffFFff);
         }
       }
       int mid=get_market_id(kb.MousePos,true);
       if(mid>=0&&Game->frame_Dot){
         auto mpos=w.city.arr[mid].pos;
-        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.BindTex(0,Game->Atlas.pTex);
         qDev.SetColor(0xffff0000);
         draw_shadow_quad_v2(qDev,Game->frame_Dot,mpos,16,0xffff0000);
-        //RD->DrawQuad(mpos.x,mpos.y,23,23);
+        //qDev.DrawQuad(mpos.x,mpos.y,23,23);
       }
       int pid=get_market_id(w.car.pos,false);
       if(pid>=0&&Game->frame_Dot){
         auto mpos=w.city.arr[pid].pos;
-        RD->BindTex(0,Game->Atlas.pTex);
+        qDev.BindTex(0,Game->Atlas.pTex);
         qDev.SetColor(0xff00ff00);
-        //RD->DrawQuad(mpos.x,mpos.y,20,20);
+        //qDev.DrawQuad(mpos.x,mpos.y,20,20);
         draw_shadow_quad_v2(qDev,Game->frame_Dot,mpos,16*0.45,0xff00ff00);
       }
       /*if(Game->Atlas.pTex){
         qDev.SetColor(0xffffffff);
-        RD->BindTex(0,Game->Atlas.pTex);
-        RD->DrawQuad(+500,0,1024,1024);
+        qDev.BindTex(0,Game->Atlas.pTex);
+        qDev.DrawQuad(+500,0,1024,1024);
       }*/
       RenderText(*RD);
     }
@@ -3089,19 +3088,19 @@ public:
     //create memory leak
     delete this;
   }
-  void AddText(real&y,TextRender*TE,const string&s,const real dy=32){
-    real x=GetQ3TextLength(*TE->NormFont,s);
-    TE->LV.push_back(TextRender::TextLine(-x*0.5,y+TE->NormFont->H[0]*0.5,s));y-=dy;
+  void AddText(real&y,TextRender&TE,const string&s,const real dy=32){
+    real x=GetQ3TextLength(*TE.NormFont,s);
+    TE.LV.push_back(TextRender::TextLine(-x*0.5,y+TE.NormFont->H[0]*0.5,s));y-=dy;
   };
-  void Render(QapDev*RD,TextRender*TE)
+  void Render(QapDev&qDev,TextRender&TE)
   {
     if(!Game->FrameMenuItem||!Game->Atlas.pTex)return;
     const real dy=32;
     real y=+0.5*Items.size()*dy;
-    RD->BindTex(0,Game->Atlas.pTex);
-    Game->FrameMenuItem->Bind(RD);
-    RD->SetColor(0x80ffffff);
-    RD->DrawQuad(0,y-dy*CurID,Game->FrameMenuItem->w,Game->FrameMenuItem->h,0);
+    qDev.BindTex(0,Game->Atlas.pTex);
+    Game->FrameMenuItem->Bind(qDev);
+    qDev.SetColor(0x80ffffff);
+    qDev.DrawQuad(0,y-dy*CurID,Game->FrameMenuItem->w,Game->FrameMenuItem->h,0);
     for(int i=0;i<Items.size();i++)AddText(y,TE,string(Items[i].OnClick->IsEnabled(this)?CurID==i?"^3":"^7":"^D")+Items[i].Caption,dy);
   }
   void Update(TGame*Game)
