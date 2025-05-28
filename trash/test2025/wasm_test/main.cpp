@@ -3491,12 +3491,14 @@ public:
       update_user_name();
       user_name_scene=user_name.empty();
     }
+    bool done=false;
     if(kb.News){
       auto c=kb.LastChar;
       if(check_char(c))user_name.push_back(c);
+      if(user_name.size()>15)done=true;
     }
     if(kb.OnDown(VK_BACK))if(user_name.size())user_name.pop_back();
-    if(kb.Down[VK_RETURN]){
+    if(kb.OnDown(VK_RETURN)||done){
       if(user_name.size()){
         user_name_scene=false;
         file_put_contents(user_name_fn,user_name);
