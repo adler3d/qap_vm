@@ -3722,6 +3722,7 @@ void update_last_char_from_keyboard(QapKeyboard&kb){
     // printable ascii
     if(key>=32&&key<=126){kb.LastChar=char(key);kb.News=true;return;}
     if(key>=VK_NUMPAD0&&key<=VK_NUMPAD9){kb.LastChar='0'+(key-VK_NUMPAD0);kb.News=true;return;}
+    if(key>='0'&&key<='9'){kb.LastChar=key;kb.News=true;return;}
   }
 }
 void update_kb(){
