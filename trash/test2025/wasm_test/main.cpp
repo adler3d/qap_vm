@@ -2016,7 +2016,7 @@ QapTexMem*BlurTexture(QapTexMem*Tex,int PassCount)//only D3DFMT_A8R8G8B8
   #undef BlurLog
   return Tex;
 }
-void DrawQapText(QapDev*RD,QapFont&Font,float X,float Y,const string&Text)
+void DrawQapText(QapDev&qDev,QapFont&Font,float X,float Y,const string&Text)
 {
   static QapColor CT[]={
     0xFF252525,0xFFFF0000,0xFF00FF00,0xFFFFFF00,
@@ -2024,10 +2024,10 @@ void DrawQapText(QapDev*RD,QapFont&Font,float X,float Y,const string&Text)
     0xFFFFFFA8,0xFFFFA8FF,
     0xFFFF8000,0xFF0080FF,0xFFA0A0A0,0xFF808080,0xFFF0F000,0xFF00F0F0,
   };
-  bool _4it=!RD->IsBatching();
-  if(_4it)RD->BeginBatch();
+  bool _4it=!qDev.IsBatching();
+  if(_4it)qDev.BeginBatch();
   int QuadCount=0;
-  int VPos=RD->GetVPos();
+  int VPos=qDev.GetVPos();
   {
     float xp=0; int i=0;
     while(i<(int)Text.length())
@@ -2037,22 +2037,22 @@ void DrawQapText(QapDev*RD,QapFont&Font,float X,float Y,const string&Text)
         int I=(uchar)Text[i];
         float s=((float)(I%16))/16,t=((float)(I/16))/16;
         float cx=(float)Font.W[I],cy=(float)Font.H[I],ts=(float)Font.Size;
-        #define F(var,x,y,z,color,u,v)int var=RD->AddVertex(QapDev::Ver(X+x,Y+y,color,u,v));
-          F(A,xp+0,-cy,0,RD->GetColor(),s,1-t-cy/ts);
-          F(B,xp+cx,-cy,0,RD->GetColor(),s+cx/ts,1-t-cy/ts);
-          F(C,xp+cx,0,0,RD->GetColor(),s+cx/ts,1-t);
-          F(D,xp+0,0,0,RD->GetColor(),s,1-t);
+        #define F(var,x,y,z,color,u,v)int var=qDev.AddVertex(QapDev::Ver(X+x,Y+y,color,u,v));
+          F(A,xp+0,-cy,0,qDev.GetColor(),s,1-t-cy/ts);
+          F(B,xp+cx,-cy,0,qDev.GetColor(),s+cx/ts,1-t-cy/ts);
+          F(C,xp+cx,0,0,qDev.GetColor(),s+cx/ts,1-t);
+          F(D,xp+0,0,0,qDev.GetColor(),s,1-t);
         #undef F
-        RD->AddTris(A,B,C);
-        RD->AddTris(C,D,A);
+        qDev.AddTris(A,B,C);
+        qDev.AddTris(C,D,A);
         xp+=cx; QuadCount++; i++; continue;
       };
       i++; if(i>(int)Text.length())continue;
-      if((Text[i]>='0')&&(Text[i]<='9')){RD->SetColor(CT[Text[i]-'0']); i++; continue;};
-      if((Text[i]>='A')&&(Text[i]<='F')){RD->SetColor(CT[Text[i]-'A'+10]); i++; continue;};
+      if((Text[i]>='0')&&(Text[i]<='9')){qDev.SetColor(CT[Text[i]-'0']); i++; continue;};
+      if((Text[i]>='A')&&(Text[i]<='F')){qDev.SetColor(CT[Text[i]-'A'+10]); i++; continue;};
     }
   };
-  if(_4it)RD->EndBatch();
+  if(_4it)qDev.EndBatch();
 }
 string Q3TextToNormal(const string&Text)
 {
@@ -2093,8 +2093,8 @@ public:
   public:
     TextLine(int x,int y,const string&text):x(x),y(y),text(text){}
   public:
-    void DrawRaw(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,Q3TextToNormal(text));}
-    void DrawSys(QapDev*RD,QapFont*Font,int dv){DrawQapText(RD,*Font,x+dv+0.5,y-dv+0.5,text);}
+    void DrawRaw(QapDev&qDev,QapFont*Font,int dv){DrawQapText(qDev,*Font,x+dv+0.5,y-dv+0.5,Q3TextToNormal(text));}
+    void DrawSys(QapDev&qDev,QapFont*Font,int dv){DrawQapText(qDev,*Font,x+dv+0.5,y-dv+0.5,text);}
   };
   vector<TextLine> LV;
   TextRender(QapDev*RD):RD(RD){}
@@ -2117,23 +2117,20 @@ public:
     LV.push_back(TextLine(x,y,text));x+=GetQ3TextLength(*NormFont,text);
   }
   void EndScope(){
-    //RD->SetBlendMode(BT_SUB);
-    //RD->SetAlphaMode(AM_NONE);
     {
       RD->BindTex(0,BlurFont->Tex);
       RD->SetColor(0xff000000);
       RD->BeginBatch();
-      for(int i=0;i<LV.size();i++)LV[i].DrawRaw(RD,BlurFont,1.0);
+      for(int i=0;i<LV.size();i++)LV[i].DrawRaw(*RD,BlurFont,1.0);
       RD->EndBatch();
     }
     {
       RD->BindTex(0,NormFont->Tex);
       RD->SetColor(0xffffffff);
       RD->BeginBatch();
-      for(int i=0;i<LV.size();i++)LV[i].DrawSys(RD,NormFont,0.0);
+      for(int i=0;i<LV.size();i++)LV[i].DrawSys(*RD,NormFont,0.0);
       RD->EndBatch();
     }
-    //RD->SetAlphaMode(AM_NONE);
   }
 };
 QapDev qDev;
@@ -2344,13 +2341,13 @@ class TGame{
 public:
   typedef QapAtlas::TFrame TFrame;
 public:
-  class ILevel{
+class ILevel{
   public:
-    virtual void Render(QapDev*RD)=0;
+    virtual void Render(QapDev&qDev)=0;
     virtual void Update(TGame*Game)=0;
     virtual bool Win()=0;
     virtual bool Fail()=0;
-    virtual void AddText(TextRender*TR){}
+    virtual void AddText(TextRender&TR){}
     virtual ~ILevel(){}
   };
   class ILevelFactory{
@@ -2702,10 +2699,10 @@ public:
     if(!ignore_r)if(dist>w.market_r)return -1;
     return market_id;
   }
-  void AddText(TextRender*TE){
+  void AddText(TextRender&TE){
     string BEG="^7";
     string SEP=" ^2: ^8";
-    #define GOO(TEXT,VALUE)TE->AddText(string(BEG)+string(TEXT)+string(SEP)+string(VALUE));
+    #define GOO(TEXT,VALUE)TE.AddText(string(BEG)+string(TEXT)+string(SEP)+string(VALUE));
     GOO("curr_t",FToS(w.t*1.0/Sys.UPS));
     GOO("prev_best_t",FToS(prev_best_t*1.0/Sys.UPS));
     GOO("curr_best_t",FToS(best_t*1.0/Sys.UPS));
@@ -2742,25 +2739,24 @@ public:
     }
     #undef GOO
   }
-  void RenderText(QapDev&RD)
+  void RenderText(QapDev&qDev)
   {
-    TextRender TE(&RD);
+    TextRender TE(&qDev);
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     hs.x=100;
     real ident=24.0;
     real Y=0;
-    RD.SetColor(0xff000000);
+    qDev.SetColor(0xff000000);
     TE.BeginScope(-hs.x+ident,+hs.y-ident,&Game->NormFont,&Game->BlurFont);
     {
       string BEG="^7";
       string SEP=" ^2: ^8";
-      //TE.AddText("");
-      RenderText(&RD,&TE);
+      RenderText(qDev,TE);
     }
     TE.EndScope();
   }
   //vector<TextRender::TextLine> tls;
-  void DrawMarketMenu(QapDev*RD,TextRender*TE,real text_posx,int mid,bool buttons)
+  void DrawMarketMenu(QapDev&qDev,TextRender&TE,real text_posx,int mid,bool buttons)
   {
     if(w.car.cargo.items.empty())return;
     if(mid<0)return;
@@ -2849,12 +2845,12 @@ public:
   bool check_rect(vec2d dpos,vec2d es){
     return (dpos.x>0&&dpos.x<es.x)&&(dpos.y>0&&dpos.y<es.y);
   }
-  void RenderText(QapDev*RD,TextRender*TE)
+  void RenderText(QapDev&qDev,TextRender&TE)
   {
     int mid=get_market_id(kb.MousePos,true);
     int pid=get_market_id(w.car.pos,false);
-    DrawMarketMenu(RD,TE,400,mid,false);
-    DrawMarketMenu(RD,TE,0,pid,true);
+    DrawMarketMenu(qDev,TE,400,mid,false);
+    DrawMarketMenu(qDev,TE,0,pid,true);
   }
   vec2d dyn_pos(const t_dynamic_obstacle&ex,int dt=0)
   {
