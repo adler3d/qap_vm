@@ -3542,7 +3542,9 @@ public:
     if(Menu->InGame())
     {
       auto check_frames=[&](){
-        for(auto&ex:g_global_imgs)if(!ex.second.done)return false;
+        QAP_EM_LOG("inside check_frames()");
+        for(auto&ex:g_global_imgs)if(!ex.second.done){QAP_EM_LOG("inside check_frames::fail");return false;}
+        QAP_EM_LOG("inside check_frames::ok");
         return true;
       };
       QAP_EM_LOG("before check_frames()");
