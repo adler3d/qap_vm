@@ -3324,6 +3324,7 @@ public:
     InitMenuSystem();
     update_user_name();
     RestartLevel();
+    Menu->Down();
     
     QAP_EM_LOG("after init");
   }
@@ -3511,7 +3512,7 @@ public:
       }
     }
   }
-  bool RenderScene_debug=true;
+  bool RenderScene_debug=false;
   void RenderScene()
   {
     /*
@@ -3543,36 +3544,25 @@ public:
       RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
     if(RenderScene_debug)QAP_EM_LOG("after kb.A");
-    QAP_EM_LOG("before QapAssert(Menu.get());");
     QapAssert(Menu.get());
-    QAP_EM_LOG("after QapAssert(Menu.get());");
     if(Menu->InGame())
     {
       auto check_frames=[&](){
-        QAP_EM_LOG("inside check_frames()");
         for(auto&ex:g_global_imgs)if(!ex.second.done){QAP_EM_LOG("inside check_frames::fail");return false;}
-        QAP_EM_LOG("inside check_frames::ok");
         return true;
       };
-      QAP_EM_LOG("before check_frames()");
       if(Level.get())if(check_frames()){
         if(RenderScene_debug)QAP_EM_LOG("before Level->Render");
         Level->Render(&RD);
       }
     }else{
-      QAP_EM_LOG("Menu->InGame() == false");
       TextRender TE(&RD);
-      QAP_EM_LOG("TextRender TE(&RD);");
       RD.SetColor(0xff000000);
       TE.BeginScope(0,0,&NormFont,&BlurFont);
-      QAP_EM_LOG("TE.BeginScope(0,0,&NormFont,&BlurFont);");
       Menu->Render(&RD,&TE);
-      QAP_EM_LOG("Menu->Render(&RD,&TE);");
       TE.EndScope();
-      QAP_EM_LOG("TE.EndScope();");
     };
     {
-      
       if(RenderScene_debug)QAP_EM_LOG("before RenderText");
       RenderText(RD);
       if(RenderScene_debug)QAP_EM_LOG("after RenderText");
