@@ -67,6 +67,7 @@ public:
   }
   static int64 qpc(){return EM_ASM_INT({return (1000*performance.now())|0;});}
 };
+#define QAP_EM_LOG(TEXT)EM_ASM({console.log(UTF8ToString($0));},string(TEXT).c_str());
 #endif //__EMSCRIPTEN__
 #endif //_WIN32
 #ifndef _WIN32
@@ -2149,7 +2150,7 @@ public:
       pMem->FillBorder(X,Y,Mem);
       pMem->FillMem(X,Y,Mem);
       X+=Mem->W+Ident;dY=max(dY,Mem->H);
-      EM_ASM({console.log("AddFrame done");});
+      QAP_EM_LOG("AddFrame done");
       return pFrame;
     }
   }
@@ -2283,23 +2284,23 @@ map<string,t_global_url> g_global_urls;
 extern "C" {
   int qap_on_load_img(char*pfn,int ptr,int w,int h){
     string fn=pfn;
-    EM_ASM({console.log("on_load:"+UTF8ToString($0));},int(fn.c_str()));
+    QAP_EM_LOG("on_load:"+fn);
     auto it=g_global_imgs.find(fn);
     if(it==g_global_imgs.end())return 0;
-    EM_ASM({console.log("on_load_bef:"+UTF8ToString($0));},int(fn.c_str()));
+    QAP_EM_LOG("on_load_bef:"+fn);
     it->second.on_load(fn,ptr,w,h);
-    EM_ASM({console.log("on_load_aft:"+UTF8ToString($0));},int(fn.c_str()));
+    QAP_EM_LOG("on_load_aft:"+fn);
     it->second.done=true;
     return 0;
   }
   int qap_on_load_url(char*purl,int ptr,int size){
     string url=purl;
-    EM_ASM({console.log("on_load_url:"+UTF8ToString($0));},int(url.c_str()));
+    QAP_EM_LOG("on_load_url:"+url);
     auto it=g_global_urls.find(url);
     if(it==g_global_urls.end())return 0;
-    EM_ASM({console.log("on_load_url_bef:"+UTF8ToString($0));},int(url.c_str()));
+    QAP_EM_LOG("on_load_url_bef:"+url);
     it->second.on_load(url,ptr,size);
-    EM_ASM({console.log("on_load_url_aft:"+UTF8ToString($0));},int(url.c_str()));
+    QAP_EM_LOG("on_load_url_aft:"+url);
     it->second.done=true;
     return 0;
   }
@@ -3216,12 +3217,12 @@ public:
     {
       static auto on_load_tex=[&](string fn){
         frames--;
-        EM_ASM({console.log("on_load_tex:"+UTF8ToString($0));},int(fn.c_str()));
+        QAP_EM_LOG("on_load_tex:"+fn);
         if(frames||done)return;
-        EM_ASM({console.log("on_load_tex_done_at:"+UTF8ToString($0));},int(fn.c_str()));
+        QAP_EM_LOG("on_load_tex_done_at:"+fn);
         done=true;
         Atlas.GenTex();
-        EM_ASM({console.log("on_load_tex_done_at_aft_GenTex:"+UTF8ToString($0));},int(fn.c_str()));
+        QAP_EM_LOG("on_load_tex_done_at_aft_GenTex:"+fn);
       };
       #define F(NAME,FILE,MODE)frames++;
       FRAMESCOPE(F);
@@ -3229,7 +3230,7 @@ public:
       #define F(NAME,FILE,MODE){\
         t_frame&f=frame_##NAME;f.fn="GFX\\" FILE ".png";\
         LoadTexture(f.fn,[&](const string&fn,int ptr,int w,int h){\
-          EM_ASM({console.log("on_LoadTexture:"+UTF8ToString($0)+" "+$1+" "+$2);},int(fn.c_str()),w,h);\
+          QAP_EM_LOG("on_LoadTexture:"+fn+" "+IToS(w)+" "+IToS(h));\
           QapTexMem*pMem=new QapTexMem(fn+"_"+to_string(w),w,h,(QapColor*)ptr);\
           if(MODE==2)pMem=m2(pMem);\
           Frame##NAME=Atlas.AddFrame(pMem);\
@@ -3250,7 +3251,7 @@ public:
   {
     srand(time(NULL));
     
-    EM_ASM({console.log("before CreateFontMem");});
+    QAP_EM_LOG("before CreateFontMem");
     {
       QapTexMem*pNormMem=NormFont.CreateFontMem("Arial",14,false,512);
       QapTexMem*pBlurMem=pNormMem->Clone();
@@ -3262,10 +3263,10 @@ public:
       NormFont.Tex=GenTextureMipMap(pNormMem);
       //SysFont=FontCreate("Arial",16,false,512);
     }
-    EM_ASM({console.log("before LoadFrames");});
+    QAP_EM_LOG("before LoadFrames");
     LoadFrames();
     
-    EM_ASM({console.log("before LoadTexture");});
+    QAP_EM_LOG("before LoadTexture");
     if(1)
     {
       LoadTexture("GFX\\market_car_v2.png",[&](const string&fn,int ptr,int w,int h){
@@ -3281,14 +3282,14 @@ public:
       //ptm=LoadTexture("GFX\\market_car_v2_full.png");
       //th_rt_tex_full=GenTextureMipMap(ptm);
     }
-    EM_ASM({console.log("before RD.Init();");});
+    QAP_EM_LOG("before RD.Init();");
     RD.Init(1024*32,1024*32*2);
-    EM_ASM({console.log("after RD.Init();");});
+    QAP_EM_LOG("after RD.Init();");
     InitLevelsInfo();
     //RestartLevel();
     InitMenuSystem();
     
-    EM_ASM({console.log("after init");});
+    QAP_EM_LOG("after init");
   }
   void InitLevelsInfo()
   {
@@ -3493,7 +3494,7 @@ public:
       RD.DrawQuad(-512,0,th_rt_tex->W,th_rt_tex->H,0);
       RD.BindTex(0,0);
     }
-    if(RenderScene_debug)EM_ASM({console.log("before kb.A");});
+    if(RenderScene_debug)QAP_EM_LOG("before kb.A");
     if(kb.Down['A']&&!Menu->InGame()){
       if(1){
         RD.BindTex(0,0);
@@ -3507,7 +3508,7 @@ public:
       RD.SetColor(0xffffffff);
       RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
-    if(RenderScene_debug)EM_ASM({console.log("after kb.A");});
+    if(RenderScene_debug)QAP_EM_LOG("after kb.A");
     QapAssert(Menu.get());
     if(Menu->InGame())
     {
@@ -3516,7 +3517,7 @@ public:
         return true;
       };
       if(Level.get())if(check_frames()){
-        if(RenderScene_debug)EM_ASM({console.log("before Level->Render");});
+        if(RenderScene_debug)QAP_EM_LOG("before Level->Render");
         Level->Render(&RD);
       }
     }else{
@@ -3528,9 +3529,9 @@ public:
     };
     {
       
-      if(RenderScene_debug)EM_ASM({console.log("before RenderText");});
+      if(RenderScene_debug)QAP_EM_LOG("before RenderText");
       RenderText(RD);
-      if(RenderScene_debug)EM_ASM({console.log("after RenderText");});
+      if(RenderScene_debug)QAP_EM_LOG("after RenderText");
     }
   }
 /*
