@@ -2,6 +2,8 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <sstream>
+#include <iomanip>
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
