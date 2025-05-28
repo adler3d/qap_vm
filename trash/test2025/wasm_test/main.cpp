@@ -223,6 +223,9 @@ static const int Sys_UPD=64;
 inline string IToS(const int&val){return to_string(val);}
 inline string FToS(const double&val){return to_string(val);}
 inline string FToS(const float&val){return to_string(val);}
+#ifdef __EMSCRIPTEN__
+#define __debugbreak()EM_ASM({throw new Error("__debugbreak");});
+#endif
 inline bool SysQapAssert(const string&exp,bool&ignore,const string&filename,const int line,const string&funcname);
 inline bool SysQapDebugMsg(const string&msg,bool&ignore,const string&filename,const int line,const string&funcname);
 #if(defined(_DEBUG)||defined(QAP_DEBUG))
