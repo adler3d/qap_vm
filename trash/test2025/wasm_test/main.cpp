@@ -3708,6 +3708,7 @@ public:
 };
 TGame Game;
 void update_last_char_from_keyboard(QapKeyboard&kb){
+  kb.News=false;
   for(int key=0;key<QapKeyboard::TKeyState::MAX_KEY;key++){
     if(!(kb.Changed[key]&&kb.Down[key]))continue;
     if((key>='A'&&key<='Z')||(key>='a'&&key<='z')){
