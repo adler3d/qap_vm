@@ -146,8 +146,35 @@ public:
 #define VK_CAPITAL        0x14
 
 #endif
-static bool file_put_contents(const string&FN,const string&mem){return true;}
-static string file_get_contents(const string&fn){return {};}
+$ifdef __EMSCRIPTEN__
+static string file_get_contents(const string&fn){
+  int length=EM_ASM_INT({
+    let key=UTF8ToString($0);
+    let val=localStorage.getItem(key);
+    if(val===null)return 0;
+    return lengthBytesUTF8(val);
+  },fn.c_str());
+  if(!length)return {};
+  string out;out.resize(length);
+  EM_ASM({
+    let key=UTF8ToString($0);
+    let val=localStorage.getItem(key);
+    if(val!==null)stringToUTF8(val,$1,$2+1);
+  },fn.c_str(),out.data(),length);
+  return out;
+}
+static bool file_put_contents(const string&FN,const string&mem){
+  EM_ASM({
+    let key=UTF8ToString($0);
+    let val=UTF8ToString($1);
+    localStorage.setItem(key,val);
+  },FN.c_str(),mem.c_str());
+  return true;
+}
+#else
+static bool file_put_contents(const string&FN,const string&mem){std::fstream f(FN,std::ios::out|std::ios::trunc);f<<mem;return true;}
+static string file_get_contents(const string&fn){std::ifstream file(fn);return std::string((std::istreambuf_iterator<char>(file)),(std::istreambuf_iterator<char>()));}
+#endif
 template<class TYPE>
 void QapPopFront(vector<TYPE>&arr)
 {
