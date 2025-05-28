@@ -3538,7 +3538,9 @@ public:
       RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
     if(RenderScene_debug)QAP_EM_LOG("after kb.A");
+    QAP_EM_LOG("before QapAssert(Menu.get());");
     QapAssert(Menu.get());
+    QAP_EM_LOG("after QapAssert(Menu.get());");
     if(Menu->InGame())
     {
       auto check_frames=[&](){
