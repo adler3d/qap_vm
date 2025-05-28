@@ -221,8 +221,7 @@ inline int WinMessageBox(const string&caption,const string&text)
   return retval;
   #else
   #ifdef __EMSCRIPTEN__
-  //emscripten_run_script(string("alert('"+caption')").c_str());
-  EM_ASM({alert(UTF8ToString($0)+"\n"+UTF8ToString($1));},int(fn.c_str()),int(text.c_str()));
+  EM_ASM({alert(UTF8ToString($0)+"\n"+UTF8ToString($1));},int(caption.c_str()),int(text.c_str()));
   return qmbrBreak;
   #endif
   #endif
