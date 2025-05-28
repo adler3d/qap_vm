@@ -222,7 +222,7 @@ struct TSys{int UPS=128;struct TSM{int W=1920,H=1024;};TSM SM;bool UPS_enabled=t
 static const int Sys_UPD=64;
 inline string IToS(const int&val){return to_string(val);}
 inline string FToS(const double&val){return to_string(val);}
-inline string FToS(const float&val){return to_string(val);}
+inline string FToS2(const float&val){std::stringstream ss;ss<<std::fixed<<std::setprecision(2)<<val;return ss.str();}
 #ifdef __EMSCRIPTEN__
 #define __debugbreak()EM_ASM({throw new Error("__debugbreak");});
 #endif
@@ -2615,7 +2615,7 @@ public:
     int seed;
     string game;
     vector<string> to_str()const{
-      return {IToS(place),user,FToS(sec),date,IToS(seed)};
+      return {IToS(place),user,FToS2(sec),date,IToS(seed)};
     }
   };
   vector<t_rec> tops;
