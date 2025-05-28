@@ -2146,7 +2146,7 @@ public:
     int x,y,w,h;
     TFrame():atlas(NULL),x(0),y(0),w(0),h(0){}
     TFrame(QapAtlas*atlas,QapTexMem*Mem,int x,int y):atlas(atlas),x(x),y(y),w(Mem->W),h(Mem->H){}
-    void Bind(QapDev*RD){atlas->Bind(RD,this);}
+    void Bind(QapDev&qDev){atlas->Bind(qDev,this);}
   };
   QapPool<TFrame>pool;
   vector<TFrame*>frames;
@@ -2886,7 +2886,7 @@ public:
         QapDev::BatchScope Scope(qDev);
         auto&F=*Game->FrameObstacle;
         qDev.SetColor(0xffffffff);
-        F.Bind(RD);
+        F.Bind(qDev);
         for(auto&ex:w.obstacles){
           qDev.DrawQuad(ex.x,ex.y,F.w,F.h);
           //qDev.DrawCircleEx(ex,0,w.obstacle_r,32,0);
@@ -2897,7 +2897,7 @@ public:
         //qDev.SetColor(0xff777777);
         qDev.SetColor(0xffffffff);
         qDev.BindTex(0,Game->Atlas.pTex);
-        Game->FrameEnemy->Bind(RD);
+        Game->FrameEnemy->Bind(qDev);
         QapDev::BatchScope Scope(qDev);
         for(auto&m:w.dyn_obs){
           auto p=dyn_pos(m);
@@ -2911,7 +2911,7 @@ public:
       if(bool need_draw_tank=Game->th_rt_tex&&Game->th_rt_tex_full){
         bool cargo_empty=true;
         for(auto&ex:w.car.cargo.items)if(ex.amount>0)cargo_empty=false;
-        auto*pF=cargo_empty?Game->th_rt_tex:Game->th_rt_tex_full;auto&qDev=*RD;
+        auto*pF=cargo_empty?Game->th_rt_tex:Game->th_rt_tex_full;
         qDev.BindTex(0,pF);
         qDev.SetColor(0xffffffff);
         auto scale=0.5;
@@ -2921,18 +2921,18 @@ public:
         qDev.BindTex(0,0);
         qDev.SetColor(0xff0000ff);
         for(auto&ex:edges){
-          DrawLine(*RD,ex.a,ex.b,4);
+          DrawLine(qDev,ex.a,ex.b,4);
         }
         qDev.SetColor(0xffff0000);
         for(auto&ex:bad_edges){
-          DrawLine(*RD,ex.a,ex.b,4);
+          DrawLine(qDev,ex.a,ex.b,4);
         }
       }
       if(bool need_draw_markets=Game->FrameMarket){
         qDev.SetColor(0xffffffff);
         qDev.BindTex(0,Game->Atlas.pTex);
         QapDev::BatchScope Scope(qDev);
-        Game->FrameMarket->Bind(RD);
+        Game->FrameMarket->Bind(qDev);
         for(auto&m:w.city.arr){
           //qDev.DrawQuad(m.pos.x,m.pos.y,40,40);
           qDev.DrawQuad(m.pos.x,m.pos.y,128,128);
@@ -2960,7 +2960,7 @@ public:
         qDev.BindTex(0,Game->Atlas.pTex);
         qDev.DrawQuad(+500,0,1024,1024);
       }*/
-      RenderText(*RD);
+      RenderText(qDev);
     }
   }
   static void draw_shadow_quad(QapDev&qDev,QapAtlas::TFrame*pF,bool shadow,vec2d pos,vec2d wh,QapColor color,real ang=0){
@@ -3175,7 +3175,7 @@ public:
   std::unique_ptr<TMenu>Menu;
 public:
   QapAtlas Atlas;
-  QapDev RD;
+  QapDev qDev;
   QapFont NormFont;
   QapFont BlurFont;
   QapTex*th_rt_tex{};
@@ -3302,9 +3302,9 @@ public:
       //ptm=LoadTexture("GFX\\market_car_v2_full.png");
       //th_rt_tex_full=GenTextureMipMap(ptm);
     }
-    QAP_EM_LOG("before RD.Init();");
-    RD.Init(1024*32,1024*32*2);
-    QAP_EM_LOG("after RD.Init();");
+    QAP_EM_LOG("before qDev.Init();");
+    qDev.Init(1024*32,1024*32*2);
+    QAP_EM_LOG("after qDev.Init();");
     InitLevelsInfo();
     //RestartLevel();
     InitMenuSystem();
@@ -3454,7 +3454,7 @@ public:
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     real ident=24.0;
     real Y=0;
-    RD.SetColor(0xff000000);
+    qDev.SetColor(0xff000000);
     TE.BeginScope(-hs.x+ident,+hs.y-ident,&NormFont,&BlurFont);
     {
       const string PreesR=" ^7(^3press ^2R^7)";
@@ -3504,32 +3504,32 @@ public:
   void RenderScene()
   {
     /*
-    RD.BindTex(0,0);
-    RD.SetColor(0xff000000);
-    RD.DrawQuad(0,0,512,512);
+    qDev.BindTex(0,0);
+    qDev.SetColor(0xff000000);
+    qDev.DrawQuad(0,0,512,512);
     if(!EndScene())return;
     Present();
     return;*/
     if(user_name_scene)return InputUserNameRender();
     if(bool need_draw_tank_hodun_rt=true)if(th_rt_tex)if(!Menu->InGame()){
-      RD.BindTex(0,th_rt_tex);
-      RD.SetColor(0xffffffff);
-      RD.DrawQuad(-512,0,th_rt_tex->W,th_rt_tex->H,0);
-      RD.BindTex(0,0);
+      qDev.BindTex(0,th_rt_tex);
+      qDev.SetColor(0xffffffff);
+      qDev.DrawQuad(-512,0,th_rt_tex->W,th_rt_tex->H,0);
+      qDev.BindTex(0,0);
     }
     if(RenderScene_debug)QAP_EM_LOG("before kb.A");
     if(kb.Down['A']&&!Menu->InGame()){
       if(1){
-        RD.BindTex(0,0);
-        RD.SetColor(0xffffffff);
-        RD.DrawQuad(kb.MousePos.x,kb.MousePos.y,96,96,0);
-        RD.SetColor(0xffff0000);
-        RD.DrawQuad(kb.MousePos.x,kb.MousePos.y,64,64,0);
+        qDev.BindTex(0,0);
+        qDev.SetColor(0xffffffff);
+        qDev.DrawQuad(kb.MousePos.x,kb.MousePos.y,96,96,0);
+        qDev.SetColor(0xffff0000);
+        qDev.DrawQuad(kb.MousePos.x,kb.MousePos.y,64,64,0);
       }
-      RD.BindTex(0,Atlas.pTex);
-      //RD.SetBlendMode(BT_SUB);
-      RD.SetColor(0xffffffff);
-      RD.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
+      qDev.BindTex(0,Atlas.pTex);
+      //qDev.SetBlendMode(BT_SUB);
+      qDev.SetColor(0xffffffff);
+      qDev.DrawQuad(0.5,0.5,Atlas.W,Atlas.H,0);
     }
     if(RenderScene_debug)QAP_EM_LOG("after kb.A");
     QapAssert(Menu.get());
@@ -3545,7 +3545,7 @@ public:
       }
     }else{
       TextRender TE(&RD);
-      RD.SetColor(0xff000000);
+      qDev.SetColor(0xff000000);
       TE.BeginScope(0,0,&NormFont,&BlurFont);
       Menu->Render(&RD,&TE);
       TE.EndScope();
@@ -3563,7 +3563,7 @@ public:
     QapDX::Set2D();
     //QapDX::Clear2d(1?QapColor(180,180,180):0xffc8c8c8);
     {int v=231*0+206*0+210;QapDX::Clear2d(QapColor(v,v,v));}
-    RD.NextFrame();
+    qDev.NextFrame();
     RenderScene();
     if(!QapDX::EndScene())return;
     QapDX::Present();
@@ -3574,7 +3574,7 @@ public:
     vec2d hs=vec2d(Sys.SM.W,Sys.SM.H)*0.5;
     real ident=24.0;
     real Y=0;
-    RD.SetColor(0xff000000);
+    qDev.SetColor(0xff000000);
     TE.BeginScope(-hs.x+ident,+hs.y-ident,&NormFont,&BlurFont);
     {
       const string PreesR=" ^7(^3press ^2R^7)";
@@ -3598,12 +3598,12 @@ public:
     }
     TE.EndScope();
     if(bool need_draw_font=false){
-      RD.color=0xFF000000;
-      RD.BindTex(0,BlurFont.Tex);
-      RD.DrawQuad(1.5,-0.5,-512,512,Pi);
-      RD.color=0xFFFFFFFF;
-      RD.BindTex(0,NormFont.Tex);
-      RD.DrawQuad(0.5,0.5,-512,512,Pi);
+      qDev.color=0xFF000000;
+      qDev.BindTex(0,BlurFont.Tex);
+      qDev.DrawQuad(1.5,-0.5,-512,512,Pi);
+      qDev.color=0xFFFFFFFF;
+      qDev.BindTex(0,NormFont.Tex);
+      qDev.DrawQuad(0.5,0.5,-512,512,Pi);
     }
   }
   void Collide()
