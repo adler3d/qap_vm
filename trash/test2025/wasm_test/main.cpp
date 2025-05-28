@@ -3108,6 +3108,7 @@ public:
   };
   void Render(QapDev*RD,TextRender*TE)
   {
+    if(!Game->FrameMenuItem||!Game->Atlas.pTex)return;
     const real dy=32;
     real y=+0.5*Items.size()*dy;
     RD->BindTex(0,Game->Atlas.pTex);
