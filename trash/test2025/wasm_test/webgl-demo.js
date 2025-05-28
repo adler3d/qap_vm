@@ -519,6 +519,7 @@ function start(){
   let mid2key=['mbLeft','mbRight','mbMiddle'];
   for(let k='a'.charCodeAt(0);k<='z'.charCodeAt(0);k++)g_keys[String.fromCharCode(k)]={k:[String.fromCharCode(k).toUpperCase().charCodeAt(0)]};
   for(let k='A'.charCodeAt(0);k<='Z'.charCodeAt(0);k++)g_keys[String.fromCharCode(k)]={k:[k]};
+  for(let k='0'.charCodeAt(0);k<='9'.charCodeAt(0);k++)g_keys[String.fromCharCode(k)]={k:[k]};
   document.addEventListener('keydown',function(event){
     if(event.key in g_keys){
       let k=g_keys[event.key];
@@ -526,6 +527,10 @@ function start(){
       k.changed=true;
       k.k.map(k=>g_kb_down[k]=1);
       k.k.map(k=>g_kb_changed[k]=1);
+    }
+    if(event.keyCode===8){
+      // Prevent the default action (going back in history)
+      event.preventDefault();
     }
   });
   document.addEventListener('keyup',function(event){
@@ -558,7 +563,7 @@ function start(){
     k.k.map(k=>g_kb_down[k]=0);
     k.k.map(k=>g_kb_changed[k]=1);
   });
-  let host=1?"185.92.223.117":document.location.host+"";
+  let host=0?"185.92.223.117":document.location.host+"";
   console.log({host});
   Module.ccall('qap_main','int',["string"],[host]);
 }
@@ -568,7 +573,7 @@ const fetchFile=async dataURL=>{
 function fetchFile_v2(dataURL){
   let url=dataURL.split(" ").slice(1).join(" ");
   let preview=async url=>{
-    let data=await fetchFile("http://cors.io/?http://"+url);
+    let data=await fetchFile("http://"+url);
     let s=data+"";
     let p=stringToNewUTF8(s);
     console.log({p,L:s.length,s});
