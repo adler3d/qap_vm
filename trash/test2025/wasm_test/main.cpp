@@ -3645,9 +3645,9 @@ public:
     {
       if(Level.get())
       {
-        QAP_EM_LOG("bef_update_level");
+        //QAP_EM_LOG("bef_update_level");
         Level->Update(this);
-        QAP_EM_LOG("aft_update_level");
+        //QAP_EM_LOG("aft_update_level");
         {WaitFail++;WaitWin++;}
         if(!WaitWin.Runned&&!WaitFail.Runned)
         {
@@ -3714,9 +3714,9 @@ void update_kb(){
 }
 extern "C" {
   int update(int nope){
-    QAP_EM_LOG("Game.RenderScene();");
+    //QAP_EM_LOG("Game.RenderScene();");
     Game.RenderScene();
-    QAP_EM_LOG("update_kb();");
+    //QAP_EM_LOG("update_kb();");
     update_kb();
     Game.Update();
     update_kb();
