@@ -3561,10 +3561,14 @@ public:
     }else{
       QAP_EM_LOG("Menu->InGame() == false");
       TextRender TE(&RD);
+      QAP_EM_LOG("TextRender TE(&RD);");
       RD.SetColor(0xff000000);
       TE.BeginScope(0,0,&NormFont,&BlurFont);
+      QAP_EM_LOG("TE.BeginScope(0,0,&NormFont,&BlurFont);");
       Menu->Render(&RD,&TE);
+      QAP_EM_LOG("Menu->Render(&RD,&TE);");
       TE.EndScope();
+      QAP_EM_LOG("TE.EndScope();");
     };
     {
       
