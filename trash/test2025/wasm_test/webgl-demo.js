@@ -1,3 +1,5 @@
+const G_UPS=128;
+const UPDATE_INTERVAL = 1000 / G_UPS; // 7.8125 мс
 var qDev={
   parr:[-1,-1,+1,-1,+1,+1,-1,+1].map(e=>e*256),
   carr:[
@@ -275,7 +277,7 @@ function drawScene(gl,prog,buffers,squareRotation,texture) {
   qDev.prog=prog;
   //qDev.parr[0]=squareRotation;
   qDev.NextFrame(qDev);
-  Module.ccall('update','int',["int"],[0]);
+  Module.ccall('render','int',["int"],[0]);
   //qDev.DIP(qDev);
 }
 
@@ -283,7 +285,7 @@ var squareRotation=-256;
 
 function main() {
   const canvas = document.querySelector("#glcanvas");
-  const gl = canvas.getContext("webgl",{ alpha: false,premultipliedAlpha: false});
+  const gl = canvas.getContext("webgl",{ alpha: false,premultipliedAlpha: false,antialias: true});
   const ext = gl.getExtension("OES_element_index_uint");
   if (gl===null||ext==null) {
     alert(
@@ -358,11 +360,19 @@ function main() {
     deltaTime = now - then;
     then = now;
     drawScene(gl,prog,null,squareRotation,texture);
+    for(;;){
+      if(performance.now()-g_lastUpdate>=UPDATE_INTERVAL){
+        Module.ccall('update','int',["int"],[0]);
+        g_lastUpdate+=UPDATE_INTERVAL;
+      }else break;
+    }
     //squareRotation += deltaTime;
     requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
 }
+let g_lastUpdate=performance.now();
+
 function update_kb(pD,pC){
   let MAX_KEY=263;
   for(let i=0;i<=MAX_KEY;i++){
