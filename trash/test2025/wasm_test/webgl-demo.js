@@ -530,22 +530,47 @@ function start(){
   for(let k='a'.charCodeAt(0);k<='z'.charCodeAt(0);k++)g_keys[String.fromCharCode(k)]={k:[String.fromCharCode(k).toUpperCase().charCodeAt(0)]};
   for(let k='A'.charCodeAt(0);k<='Z'.charCodeAt(0);k++)g_keys[String.fromCharCode(k)]={k:[k]};
   for(let k='0'.charCodeAt(0);k<='9'.charCodeAt(0);k++)g_keys[String.fromCharCode(k)]={k:[k]};
+
+  // === [Добавлено] ===
+  // Быстрый обратный индекс: code -> keyname
+  let g_code2key={};
+  for(let keyname in g_keys){
+    let arr=g_keys[keyname].v||[];
+    for(let v of arr){
+      g_code2key[v]=keyname;
+    }
+  }
+  // Добавим стандартные коды для букв и цифр
+  for(let c=0;c<26;c++){
+    g_code2key["Key"+String.fromCharCode(65+c)] = String.fromCharCode(65+c); // "KeyA" -> "A"
+  }
+  for(let c=0;c<10;c++){
+    g_code2key["Digit"+c]=""+c;
+    g_code2key["Numpad"+c]=""+c;
+  }
+  // ==================
+
   document.addEventListener('keydown',function(event){
-    if(event.key in g_keys){
-      let k=g_keys[event.key];
+    let keyname=null;
+    if(event.key in g_keys)keyname=event.key;
+    else if(event.code && (event.code in g_code2key))keyname=g_code2key[event.code];
+    if(keyname){
+      let k=g_keys[keyname];
       k.down=true;
       k.changed=true;
       k.k.map(k=>g_kb_down[k]=1);
       k.k.map(k=>g_kb_changed[k]=1);
     }
     if(event.keyCode===8){
-      // Prevent the default action (going back in history)
       event.preventDefault();
     }
   });
   document.addEventListener('keyup',function(event){
-    if(event.key in g_keys){
-      let k=g_keys[event.key];
+    let keyname=null;
+    if(event.key in g_keys)keyname=event.key;
+    else if(event.code && (event.code in g_code2key))keyname=g_code2key[event.code];
+    if(keyname){
+      let k=g_keys[keyname];
       k.down=false;
       k.changed=true;
       k.k.map(k=>g_kb_down[k]=0);
