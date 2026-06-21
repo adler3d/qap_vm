@@ -249,6 +249,29 @@ auto lex2str=[](auto&lex){
 
 #include "t_calc_impl.hpp"
 
+extern "C" {
+  static double sin_(double x){return sin(x);}
+  static double cos_(double x){return cos(x);}
+  static double sqrt_(double x){return sqrt(x);}
+  static double floor_(double x){return floor(x);}
+  static double ceil_(double x){return ceil(x);}
+  static double exp_(double x){return exp(x);}
+  static double abs_(double x){return abs(x);}
+  static double log_(double x){return log(x);}
+  static double tan_(double x){return tan(x);}
+  static double pow_(double x,double y){return pow(x,y);}
+  static double dist_(double x,double y){return sqrt(x*x+y*y);}
+  static double ifgtone_(double x,double y){return x>1?y:x;}
+  static double atan2_(double y,double x){return atan2(y,x);}
+  static double min_(double y,double x){
+    //cout<<"passed"<<endl;cin.get();
+    return min(y,x);
+  }
+  static double max_(double y,double x){
+    return max(y,x);
+  }
+};
+
 namespace t_calc_test{
 enum
 {
@@ -308,6 +331,70 @@ struct t_codegen{
   static string sxmm(int id)
   {
     return "xmm"+IToS(id);
+  }
+  void emit_mov_rdi_r13() {  // для Linux: первый аргумент в RDI
+    out("mov rdi,r13");
+    u8(0x4C); u8(0x89); u8(0xEF);
+  }
+  void emit_mov_arg1_reg() {
+    #ifdef __linux__
+    emit_mov_rdi_r13();
+    #else
+    emit_mov_rcx_r13();
+    #endif
+  }
+  void emit_call_user(t_function*target){
+    // Сохраняем параметры в правильных регистрах
+    #ifdef __linux__
+    emit_mov_rdi_r13();  // Linux: 1-й аргумент в RDI
+    #else
+    emit_mov_rcx_r13();  // Windows: 1-й аргумент в RCX
+    #endif
+    
+    out("mov rax,"+target->name);
+    u8(0x48); u8(0xB8);
+    auto pos=code.size();
+    u64(0);
+    patches.push_back({pos,target->name,target});
+    
+    // Выравнивание стека для Linux (должен быть 16-байтовым)
+    #ifdef __linux__
+    // Проверяем выравнивание стека
+    int alignment = (rsp_bias + 8) & 15; // +8 для return address
+    if (alignment != 0) {
+      int pad = 16 - alignment;
+      emit_sub_rsp(pad);
+      emit_call_rax();
+      emit_add_rsp(pad);
+    } else {
+      emit_call_rax();
+    }
+    #else
+    emit_call_rax();
+    #endif
+  }
+  void emit_call(const string&name){
+    if(!fn_addr.count(name)){cerr<<"fatal error! function not found: "<<name<<endl;exit(-1);}
+    auto addr=(uint64_t)fn_addr[name];
+    out("mov rax,"+name);
+    u8(0x48);
+    u8(0xB8);
+    u64(addr);
+    
+    #ifdef __linux__
+    // Выравнивание стека для Linux
+    int alignment = (rsp_bias + 8) & 15;
+    if (alignment != 0) {
+      int pad = 16 - alignment;
+      emit_sub_rsp(pad);
+      emit_call_rax();
+      emit_add_rsp(pad);
+    } else {
+      emit_call_rax();
+    }
+    #else
+    emit_call_rax();
+    #endif
   }
   void emit_load_const(double v)
   {
@@ -624,7 +711,7 @@ struct t_codegen{
     out("call rax");
     u8(0xFF);u8(0xD0);
     emit_add_rsp(bytes);
-  }
+  }/*
   void emit_call(const string&name){
     if(!fn_addr.count(name)){cerr<<"fatal error! function not found: "<<name<<endl;exit(-1);}
     auto addr=(uint64_t)fn_addr[name];
@@ -642,7 +729,7 @@ struct t_codegen{
     u64(0);
     patches.push_back({pos,target->name,target});
     emit_call_rax();
-  }
+  }*/
   void emit_alloc_call_frame(int bytes)
   {
     out("mov rdx,r12");
@@ -705,26 +792,6 @@ struct t_codegen{
   void pop_r8(){out("pop r8");u8(0x41);u8(0x58);rsp_bias-=8;}
 
   unordered_map<string,void*> fn_addr;
-  static double sin_(double x){return sin(x);}
-  static double cos_(double x){return cos(x);}
-  static double sqrt_(double x){return sqrt(x);}
-  static double floor_(double x){return floor(x);}
-  static double ceil_(double x){return ceil(x);}
-  static double exp_(double x){return exp(x);}
-  static double abs_(double x){return abs(x);}
-  static double log_(double x){return log(x);}
-  static double tan_(double x){return tan(x);}
-  static double pow_(double x,double y){return pow(x,y);}
-  static double dist_(double x,double y){return sqrt(x*x+y*y);}
-  static double ifgtone_(double x,double y){return x>1?y:x;}
-  static double atan2_(double y,double x){return atan2(y,x);}
-  static double min_(double y,double x){
-    //cout<<"passed"<<endl;cin.get();
-    return min(y,x);
-  }
-  static double max_(double y,double x){
-    return max(y,x);
-  }
   void init_fn_addr(){
     fn_addr["sin"]=(void*)sin_;
     fn_addr["cos"]=(void*)cos_;
@@ -742,7 +809,7 @@ struct t_codegen{
     fn_addr["tan"]=(void*)tan_;
     fn_addr["ifgtone"]=(void*)ifgtone_;
     #define F(CODE)cout<<#CODE"="<<(CODE)<<endl;
-    F(sin_(10))F(cos_(10))F(sqrt_(14))F(atan2_(10,20))F(min_(10,20))F(max_(10,20))
+    //F(sin_(10))F(cos_(10))F(sqrt_(14))F(atan2_(10,20))F(min_(10,20))F(max_(10,20))
     #undef F
   }
 };
@@ -843,7 +910,11 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
         jit.emit_store_call_arg(slot);
       }
       jit.emit_push_rcx();
-      jit.emit_mov_rcx_r13();
+      #ifdef __linux__
+      jit.emit_mov_rdi_r13();  // Linux: указатель в RDI
+      #else
+      jit.emit_mov_rcx_r13();  // Windows: указатель в RCX
+      #endif
       jit.emit_call_user(target);
       jit.emit_pop_rcx();
       jit.emit_free_call_frame(target->frame_size_aligned);
