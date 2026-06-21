@@ -979,7 +979,7 @@ struct t_codegen{
 
   void emit_root_func_begin(int frame_size){
     emit_push_stack_reg();
-    ifdef __linux__
+    #ifdef __linux__
     out("mov rcx,rdi");
     u8(0x48); u8(0x89); u8(0xF9);
     #endif
