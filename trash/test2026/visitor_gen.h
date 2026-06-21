@@ -932,37 +932,46 @@ struct t_codegen{
   }
 
   void emit_stack_push(int reg){
+    int xmm_id = reg - XMM0;
+  
     QQ(
       // Linux: используем r15
-      out("movsd [r15],xmm"+IToS(reg-XMM0));
-      u8(0xF2); u8(0x41); u8(0x0F); u8(0x11); u8(0x07);
+      out("movsd [r15],xmm"+IToS(xmm_id));
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x11);
+      u8(0x07 | (xmm_id << 3)); // base=7 для r15
       out("add r15,8");
       u8(0x49); u8(0x83); u8(0xC7); u8(8),
-      
+    
       // Windows: используем r8
-      out("movsd [r8],xmm"+IToS(reg-XMM0));
-      u8(0xF2); u8(0x41); u8(0x0F); u8(0x11); u8(8*(reg-XMM0));
+      out("movsd [r8],xmm"+IToS(xmm_id));
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x11);
+      u8(0x00 | (xmm_id << 3)); // base=0 для r8
       out("add r8,8");
       u8(0x49); u8(0x83); u8(0xC0); u8(8)
     )
   }
-  /*
   void emit_stack_pop(int reg){
+    int xmm_id = reg - XMM0;
+  
     QQ(
       // Linux: используем r15
       out("sub r15,8");
       u8(0x49); u8(0x83); u8(0xEF); u8(8);
-      out("movsd xmm"+IToS(reg-XMM0)+",[r15]");
-      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10); u8(0x07),
-      
+      out("movsd xmm"+IToS(xmm_id)+",[r15]");
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10);
+      u8(0x07 | (xmm_id << 3));, // base=7 для r15
+    
       // Windows: используем r8
       out("sub r8,8");
       u8(0x49); u8(0x83); u8(0xE8); u8(8);
-      out("movsd xmm"+IToS(reg-XMM0)+",[r8]");
-      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10); u8(8*(reg-XMM0))
+      out("movsd xmm"+IToS(xmm_id)+",[r8]");
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10);
+      u8(0x00 | (xmm_id << 3)); // base=0 для r8
     )
-  }*/
+  }
 
+
+  /*
   void emit_stack_pop(int reg){
     QQ(
       // Linux: используем r15
@@ -987,7 +996,7 @@ struct t_codegen{
       u8(0xF2); u8(0x41); u8(0x0F); u8(0x10);
       u8(0x07 | (xmm_id << 3));  // MODRM для [r8] с указанием регистра
     )
-  }
+  }*/
 
   void emit_push_stack_reg(){
     QQ(
