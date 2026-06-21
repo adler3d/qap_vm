@@ -4,8 +4,8 @@ import pybind11
 ext = Extension(
     name="tcalc",
     sources=["tcalc_binding.cpp"],
-    include_dirs=[pybind11.get_include(), "../"],  # "../" Ч туда, где core.h
-    libraries=[],  # на Windows: возможно "tcalc" (DLL)
+    include_dirs=[pybind11.get_include(), "../"],  # "../" core.h
+    libraries=[],  # "tcalc" (DLL)
     extra_compile_args=["-std=c++17"],
 )
 
