@@ -1102,9 +1102,34 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
     unique_ptr<t_runtime> urt=make_unique<t_runtime>();
     t_runtime&rt=*urt;double t=10;auto*pbase=(uint8_t*)base;
     typedef double(*t_jit_func)(t_runtime*);
-    auto r_func=find_func(cur_func,"r");auto*pr=(t_jit_func)(&pbase[r_func->code_offset]);
-    auto g_func=find_func(cur_func,"g");auto*pg=(t_jit_func)(&pbase[g_func->code_offset]);
-    auto b_func=find_func(cur_func,"b");auto*pb=(t_jit_func)(&pbase[b_func->code_offset]);
+    // ¬ј∆Ќќ: »щем функции в корне, а не в cur_func!
+    // —охран€ем указатель на root перед компил€цией
+    t_function* root_ptr = &root;
+  
+    auto r_func = find_func(root_ptr, "r");  // »щем в root
+    if (!r_func) {
+      cerr << "Function 'r' not found!" << endl;
+      return {};
+    }
+    auto*pr = (t_jit_func)(&pbase[r_func->code_offset]);
+  
+    auto g_func = find_func(root_ptr, "g");
+    if (!g_func) {
+      cerr << "Function 'g' not found!" << endl;
+      return {};
+    }
+    auto*pg = (t_jit_func)(&pbase[g_func->code_offset]);
+  
+    auto b_func = find_func(root_ptr, "b");
+    if (!b_func) {
+      cerr << "Function 'b' not found!" << endl;
+      return {};
+    }
+    auto*pb = (t_jit_func)(&pbase[b_func->code_offset]);  // ѕереименовал чтобы не конфликтовать с pb (указатель на base)
+
+    //auto r_func=find_func(cur_func,"r");auto*pr=(t_jit_func)(&pbase[r_func->code_offset]);
+    //auto g_func=find_func(cur_func,"g");auto*pg=(t_jit_func)(&pbase[g_func->code_offset]);
+    //auto b_func=find_func(cur_func,"b");auto*pb=(t_jit_func)(&pbase[b_func->code_offset]);
     auto&X=rt.slots[0];auto&Y=rt.slots[1];auto&T=rt.slots[2];T=10;rt.slots[0]=0;auto*p=&arr[0];
 
     for(int y=0;y<cy;y++){
