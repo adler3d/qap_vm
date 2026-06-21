@@ -1433,7 +1433,7 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
     root.name="<root>";
     cur_func=&root;
     jit.init_fn_addr();
-    jit.emit_prolog();
+    //jit.emit_prolog();
     auto&ctx=scopes.back();
     auto r=load_obj_full(c,data,true,&errmsg);
     parse_ms=clock.MS();
