@@ -946,7 +946,7 @@ struct t_codegen{
       u8(0x49); u8(0x83); u8(0xC0); u8(8)
     )
   }
-
+  /*
   void emit_stack_pop(int reg){
     QQ(
       // Linux: используем r15
@@ -960,6 +960,32 @@ struct t_codegen{
       u8(0x49); u8(0x83); u8(0xE8); u8(8);
       out("movsd xmm"+IToS(reg-XMM0)+",[r8]");
       u8(0xF2); u8(0x41); u8(0x0F); u8(0x10); u8(8*(reg-XMM0))
+    )
+  }*/
+
+  void emit_stack_pop(int reg){
+    QQ(
+      // Linux: используем r15
+      out("sub r15,8");
+      u8(0x49); u8(0x83); u8(0xEF); u8(8);
+        
+      // Загружаем в нужный XMM регистр
+      int xmm_id = reg - XMM0;
+      out("movsd xmm"+IToS(xmm_id)+",[r15]");
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10);
+        
+      // MODRM для [r15] с указанием регистра назначения
+      // reg поле в MODRM: 000 = xmm0, 001 = xmm1, 010 = xmm2, 011 = xmm3
+      u8(0x07 | (xmm_id << 3));,  // 0x07 = [r15], сдвигаем для указания регистра
+        
+      // Windows: используем r8
+      out("sub r8,8");
+      u8(0x49); u8(0x83); u8(0xE8); u8(8);
+        
+      int xmm_id = reg - XMM0;
+      out("movsd xmm"+IToS(xmm_id)+",[r8]");
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10);
+      u8(0x07 | (xmm_id << 3));  // MODRM для [r8] с указанием регистра
     )
   }
 
@@ -1035,6 +1061,10 @@ struct t_codegen{
 
   void emit_func_begin(int frame_size){
     emit_push_stack_reg();
+    #ifdef __linux__
+    out("mov rcx,rdi");
+    u8(0x48); u8(0x89); u8(0xF9);
+    #endif
     emit_prolog();
     emit_push_rbp();
     emit_mov_rbp_rsp();
