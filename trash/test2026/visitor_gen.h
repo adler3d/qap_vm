@@ -833,7 +833,10 @@ struct t_codegen{
   void u64(uint64_t v){auto*p=(uint8_t*)&v; code.insert(code.end(),p,p+8);}
 
   static string sxmm(int id){return "xmm"+IToS(id);}
-
+  void emit_mov_rdi_r13() {  // для Linux: первый аргумент в RDI
+    out("mov rdi,r13");
+    u8(0x4C); u8(0x89); u8(0xEF);
+  }
   void emit_load_const(double v){
     out("mov rax,"+to_string((uint64_t&)v)+"//"+to_string(v));
     uint64_t bits=*(uint64_t*)&v;
