@@ -1,4 +1,3 @@
-//*
 g(x,y,t)={
 charge(x,y,s)=s/sqrt(x*x+y*y+0.001);
 noise(x,y)=sin(x*123.456)+cos(y*789.012)+sin(x*y*0.12345);
@@ -36,31 +35,3 @@ a=a*a+p4(x,y,t)*p4(x,y,t);
 res=sin(a*1.092776+5.044271)*0.5+0.5;
 res=max(0,min(1,res));
 }r(x,y,t)=0;b(x,y,t)=0;
-/*//*
-r(x,y,t)={
-  q=sin(x/64.0)*sin(y/64.0);
-  res=sin(q*7.0)*0.5+0.5;
-  res=res+sin(sqrt(x*x+y*y+res*31456.0)/2.0);
-  res=res+sin(atan2(y,x)*5.7+1.5)+0.5;
-}b(x,y,t)=0;
-g(x,y,z)={
-  q=sin(x/64.0)*sin(y/64.0);
-  res=sin(q*7.0)*0.5+0.5;
-  res=res+sin(sqrt(x*x+y*y+res*31456.0)/2.0);
-  res=res+sin(atan2(y,x)*5.7+1.5)+0.5;
-}/*
-r(x,y,t)=0;b(x,y,t)=0;
-g(x,y,z)={res=sin(x*0.01)*0.5+0.5;}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
