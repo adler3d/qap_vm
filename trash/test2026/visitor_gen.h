@@ -1514,12 +1514,6 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
       //  опируем код
       memcpy(base, jit.code.data(), code_size);
     
-      // ћен€ем права на исполнение и чтение (защита от записи)
-      if (mprotect(base, aligned_size, PROT_READ | PROT_EXEC) == -1) {
-        std::cerr << "mprotect failed: " << strerror(errno) << std::endl;
-        munmap(base, aligned_size);
-        return {};
-      }
       #else
       base=VirtualAlloc(
           nullptr,
@@ -1538,6 +1532,14 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
         auto addr=pb+ex.target->code_offset;
         *(uint64_t*)(&pb[ex.offset])=(uint64_t)addr;
       }
+      #ifndef _WIN32
+      // ћен€ем права на исполнение и чтение (защита от записи)
+      if (mprotect(base, aligned_size, PROT_READ | PROT_EXEC) == -1) {
+        std::cerr << "mprotect failed: " << strerror(errno) << std::endl;
+        munmap(base, aligned_size);
+        return {};
+      }
+      #endif
       stringstream ss;//string str;str.resize(jit.code.size());
       for(int i=0;i<jit.code.size();i++){
         ss<<std::hex<<std::setw(2)<<std::setfill('0')<<(int)pb[i];
