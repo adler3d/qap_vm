@@ -308,6 +308,7 @@ struct t_function{
     return slot;
   }
 };
+#if(0)
 struct t_codegen{
   vector<string> asm_text;
   vector<uint8_t> code;
@@ -813,6 +814,415 @@ struct t_codegen{
     #undef F
   }
 };
+#endif
+// В начале файла после includes:
+#ifdef __linux__
+  #define QQ(LINUX_CODE, WIN_CODE) {LINUX_CODE;}
+#else
+  #define QQ(LINUX_CODE, WIN_CODE) {WIN_CODE;}
+#endif
+
+struct t_codegen{
+  vector<string> asm_text;
+  vector<uint8_t> code;
+  int rsp_bias = 0;
+
+  void out(const string&s){asm_text.push_back(s);}
+  void u8(uint8_t v){code.push_back(v);}
+  void u32(uint32_t v){auto*p=(uint8_t*)&v; code.insert(code.end(),p,p+4);}
+  void u64(uint64_t v){auto*p=(uint8_t*)&v; code.insert(code.end(),p,p+8);}
+
+  static string sxmm(int id){return "xmm"+IToS(id);}
+
+  void emit_load_const(double v){
+    out("mov rax,"+to_string((uint64_t&)v)+"//"+to_string(v));
+    uint64_t bits=*(uint64_t*)&v;
+    u8(0x48); u8(0xB8); u64(bits);
+    out("movq xmm0,rax");
+    u8(0x66); u8(0x48); u8(0x0F); u8(0x6E); u8(0xC0);
+  }
+
+  void emit_load_var(int id){
+    int disp=id*8;
+    out("movsd xmm0,[rcx+"+IToS(disp)+"]");
+    u8(0xF2); u8(0x0F); u8(0x10); u8(0x81); u32(disp);
+  }
+
+  void emit_store_var(int id){
+    int disp=id*8;
+    out("movsd [rcx+"+IToS(disp)+"],xmm0");
+    u8(0xF2); u8(0x0F); u8(0x11); u8(0x81); u32(disp);
+  }
+
+  void emit_movapd_xmm2_xmm0(){
+    out("movapd xmm2,xmm0");
+    u8(0x66); u8(0x0F); u8(0x28); u8(0xD0);
+  }
+
+  void emit_movapd_xmm3_xmm0(){
+    out("movapd xmm3,xmm0");
+    u8(0x66); u8(0x0F); u8(0x28); u8(0xD8);
+  }
+
+  void emit_movapd_xmm0_xmm1(){
+    out("movapd xmm0,xmm1");
+    u8(0x66); u8(0x0F); u8(0x28); u8(0xC1);
+  }
+
+  void emit_movapd_xmm0_xmm2(){
+    out("movapd xmm0,xmm2");
+    u8(0x66); u8(0x0F); u8(0x28); u8(0xC2);
+  }
+
+  void emit_movapd_xmm0_xmm3(){
+    out("movapd xmm0,xmm3");
+    u8(0x66); u8(0x0F); u8(0x28); u8(0xC3);
+  }
+
+  void emit_addsd(int dst=XMM0,int src=XMM1){
+    QapAssert(dst==XMM0); QapAssert(src==XMM1);
+    out("addsd xmm0,xmm1");
+    u8(0xF2); u8(0x0F); u8(0x58); u8(0xC1);
+  }
+
+  void emit_subsd(int dst=XMM1,int src=XMM0){
+    QapAssert(dst==XMM1); QapAssert(src==XMM0);
+    out("subsd xmm1,xmm0");
+    u8(0xF2); u8(0x0F); u8(0x5C); u8(0xC8);
+    emit_movapd_xmm0_xmm1();
+  }
+
+  void emit_mulsd(int dst=XMM0,int src=XMM1){
+    QapAssert(dst==XMM0); QapAssert(src==XMM1);
+    out("mulsd xmm0,xmm1");
+    u8(0xF2); u8(0x0F); u8(0x59); u8(0xC1);
+  }
+
+  void emit_divsd(int dst=XMM1,int src=XMM0){
+    QapAssert(dst==XMM1); QapAssert(src==XMM0);
+    out("divsd xmm1,xmm0");
+    u8(0xF2); u8(0x0F); u8(0x5E); u8(0xC8);
+    emit_movapd_xmm0_xmm1();
+  }
+
+  void emit_movapd(int dst,int src){
+    QapAssert(dst==XMM0); QapAssert(src==XMM1);
+    out("movapd xmm0,xmm1");
+    u8(0x66); u8(0x0F); u8(0x28); u8(0xC1);
+  }
+
+  void emit_ret(){
+    out("ret");
+    u8(0xC3);
+  }
+
+  void emit_prolog(){
+    QQ(
+      // Linux: используем r15
+      out("lea r15,[rcx+2048]");
+      u8(0x4C); u8(0x8D); u8(0xB9); u32(2048),
+      
+      // Windows: используем r8
+      out("lea r8,[rcx+2048]");
+      u8(0x4C); u8(0x8D); u8(0x81); u32(2048)
+    )
+  }
+
+  void emit_stack_push(int reg){
+    QQ(
+      // Linux: используем r15
+      out("movsd [r15],xmm"+IToS(reg-XMM0));
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x11); u8(0x07);
+      out("add r15,8");
+      u8(0x49); u8(0x83); u8(0xC7); u8(8),
+      
+      // Windows: используем r8
+      out("movsd [r8],xmm"+IToS(reg-XMM0));
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x11); u8(8*(reg-XMM0));
+      out("add r8,8");
+      u8(0x49); u8(0x83); u8(0xC0); u8(8)
+    )
+  }
+
+  void emit_stack_pop(int reg){
+    QQ(
+      // Linux: используем r15
+      out("sub r15,8");
+      u8(0x49); u8(0x83); u8(0xEF); u8(8);
+      out("movsd xmm"+IToS(reg-XMM0)+",[r15]");
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10); u8(0x07),
+      
+      // Windows: используем r8
+      out("sub r8,8");
+      u8(0x49); u8(0x83); u8(0xE8); u8(8);
+      out("movsd xmm"+IToS(reg-XMM0)+",[r8]");
+      u8(0xF2); u8(0x41); u8(0x0F); u8(0x10); u8(8*(reg-XMM0))
+    )
+  }
+
+  void emit_push_stack_reg(){
+    QQ(
+      out("push r15"); u8(0x41); u8(0x57); rsp_bias += 8,  // Linux
+      out("push r8");  u8(0x41); u8(0x50); rsp_bias += 8   // Windows
+    )
+  }
+
+  void emit_pop_stack_reg(){
+    QQ(
+      out("pop r15"); u8(0x41); u8(0x5F); rsp_bias -= 8,   // Linux
+      out("pop r8");  u8(0x41); u8(0x58); rsp_bias -= 8    // Windows
+    )
+  }
+
+  void emit_root_func_begin(int frame_size){
+    emit_push_stack_reg();
+    emit_prolog();
+    emit_push_rbp();
+    emit_mov_rbp_rsp();
+    emit_push_r12();
+    emit_push_r13();
+    
+    QQ(
+      // Linux: выравнивание стека
+      {
+        int total_push = 8 + 8 + 8 + 8;
+        int adjusted_frame = (frame_size + 15) & ~15;
+        if ((adjusted_frame + total_push) % 16 != 0) adjusted_frame += 8;
+        if(adjusted_frame) emit_sub_rsp(adjusted_frame);
+      },
+      
+      // Windows: без выравнивания
+      {
+        if(frame_size) emit_sub_rsp(frame_size);
+      }
+    )
+    
+    out("lea r12,[rcx+8192]");
+    u8(0x4C); u8(0x8D); u8(0xA1); u32(8192);
+    out("mov r13,r12");
+    u8(0x4D); u8(0x89); u8(0xE5);
+  }
+
+  void emit_root_func_end(int frame_size){
+    QQ(
+      // Linux: восстановление стека
+      {
+        int total_push = 8 + 8 + 8 + 8;
+        int adjusted_frame = (frame_size + 15) & ~15;
+        if ((adjusted_frame + total_push) % 16 != 0) adjusted_frame += 8;
+        if(adjusted_frame) emit_add_rsp(adjusted_frame);
+      },
+      
+      // Windows
+      {
+        if(frame_size) emit_add_rsp(frame_size);
+      }
+    )
+    
+    emit_pop_r13();
+    emit_pop_r12();
+    emit_pop_rbp();
+    emit_pop_stack_reg();
+    emit_ret();
+  }
+
+  void emit_func_begin(int frame_size){
+    emit_push_stack_reg();
+    emit_prolog();
+    emit_push_rbp();
+    emit_mov_rbp_rsp();
+    emit_push_r12();
+    emit_push_r13();
+    
+    QQ(
+      // Linux: выравнивание стека
+      {
+        int total_push = 8 + 8 + 8 + 8;
+        int adjusted_frame = (frame_size + 15) & ~15;
+        if ((adjusted_frame + total_push) % 16 != 0) adjusted_frame += 8;
+        if(adjusted_frame) emit_sub_rsp(adjusted_frame);
+      },
+      
+      // Windows
+      {
+        if(frame_size) emit_sub_rsp(frame_size);
+      }
+    )
+    
+    out("lea r12,[rcx+8192]");
+    u8(0x4C); u8(0x8D); u8(0xA1); u32(8192);
+    out("mov r13,r12");
+    u8(0x4D); u8(0x89); u8(0xE5);
+  }
+
+  void emit_func_end(int frame_size){
+    QQ(
+      // Linux: восстановление стека
+      {
+        int total_push = 8 + 8 + 8 + 8;
+        int adjusted_frame = (frame_size + 15) & ~15;
+        if ((adjusted_frame + total_push) % 16 != 0) adjusted_frame += 8;
+        if(adjusted_frame) emit_add_rsp(adjusted_frame);
+      },
+      
+      // Windows
+      {
+        if(frame_size) emit_add_rsp(frame_size);
+      }
+    )
+    
+    emit_pop_r13();
+    emit_pop_r12();
+    emit_pop_rbp();
+    emit_pop_stack_reg();
+    emit_ret();
+  }
+
+  void emit_mov_rbp_rsp(){
+    out("mov rbp,rsp");
+    u8(0x48); u8(0x89); u8(0xE5);
+  }
+
+  void emit_sub_rsp(int n){
+    QapAssert(n>=0);
+    out("sub rsp,"+IToS(n));
+    if(n<=127){ u8(0x48); u8(0x83); u8(0xEC); u8(n); }
+    else { u8(0x48); u8(0x81); u8(0xEC); u32(n); }
+    rsp_bias+=n;
+  }
+
+  void emit_add_rsp(int n){
+    QapAssert(n>=0);
+    out("add rsp,"+IToS(n));
+    if(n<=127){ u8(0x48); u8(0x83); u8(0xC4); u8(n); }
+    else { u8(0x48); u8(0x81); u8(0xC4); u32(n); }
+    rsp_bias-=n;
+  }
+
+  int calc_call_bytes()const{
+    QQ(
+      // Linux: только выравнивание
+      {
+        int mis = (rsp_bias + 8) & 15;
+        int pad = (16 - mis) & 15;
+        return pad;
+      },
+      
+      // Windows: shadow space + выравнивание
+      {
+        int shadow = 32;
+        int mis = (rsp_bias + 8) & 15;
+        int pad = (16 - mis) & 15;
+        return shadow + pad;
+      }
+    )
+  }
+
+  void emit_call_rax(){
+    int bytes = calc_call_bytes();
+    if(bytes) emit_sub_rsp(bytes);
+    out("call rax");
+    u8(0xFF); u8(0xD0);
+    if(bytes) emit_add_rsp(bytes);
+  }
+
+  void emit_mov_arg1_r13(){
+    QQ(
+      // Linux: первый аргумент в RDI
+      out("mov rdi,r13");
+      u8(0x4C); u8(0x89); u8(0xEF),
+      
+      // Windows: первый аргумент в RCX
+      out("mov rcx,r13");
+      u8(0x4C); u8(0x89); u8(0xE9)
+    )
+  }
+
+  void emit_call_user(t_function*target){
+    emit_mov_arg1_r13();
+    out("mov rax,"+target->name);
+    u8(0x48); u8(0xB8);
+    auto pos=code.size();
+    u64(0);
+    patches.push_back({pos,target->name,target});
+    emit_call_rax();
+  }
+
+  void emit_call(const string&name){
+    if(!fn_addr.count(name)){cerr<<"fatal error! function not found: "<<name<<endl;exit(-1);}
+    auto addr=(uint64_t)fn_addr[name];
+    out("mov rax,"+name);
+    u8(0x48); u8(0xB8); u64(addr);
+    emit_call_rax();
+  }
+
+  void emit_alloc_call_frame(int bytes){
+    int aligned_bytes = (bytes + 15) & ~15;
+    out("mov rdx,r12");
+    u8(0x4C); u8(0x89); u8(0xE2);
+    out("add r12,"+IToS(aligned_bytes));
+    u8(0x49); u8(0x81); u8(0xC4); u32(aligned_bytes);
+  }
+
+  void emit_free_call_frame(int bytes){
+    int aligned_bytes = (bytes + 15) & ~15;
+    out("sub r12,"+IToS(aligned_bytes));
+    u8(0x49); u8(0x81); u8(0xEC); u32(aligned_bytes);
+  }
+
+  void emit_store_call_arg(int slot){
+    int disp=slot*8;
+    out("movsd [rdx+"+IToS(disp)+"],xmm0");
+    u8(0xF2); u8(0x0F); u8(0x11); u8(0x82); u32(disp);
+  }
+
+  void emit_mov_rcx_r13(){
+    out("mov rcx,r13");
+    u8(0x4C); u8(0x89); u8(0xE9);
+  }
+
+  void emit_push_rbp(){out("push rbp"); u8(0x55); rsp_bias+=8;}
+  void emit_pop_rbp(){out("pop rbp"); u8(0x5D); rsp_bias-=8;}
+     
+  void emit_push_r12(){out("push r12"); u8(0x41); u8(0x54); rsp_bias+=8;}
+  void emit_pop_r12(){out("pop r12"); u8(0x41); u8(0x5C); rsp_bias-=8;}
+     
+  void emit_push_r13(){out("push r13"); u8(0x41); u8(0x55); rsp_bias+=8;}
+  void emit_pop_r13(){out("pop r13"); u8(0x41); u8(0x5D); rsp_bias-=8;}
+     
+  void emit_push_rcx(){out("push rcx"); u8(0x51); rsp_bias+=8;}
+  void emit_pop_rcx(){out("pop rcx"); u8(0x59); rsp_bias-=8;}
+     
+  void push_r8(){out("push r8"); u8(0x41); u8(0x50); rsp_bias+=8;}
+  void pop_r8(){out("pop r8"); u8(0x41); u8(0x58); rsp_bias-=8;}
+
+  struct t_call_patch{size_t offset;string name;t_function*target=nullptr;};
+  vector<t_call_patch> patches;
+
+  unordered_map<string,void*> fn_addr;
+
+  void init_fn_addr(){
+    fn_addr["sin"]=(void*)sin_;
+    fn_addr["cos"]=(void*)cos_;
+    fn_addr["sqrt"]=(void*)sqrt_;
+    fn_addr["atan2"]=(void*)atan2_;
+    fn_addr["min"]=(void*)min_;
+    fn_addr["max"]=(void*)max_;
+    fn_addr["floor"]=(void*)floor_;
+    fn_addr["ceil"]=(void*)ceil_;
+    fn_addr["exp"]=(void*)exp_;
+    fn_addr["pow"]=(void*)pow_;
+    fn_addr["dist"]=(void*)dist_;
+    fn_addr["abs"]=(void*)abs_;
+    fn_addr["log"]=(void*)log_;
+    fn_addr["tan"]=(void*)tan_;
+    fn_addr["ifgtone"]=(void*)ifgtone_;
+    #define F(CODE)cout<<#CODE"="<<(CODE)<<endl;
+    F(sin_(10))F(cos_(10))F(sqrt_(14))F(atan2_(10,20))F(min_(10,20))F(max_(10,20))
+    #undef F
+  }
+};
+
 struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
   vector<t_function*> all_funcs;
   t_function*cur_func=nullptr;
