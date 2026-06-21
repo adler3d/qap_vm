@@ -942,7 +942,7 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
   }
   double parse_ms=0;
   string main(const string&data,const string&out_fn={}){
-    t_calc tar;QapClock clock;string errmsg;
+    TAutoPtr<t_calc> c;QapClock clock;string errmsg;
     scopes.reserve(4096);
     scopes.push_back({});
     //init_builtin_vars();
@@ -951,10 +951,11 @@ struct t_ast2x64:t_calc::i_term::i_visitor,t_calc::i_stat::i_visitor{
     jit.init_fn_addr();
     jit.emit_prolog();
     auto&ctx=scopes.back();
-    auto r=load_obj_full(tar,data,true,&errmsg);
+    auto r=load_obj_full(c,data,true,&errmsg);
     parse_ms=clock.MS();
     std::cerr<<"{\"parse_ms\":"<<parse_ms<<"}"<<endl;
     if(!r.ok){QapDebugMsg(r.msg);return {};}
+    auto&tar=*c;
     pass=PASS_REGISTER_FUNCS;
     Do(tar);
     pass=PASS_CODEGEN;
